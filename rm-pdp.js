@@ -125,12 +125,21 @@ function render(){
 }
 function goProduct(d){ goProductTo(pi+d); }
 /* Doğrudan bir pakete git — oklar da, üst bardaki seçici de buradan geçer. */
+var swapT1=null, swapT2=null;
 function goProductTo(n){
   if(n<0||n>=PRODUCTS.length||n===pi) return;
+  /* Gidilen yön: ileri giderken içerik sola çıkar ve sağdan gelir. */
+  pdp.style.setProperty('--rmp-dir', n>pi ? 1 : -1);
+  clearTimeout(swapT1); clearTimeout(swapT2);
+  pdp.classList.remove('rmp-swapped');
   document.body.classList.add('rmp-swapping');
-  setTimeout(function(){
+  swapT1=setTimeout(function(){
     pi=n; mi=0; resetZoom(); render(); track.scrollTop=0; sizeRail();
     document.body.classList.remove('rmp-swapping');
+    /* Çıkış sınıfı kalkarken giriş animasyonu aynı karede başlamalı,
+       yoksa arada tek kare tam opak bir sıçrama görünüyor. */
+    pdp.classList.add('rmp-swapped');
+    swapT2=setTimeout(function(){ pdp.classList.remove('rmp-swapped'); },460);
   },180);
 }
 /* Ok etiketi yalnızca adı taşır: mini ürün kutusu görseli kaldırıldı,

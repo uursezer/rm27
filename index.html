@@ -6140,7 +6140,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           </div>
           <div class="wa__bar"><span class="wa__field">☺ &nbsp; Mesaj yazın…</span><span class="wa__send"><svg viewBox="0 0 20 20" fill="none"><path d="M3 3.5l14 6.5-14 6.5 2-6.5zM5 10h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
         </div>
-        <div class="wa__live"><span class="wa__live-e" data-live-icon>🎥</span><span class="wa__live-c" data-live-copy><b data-live-title>Workshop duyurusu</b><span data-live-text>Cuma &#183; 20.00 &#183; Ücretsiz</span></span></div>
+        <div class="wa__live"><span class="wa__live-e" data-live-icon>🎓</span><span class="wa__live-c" data-live-copy><b data-live-title>Workshop duyurusu</b><span data-live-text>Cuma &#183; 20.00 &#183; Ücretsiz</span></span></div>
       </div>
     </div>
   </div>
@@ -9621,11 +9621,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      Four things the group actually sends, one at a time, on a short calm
      fade. It only runs while the band is on screen: a timer ticking behind a
      section nobody is looking at is work for nothing. */
+  /* The tile behind them is WhatsApp's bright green, so a yellow emoji
+     disappears into it — ⚡ and ✨ measured 1.1:1 and 1.2:1 against that
+     ground. These four are the dark ones: 4.8, 2.2, 4.4 and 4.4:1, and each
+     still says what its line says. */
   var NOTICES = [
-    ['🎥', 'Workshop duyurusu',        'Cuma · 20.00 · Ücretsiz'],
-    ['⚡', 'Bugüne özel %20 indirim',  'Sepette otomatik uygulanır'],
+    ['🎓', 'Workshop duyurusu',        'Cuma · 20.00 · Ücretsiz'],
+    ['🎟️', 'Bugüne özel %20 indirim',  'Sepette otomatik uygulanır'],
     ['🎬', 'Yeni tutorial yayında',    'Doğal ten rötuşu'],
-    ['✨', 'Yeni preset çıktı',        'Natural Wedding Pack']
+    ['📸', 'Yeni preset çıktı',        'Natural Wedding Pack']
   ];
   var icon = wa.querySelector('[data-live-icon]'),
       copyBox = wa.querySelector('[data-live-copy]'),

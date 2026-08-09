@@ -353,9 +353,34 @@ body.rmp-locked{overflow:hidden}
 
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 
-/* ürün değişiminde yumuşak geçiş */
-.rmp-stage,.rmp-info{transition:opacity .18s ease}
-.rmp-swapping .rmp-stage,.rmp-swapping .rmp-info{opacity:.25}
+/* ── paket değişimi ────────────────────────────────────────────
+   Yalnızca soluklaşmak "aynı paketin başka bir karesi" gibi okunuyordu.
+   Üç sütun da gidilen yönde çıkar, yeni paket öbür yandan gelir; şerit,
+   içerik ve bilgi sırayla girer, böylece panelin TAMAMININ değiştiği
+   görülür. --rmp-dir ileri giderken 1, geri giderken -1'dir.
+   Sadece opaklık ve transform: ikisi de düzen hesaplatmaz. */
+.rmp-railcol,.rmp-col,.rmp-infocol{
+  transition:opacity .18s var(--ease), transform .18s var(--ease);
+}
+.rmp-swapping .rmp-railcol,
+.rmp-swapping .rmp-col,
+.rmp-swapping .rmp-infocol{
+  opacity:0;transform:translateX(calc(var(--rmp-dir,1) * -20px)) scale(.985);
+}
+@keyframes rmpSwapIn{
+  from{opacity:0;transform:translateX(calc(var(--rmp-dir,1) * 24px)) scale(.985)}
+  to  {opacity:1;transform:none}
+}
+.rmp-swapped .rmp-railcol{animation:rmpSwapIn .30s var(--ease) both}
+.rmp-swapped .rmp-col    {animation:rmpSwapIn .30s var(--ease) .05s both}
+.rmp-swapped .rmp-infocol{animation:rmpSwapIn .30s var(--ease) .10s both}
+/* hareketi azaltmak isteyene aynı bilgi, kaymadan: sadece sönüp yanar */
+@media (prefers-reduced-motion:reduce){
+  .rmp-swapping .rmp-railcol,
+  .rmp-swapping .rmp-col,
+  .rmp-swapping .rmp-infocol{transform:none}
+  @keyframes rmpSwapIn{from{opacity:0}to{opacity:1}}
+}
 
 /* before / after */
 .rmp-ba__after{position:absolute;inset:0;clip-path:inset(0 0 0 var(--pos,50%))}
@@ -397,6 +422,9 @@ body.rmp-locked{overflow:hidden}
 /* ── sağ: bilgi paneli (okunabilirlik genişliği) ── */
 .rmp-info{
   background:var(--boxBg);color:var(--fg-body);border-radius:var(--boxR);overflow:hidden;
+  /* Künye kutusunun ve satın alma bloğunun taşıdığı çizginin AYNISI:
+     aynı renk, aynı kalınlık. Panelin kendi kenarı da artık çizili. */
+  border:1px solid var(--border);
   display:flex; flex-direction:column;
 }
 .rmp-info__scroll{flex:1 1 auto;min-height:0;overflow:hidden;
@@ -427,7 +455,7 @@ body.rmp-locked{overflow:hidden}
 .rmp-info h1{margin:0;overflow-wrap:anywhere;
   /* kutu kalkınca genişlik açıldı: başlık ölçekte bir kademe yukarı.
      Dar panelde --fs-8'e iner — kırılmaz, taşmaz. */
-  font-size:clamp(var(--fs-8),8cqw,var(--fs-9));
+  font-size:clamp(var(--fs-8),10cqw,var(--fs-10));
   font-weight:var(--fw-bold);letter-spacing:var(--tr-display);
   line-height:var(--lh-tight);color:var(--fg);text-wrap:balance}
 .rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-2);
