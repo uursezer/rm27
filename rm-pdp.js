@@ -840,13 +840,20 @@ function kaydirabilir(el,dy){
      · deltaMode satır ise (0 değilse) o kesin faredir,
      · yoğun bir akışın içindeysek (arka arkaya <50ms) parmaktır,
        değilse ve adım büyükse (≥60) faredir. */
-var wSon=0, wAkis=0, wTik=0;
+var wSon=0, wTik=0, wGirdi=null;
 function tekerlekFare(e){
-  var now=Date.now(), ara=now-wSon; wSon=now;
-  if(ara<50) wAkis++; else wAkis=0;
-  if(e.deltaMode!==0) return true;
-  if(wAkis>=3) return false;                 /* akış sürüyor: parmak */
-  return Math.abs(e.deltaY)>=60;
+  if(e.deltaMode!==0){ wGirdi='fare'; return true; }
+  var d=Math.abs(e.deltaY), now=Date.now(), ara=now-wSon; wSon=now;
+  /* KARAR YAPIŞKANDIR. Her olayı tek başına yargılamak, tekerleği hızlı
+     çevirenin çentiklerini "akış" sanıp serbest kaydırmaya düşürüyordu —
+     ve bir kareyi geçmek için tekerleği defalarca çevirmek gerekiyordu.
+     Cihaz oturumda bir kere tanınır, sonra kararı korunur:
+       · 40'tan küçük bir adım yalnızca parmakta olur,
+       · seyrek (>30ms) ve 40'tan büyük bir adım yalnızca farede.
+     Aradaki her şey son karara bırakılır. */
+  if(d<40) wGirdi='parmak';
+  else if(ara>30) wGirdi='fare';
+  return wGirdi==='fare';
 }
 function tekerlekNorm(e){
   var dy=e.deltaY;
@@ -858,7 +865,10 @@ function tekerlekTik(e, dy){
   if(!tekerlekFare(e)) return false;
   e.preventDefault();
   var now=Date.now();
-  if(now-wTik<110) return true;              /* aynı çentiğin ikizi */
+  /* Bazı sistemler tek çentik için iki olay yollar; yalnızca o ikizi
+     yutacak kadar dar bir aralık. Daha genişi, tekerleği hızlı çevireni
+     cezalandırıyordu. */
+  if(now-wTik<25) return true;
   wTik=now; navIptal();
   goToMedia(mi + (dy>0?1:-1));
   return true;
