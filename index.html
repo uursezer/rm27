@@ -3772,7 +3772,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    band's ambient pair — a soft purple lift in two corners — which is why it
    read as a gradient rather than as a ground. Both the layer and the rule
    that drew it are gone; this is the whole background now. */
-.footer{background:#080A15;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
+.footer{background:#05060D;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
 /* the solid a menu opens onto here: the footer's own ground, one step up so
    the menu still reads as standing on it rather than cut out of it */
 .footer,.offer2{--pop:#161B33}
@@ -3882,7 +3882,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   --px:53%; --py:25%;
   position:relative;isolation:isolate;overflow:clip;
   padding:var(--section-y) var(--gutter);
-  border-block:1px solid rgba(255,255,255,.08);
+  /* top only. The footer draws its own line and this band sits straight on
+     it, so a border here put two hairlines a pixel apart and the seam read
+     as 2px. */
+  border-top:1px solid rgba(255,255,255,.08);
   background:linear-gradient(108deg,#0A1020 0%,#070B16 48%,#050812 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025), inset 0 0 180px rgba(1,3,10,.36);
   color:var(--fg-body);
