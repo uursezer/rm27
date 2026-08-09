@@ -2001,22 +2001,55 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 #voices.is-2up .vcard{cursor:zoom-out}
 /* it rides the cursor, a little below and to the right, and flips to the
    other side rather than running off the edge of the window */
-/* ── the product panel's ground, as an experiment ────────────────
-   The component paints its scrim fully opaque on purpose: half-transparent
-   and blurred, it found the page's coloured cards haloing through the gaps
-   between the columns. Asked for here is the other feeling — still dark,
-   but with the page alive underneath rather than switched off.
-   So: not clear, .94 of the same near-black, and a real blur behind it. At
-   that strength a white section behind reads as the faintest lift in the
-   corners rather than as a page; the blur is what makes it feel like a
-   layer over something instead of a wall.
-   This is the page overriding the component, not a change to it. Delete
-   these four lines and the panel is fully opaque again. */
-.rmp-pdp__scrim{
-  background:rgba(7,10,17,.94);
-  -webkit-backdrop-filter:blur(20px) saturate(115%);
-  backdrop-filter:blur(20px) saturate(115%);
+/* ── before/after in the panel, the way it works on the page ─────
+   Explore Presets has had a comparison for as long as the page has, and it
+   is the one people on this site have already learned: two small dark
+   labels in the top corners, a white hairline with a round handle on it,
+   and — on a mouse — a reveal that simply follows the pointer, with nothing
+   to grab and nothing to work out. The panel's own comparison is a
+   different object: pale labels, a bigger knob, and a line you have to drag.
+   These rules make the panel's look like the page's, to the pixel values
+   the page uses. The behaviour is added in script further down.
+
+   Written against both spellings of the frame's class. The component's
+   script writes `frame ba` where its own stylesheet expects
+   `rmp-frame rmp-ba`, so today only the first matches — and when that is
+   put right at source, these rules keep matching without another edit. */
+.rmp-pdp .rmp-ba__tag{
+  top:var(--s-3);z-index:2;
+  font-size:0;                      /* the component's own word steps aside */
+  font-weight:var(--fw-semibold);text-transform:uppercase;
+  color:#fff;padding:3px var(--s-2);border-radius:5px;
+  background:rgba(8,20,36,.62);box-shadow:none;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
 }
+/* …and the page's own words take its place, in the page's own language */
+/* the tracking has to live here too: .14em of a zero font size is zero, and
+   the label came out unspaced */
+.rmp-pdp .rmp-ba__tag::before{font-size:10px;line-height:1.6;letter-spacing:.14em}
+.rmp-pdp .rmp-ba__tag.rmp-b::before{content:"Before"}
+.rmp-pdp .rmp-ba__tag.rmp-a::before{content:"After"}
+.rmp-pdp .rmp-ba__tag.rmp-b{left:var(--s-3);right:auto}
+.rmp-pdp .rmp-ba__tag.rmp-a{right:var(--s-3);left:auto}
+/* the line and its handle: the page's hairline and 36px disc with two
+   chevrons drawn on it, rather than the panel's 40px disc with triangles */
+.rmp-pdp .rmp-ba__div{
+  width:2px;margin-left:-1px;background:rgba(255,255,255,.9);
+  box-shadow:0 0 0 1px rgba(10,37,64,.18);
+}
+.rmp-pdp .rmp-ba__knob{
+  width:36px;height:36px;background:#fff;box-shadow:var(--sh-3);
+  border:0;padding:0;gap:0;
+}
+.rmp-pdp .rmp-ba__knob::before,.rmp-pdp .rmp-ba__knob::after{
+  content:"";position:absolute;top:50%;width:5px;height:5px;
+  border:0;border-top:2px solid var(--n-700);border-right:2px solid var(--n-700);
+  border-radius:1px;background:none;
+}
+.rmp-pdp .rmp-ba__knob::before{left:10px;transform:translateY(-50%) rotate(-135deg)}
+.rmp-pdp .rmp-ba__knob::after{right:10px;transform:translateY(-50%) rotate(45deg)}
+/* on a mouse there is nothing to grab: the reveal follows the pointer */
+.rmp-pdp .frame.ba,.rmp-pdp .rmp-frame.rmp-ba{cursor:ew-resize}
 
 /* The words that ride the cursor over a pack's picture. They belonged to the
    gallery that used to open there and they outlived it: the product panel
@@ -8765,6 +8798,44 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   [].forEach.call(grid.querySelectorAll('.card__add'), function(btn){
     btn.addEventListener('click', function(e){ e.stopPropagation(); });
   });
+
+  /* ---- and the comparison answers the pointer, as it does on the page ----
+     Explore Presets reveals as you move across the frame; the panel asks you
+     to drag its handle. One gesture for one idea, so the panel learns the
+     page's: on a mouse the reveal follows the pointer and lets go back to
+     the middle when you leave, exactly as the row above does. The handle
+     still drags, and a touch screen — which has no pointer to follow — is
+     left with the drag it always had.
+
+     --pos is the component's own property and the only thing written here;
+     nothing else about the frame is touched. Both spellings of the class
+     are matched, so this keeps working when the prefix is put right. */
+  (function(){
+    var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+    if(!fine) return;
+    var BA = '.frame.ba, .rmp-frame.rmp-ba';
+    function follow(e){
+      if(e.pointerType !== 'mouse') return;
+      var f = e.target.closest && e.target.closest(BA);
+      if(!f) return;
+      /* while it is zoomed in the frame is being panned, not compared */
+      if(f.classList.contains('rmp-is-zoomed')) return;
+      var r = f.getBoundingClientRect();
+      if(!r.width) return;
+      var pct = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+      f.style.setProperty('--pos', pct.toFixed(2) + '%');
+    }
+    function centre(e){
+      var f = e.target.closest && e.target.closest(BA);
+      if(f) f.style.setProperty('--pos', '50%');
+    }
+    /* the panel builds its frames as you go, so listen where they live */
+    document.addEventListener('pointermove', follow, {passive:true});
+    document.addEventListener('pointerout', function(e){
+      var f = e.target.closest && e.target.closest(BA);
+      if(f && !f.contains(e.relatedTarget)) centre(e);
+    }, {passive:true});
+  })();
 
   /* ---- the mark in the corner, and the words at the pointer ----
      Both kept from the gallery that used to open here: the press still opens
