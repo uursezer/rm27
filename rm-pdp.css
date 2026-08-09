@@ -1,0 +1,675 @@
+/*! RM PDP Lightbox — stiller (rmp- ad alanı) */
+
+.rmp-pdp{
+  font-family:var(--font);font-size:var(--fs-5);
+  line-height:var(--lh-normal);letter-spacing:var(--tr-body);
+  -webkit-font-smoothing:antialiased;
+  /* Token'lar bileşenin kendi köküne kapatıldı: host'un
+     :root tanımlarına dokunmaz, ondan da etkilenmez. */
+  /* ════════ rm27 tasarım sistemi — uursezer.github.io/rm27 ════════
+     Renk rampaları, tip ölçeği, boşluk ızgarası, yarıçaplar ve
+     yükseltiler kaynak siteden birebir alındı. */
+
+  /* marka rampası */
+  --accent-50:#F3F2FE;  --accent-100:#E5E3FE; --accent-200:#C9C5FD;
+  --accent-500:#635BFF; --accent-600:#5A52E0; --accent-700:#4740B8;
+
+  /* nötr rampa — açık yüzeyler için soğuk mürekkep */
+  --n-0:#FFFFFF;  --n-25:#FCFDFE; --n-50:#F6F9FC;  --n-100:#EEF3F8;
+  --n-200:#E3E9F0; --n-300:#D2DBE5; --n-400:#A6B1C2; --n-500:#616B7D;
+  --n-600:#556376; --n-700:#425466; --n-800:#22364F; --n-900:#0A2540;
+
+  /* anlamsal yüzeyler */
+  --bg:var(--n-0);        --bg-subtle:var(--n-50);
+  --surface:var(--n-0);   --surface-sunken:var(--n-100);
+  --border:var(--n-200);  --border-strong:var(--n-300);
+
+  /* anlamsal mürekkep */
+  --fg:var(--n-900);      --fg-body:var(--n-700);
+  --fg-muted:var(--n-500); --fg-faint:var(--n-400);
+  --fg-on-accent:#FFFFFF;
+  --accent:var(--accent-500);   --accent-fg:var(--accent-600);
+  --accent-bg:var(--accent-50); --accent-border:var(--accent-200);
+  --star:#E8A33D;                       /* yalnızca puan — asla vurgu */
+  --danger:#C0392E;
+  --ok:#1A7F4B; --ok-bg:#E9F4EE; --ok-edge:#B9DCC9;  /* yalnızca "tamamlandı" */
+
+  /* tip */
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
+         "Helvetica Neue",Arial,sans-serif;
+  --fs-1:12px; --fs-2:13px; --fs-3:14px; --fs-4:15px; --fs-5:16px;
+  --fs-6:18px; --fs-7:20px; --fs-8:24px; --fs-9:30px; --fs-10:38px;
+  --lh-display:1.06; --lh-tight:1.16; --lh-snug:1.35;
+  --lh-normal:1.55;  --lh-relaxed:1.7;
+  --tr-display:-.034em; --tr-heading:-.024em; --tr-body:-.011em; --tr-caps:.075em;
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
+
+  /* boşluk — 4pt ızgara */
+  --s-1:4px;  --s-2:8px;  --s-3:12px; --s-4:16px; --s-5:20px;
+  --s-6:24px; --s-7:32px; --s-8:40px; --s-9:48px; --s-10:64px;
+
+  /* yarıçap — eleman türü başına tek değer */
+  --r-control:8px; --r-card:12px; --r-panel:16px; --r-full:999px;
+
+  /* yükselti — mavi-gri yüzeye boyanmış, asla düz siyah */
+  --sh-1:0 1px 2px rgba(10,37,64,.06), 0 1px 3px rgba(10,37,64,.04);
+  --sh-2:0 2px 5px rgba(10,37,64,.06), 0 6px 16px -6px rgba(10,37,64,.10);
+  --sh-3:0 8px 20px -8px rgba(10,37,64,.14), 0 24px 48px -20px rgba(10,37,64,.20);
+  /* açık zeminde yüzen rozet — kaynak sitedeki .chip gölgesi */
+  --sh-chip:0 0 0 1px rgba(10,25,50,.12), 0 1px 2px rgba(10,25,50,.22),
+            0 4px 10px -2px rgba(10,25,50,.26), 0 12px 26px -12px rgba(10,25,50,.40);
+
+  /* hareket */
+  --ease:cubic-bezier(.16,.72,.3,1); --dur-1:.15s; --dur-2:.24s; --dur-3:.45s;
+
+  /* Geçiş dönemindeki eski ad köprüleri (--ink, --brand, --sans …)
+     kaldırıldı: her kural artık doğrudan sistemin kendi token'ını
+     kullanıyor, ikinci bir isim katmanı yok. */
+
+  /* ── KOYU TEMA (tum sayfa) ──
+     Kaynak sitenin kendi koyu bandı (.topband/.footer) nötr rampayı
+     yeniden tanımlıyor. Aynı değerler burada da kullanılıyor: sistem
+     dışına çıkılmadan lightbox koyu zemine geçiyor. */
+  --n-0:#0B1020;  --n-25:#0C1224; --n-50:#0E1428;  --n-100:#161E36;
+  --n-200:#232C48; --n-300:#33405F; --n-400:#6B7793; --n-500:#9AA6BF;
+  --n-600:#B7C0D4; --n-700:#D3DAE8; --n-800:#E9EDF5; --n-900:#FFFFFF;
+  /* tek zemin rengi — satın alma bloğu da aynı tonu kullanır */
+  --bg:#0A0B0D;   --bg-subtle:#0A0B0D;
+  --surface:rgba(255,255,255,.06);
+  --surface-sunken:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.10);
+  --border-strong:rgba(255,255,255,.20);
+  --fg:#FFFFFF; --fg-body:#D3DAE8; --fg-muted:#9AA6BF; --fg-faint:#6B7793;
+  --accent-fg:#A7A2FF;
+  --accent-bg:rgba(99,91,255,.16);
+  --accent-border:rgba(167,162,255,.38);
+  /* koyu zeminde gölge iş görmez — ışıktan bir tel çizgi görür */
+  --sh-1:0 1px 2px rgba(0,0,0,.4);
+  --sh-2:0 6px 18px -8px rgba(0,0,0,.6);
+  --sh-3:0 10px 30px -10px rgba(0,0,0,.7);
+  --sh-chip:0 0 0 1px rgba(255,255,255,.14), 0 6px 18px -8px rgba(0,0,0,.7);
+  color:var(--fg-body);
+}
+/* ── LIGHTBOX ── */
+.rmp-pdp{
+  --capH:40px; --capGap:12px;
+  --panelH: min( calc(100dvh - 48px - var(--capH) - var(--capGap)),
+                 calc((100vw - 260px) / 1.5716) );
+  /* Tüm ölçüler referans PSD'den panel yüksekliğine oranlanarak türetildi */
+  /* Sütun arası boşluk: --gutter (24px) üç sütun arasında fazla geliyordu,
+     bir kademe iniyor. İki aralık da bu tek değerden gelir — eşit kalır. */
+  --gap:  var(--s-4);
+  --infoW:calc(var(--panelH) * 0.5194);   /* 885/1704 */
+  --thumb:calc(var(--panelH) * 0.0920);
+  /* Şerit kutusunun İÇ boşluğu dört yanda eşit ve kareler arası boşlukla
+     aynı: eskiden yatayda ~19px, dikeyde ~18px, aralarda ~13px vardı ve
+     ritim tutmuyordu. Tek değer: --s-3 (12px). */
+  --thumbGap:var(--s-3);
+  --railPadX:var(--s-3);
+  --railW:calc(var(--thumb) + 2*var(--railPadX));
+  --ringW:max(2px, calc(var(--panelH) * 0.0029));
+  --navD: calc(var(--panelH) * 0.0792);   /* 135/1704 */
+  --railPad:var(--s-3);
+  /* TEK KUTU DİLİ: şerit, sahne ve üç bilgi çubuğu aynı zemin ve aynı
+     yarıçapı kullanır. Tek istisna bilgi paneli — o beyaz kalır. */
+  /* Kaynak sistemin koyu bandında yüzeyler saydam beyazdır ve OPAK bir
+     zemin (--bg) üstünde durur. Lightbox'ta böyle bir zemin olmadığı için
+     saydam panellerden arkadaki bulanık sayfa sızıyordu. Her kutu, yüzey
+     tonunu kendi opak zemininin üstünde taşır. */
+  --boxBg:#12151F;
+  --boxR:var(--r-panel);
+
+  position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+  padding:24px;opacity:0;transition:opacity .2s ease;
+}
+.rmp-pdp.rmp-open{display:flex}
+.rmp-pdp.rmp-vis{opacity:1}
+/* Global standart: tam siyah değil — koyu ama yarı saydam + blur.
+   Arkadaki sayfa seçilir, "üstte bir katman var" hissi korunur. */
+.rmp-pdp__scrim{
+  /* TAM OPAK örtü: yarı saydam + blur olduğunda arkadaki sayfanın renkli
+     kartları sütun aralarından hale gibi sızıyordu. Zemin düz tek renk.
+     (Opak olduğu için backdrop-filter'a da gerek kalmadı — bedava hız.) */
+  position:absolute;inset:0;background:var(--bg);
+}
+body.rmp-locked{overflow:hidden}
+
+/* ═══════════ DÜZEN ═══════════
+   Medya paneli 4:5 (kahraman). Bilgi sütunu 4:5 değil —
+   okunabilirlik genişliğinde sabit, medyanın rolünü çalmaz.      */
+/* Örtü mutlak konumlu; .rmp-wrap konumlandırılmamış olsa örtünün ALTINDA
+   boyanır ve içerideki tıklamalar yutulurdu. */
+/* ── paket seçici: BAŞLIĞIN kendisi tetikleyici ──
+   Ayrı bir üst bar yerine, görüntülenen paketin adına tıklanır. */
+.rmp-pick{position:relative}
+.rmp-pick__btn{
+  display:flex;align-items:center;gap:var(--s-2);
+  margin:0 0 0 calc(-1 * var(--s-2));padding:2px var(--s-2);
+  border:0;border-radius:var(--r-control);cursor:pointer;
+  background:transparent;color:inherit;
+  font:inherit;letter-spacing:inherit;text-align:left;
+  transition:background var(--dur-1) var(--ease);
+}
+/* Yalnızca zemin değişimi "buton" hissi vermiyordu; ince bir kenar
+   çizgisi ve chevron'un canlanması niyeti okunur kılıyor. */
+.rmp-pick__btn:hover{background:var(--accent-bg);
+  box-shadow:inset 0 0 0 1px var(--accent-border)}
+.rmp-pick__btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rmp-pick__ch{width:.62em;height:.62em;flex:0 0 auto;margin-top:.12em;
+  fill:none;stroke:var(--fg-muted);stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round;
+  transition:transform var(--dur-2) var(--ease),stroke var(--dur-1) var(--ease)}
+.rmp-pick__btn:hover .rmp-pick__ch{stroke:var(--fg)}
+.rmp-pick.rmp-open .rmp-pick__ch{transform:rotate(180deg)}
+.rmp-pick__menu{
+  position:absolute;top:calc(100% + 6px);left:calc(-1 * var(--s-2));z-index:8;
+  min-width:100%;padding:var(--s-1);
+  /* Uzun paket adları menüyü ekran dışına taşırıyordu: genişlik ekranla
+     sınırlanır, taşan ad alt satıra iner. */
+  max-width:min(340px, calc(100vw - 2 * var(--s-6)));
+  background:var(--boxBg);border-radius:var(--r-card);
+  box-shadow:inset 0 0 0 1px var(--border), var(--sh-3);
+  display:flex;flex-direction:column;
+}
+.rmp-pick__menu[hidden]{display:none}
+.rmp-pick__menu button{
+  display:flex;align-items:center;gap:var(--s-2);
+  padding:9px var(--s-3);border:0;border-radius:var(--r-control);
+  background:transparent;color:var(--fg-body);cursor:pointer;text-align:left;
+  font-family:inherit;font-size:var(--fs-3);font-weight:var(--fw-medium);
+  letter-spacing:var(--tr-body);
+}
+.rmp-pick__menu button:hover,.rmp-pick__menu button:focus-visible{
+  background:var(--accent-bg);color:var(--fg);outline:0}
+.rmp-pick__menu button[aria-selected="true"]{color:var(--fg);font-weight:var(--fw-semibold)}
+.rmp-pick__tik{width:14px;height:14px;flex:0 0 auto;fill:none;stroke:var(--accent-fg);
+  stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+.rmp-pick__menu button[aria-selected="true"] .rmp-pick__tik{visibility:visible}
+
+.rmp-wrap{
+  position:relative;
+
+  display:flex; align-items:flex-start; gap:var(--gap); height:calc(var(--panelH) + var(--capH) + var(--capGap));
+}
+/* Sütun sırası: önizleme · içerik · bilgi. Her sütunun altında
+   kendi bilgi çubuğu var; üçü aynı hizada biter. */
+.rmp-railcol { order:1 }
+.rmp-col     { order:2 }
+.rmp-infocol { order:3 }
+.rmp-railcol,.rmp-col,.rmp-infocol{
+  height:100%;flex:0 0 auto;display:flex;flex-direction:column;gap:var(--capGap);
+}
+.rmp-railcol{width:var(--railW)}
+.rmp-infocol{width:var(--infoW)}
+.rmp-railwrap,.rmp-stage,.rmp-info{flex:0 0 auto;height:var(--panelH)}
+/* Bilgi sütunu da diğer ikisi gibi: panel + altında bilgi çubuğu.
+   Panel panelH yüksekliğinde kaldığı için "Sepete ekle" butonunun alt
+   çizgisi, medya alanının alt çizgisiyle aynı hizaya düşer. */
+.rmp-stage{width:calc(var(--panelH) * 0.8)}
+.rmp-col{width:calc(var(--panelH) * 0.8)}
+.rmp-info{width:100%}
+.rmp-railwrap{width:100%}
+
+/* alt bilgi çubuğu — üç sütunda da aynı yükseklik */
+.rmp-cap{
+  /* Panellerin 16px'i bu 40px'lik şeritlerde iri, küçük resimlerin 8px'i
+     ise fazla köşeli duruyordu; ikisinin arası --r-card dengeyi tutuyor. */
+  flex:0 0 auto;height:var(--capH);border-radius:var(--r-card);
+  background:var(--boxBg);color:var(--fg-muted);
+  box-shadow:inset 0 0 0 1px var(--border);
+  display:flex;align-items:center;justify-content:center;gap:var(--s-2);
+  font-size:var(--fs-2);font-weight:var(--fw-medium);letter-spacing:var(--tr-body);
+  white-space:nowrap;overflow:hidden;padding:0 var(--s-3);
+}
+.rmp-cap .rmp-sep{width:1px;height:14px;background:var(--border-strong);flex:0 0 auto}
+/* Ok glifleri ve ikonlar beyaz: --fg-body koyu zeminde sönük kalıyordu. */
+.rmp-cap .rmp-k{font-size:var(--fs-2);color:var(--fg);display:inline-flex;align-items:center}
+/* çubuk içi çizgi ikon: metin glifleriyle aynı boyut ve mürekkep */
+.rmp-cap .rmp-kic{width:14px;height:14px;display:block;
+  fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+/* Çapraz ok: metnin peşinden gider, "başka bir yere götürür" der. */
+.rmp-cap .rmp-kic--go{width:15px;height:15px;color:var(--accent-fg)}
+/* Tıklanabilir çubuk — diğer çubuklarla aynı kutu, davranışı farklı. */
+.rmp-cap--link{
+  /* font:inherit kısayolu .rmp-cap'in punto/ağırlık/aralık değerlerini de
+     sıfırlıyordu; düğmeye yalnızca yazı ailesi devredilir. */
+  border:0;font-family:inherit;width:100%;cursor:pointer;
+  transition:background var(--dur-1) var(--ease),box-shadow var(--dur-1) var(--ease);
+}
+.rmp-cap--link:hover{background:var(--accent-bg);
+  box-shadow:inset 0 0 0 1px var(--accent-border);color:var(--fg)}
+.rmp-cap--link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rmp-cap--count{font-weight:var(--fw-semibold);color:var(--fg);font-variant-numeric:tabular-nums}
+
+/* medya kolonu = sahne + altındaki bilgi şeridi */
+
+/* Şerit, kendi çerçeveli kabında: kaydırma alanı + altında sayaç ve düğme */
+.rmp-railwrap{
+  position:relative;
+  background:var(--boxBg);border-radius:var(--boxR);
+  box-shadow:inset 0 0 0 1px var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* ── kaydırma alanı: altta yumuşak solma maskesi ── */
+.rmp-rail{
+  flex:1 1 auto;min-height:0;width:100%;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+  display:flex;flex-direction:column;align-items:center;
+  gap:var(--thumbGap);
+  padding:var(--railPad) var(--railPadX);
+  /* maskede #000 bir RENK değil, "tam görünür" anlamına gelen parlaklık */
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-10)),transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-10)),transparent 100%);
+}
+.rmp-rail.rmp-at-end{-webkit-mask-image:none;mask-image:none}
+.rmp-rail::-webkit-scrollbar{display:none}
+/* Dış halka (box-shadow 0 0 0 2.5px) komşularla çakışıyor ve sert
+   duruyordu. İç kenarlık kullanılıyor: boyut değişmez, yumuşak durur. */
+.rmp-rail button{
+  position:relative;flex:0 0 auto;width:var(--thumb);height:var(--thumb);
+  border:0;padding:0;cursor:pointer;border-radius:var(--r-control);overflow:visible;
+  background:var(--n-200);opacity:.62;filter:saturate(.85);
+  transition:opacity var(--dur-1) var(--ease),box-shadow var(--dur-1) var(--ease),
+             filter var(--dur-1) var(--ease);
+}
+.rmp-rail button img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+.rmp-rail button:hover{opacity:.9;filter:none;box-shadow:0 0 0 var(--ringW) var(--border-strong)}
+.rmp-rail button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Aktif çerçeve: outline köşe yarıçapını tam takip etmediği için
+   kopuk görünüyordu. Çift halka box-shadow radius'u birebir izler:
+   önce zemin rengiyle boşluk, sonra beyaz halka. */
+.rmp-rail button[aria-current="true"]{
+  opacity:1;filter:none;
+  box-shadow:0 0 0 var(--ringW) var(--accent);
+}
+/* İçerik türü etiketi: simge değil kısa metin (IMG · B/A · 16:9 · 9:16).
+   Küçük boyutta bir simgeyi çözmek zorunda kalmadan okunur. */
+.rmp-rail .rmp-bdg{
+  position:absolute;right:6px;bottom:6px;
+  padding:4px 7px;border-radius:var(--r-control);
+  background:rgba(12,14,20,.82);color:var(--n-900);
+  font-size:11px;font-weight:var(--fw-bold);letter-spacing:.01em;line-height:1;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  pointer-events:none;
+}
+/* etiket, küçük resmin sönük halinden etkilenmez — hep okunur kalır */
+.rmp-rail button .rmp-bdg{opacity:1}
+
+/* ── orta: 4:5 medya sahnesi ──
+   Her öğe sahnenin tam yüksekliği kadar; scroll-snap sayesinde
+   içerik asla yarım kalmaz.                                      */
+/* Galerinin kendi zemini yok: sitenin arka plani gorunur.
+   Boylece 16:9 video gibi tam oturmayan icerikler siyah kutu
+   icinde degil, sayfanin kendi zemininde durur. */
+.rmp-stage{
+  position:relative;border-radius:var(--boxR);overflow:hidden;background:var(--boxBg);
+}
+.rmp-track{
+  position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
+  scroll-snap-type:y mandatory; overscroll-behavior:contain;
+  scrollbar-width:none;
+}
+/* scroll-snap-stop:always, akıcı bir programatik kaydırmayı ARADAKİ her
+   snap noktasında durduruyor ("takılma" hissi). Kaydırma sürerken snap
+   kapatılır, hedefe varınca geri açılır. */
+.rmp-track.rmp-no-snap{scroll-snap-type:none}
+.rmp-track::-webkit-scrollbar{display:none}
+.rmp-track.rmp-locked{overflow:hidden}
+.rmp-cell{
+  height:100%; scroll-snap-align:start; scroll-snap-stop:always;
+  display:grid; place-items:center; position:relative;
+}
+.rmp-frame{
+  position:relative; max-width:100%; max-height:100%;
+  overflow:hidden; background:transparent; will-change:transform;
+}
+.rmp-frame img{user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none}
+/* içerik ne olursa olsun hücreye SIĞAR, taşmaz */
+.rmp-frame img.rmp-base{display:block;width:auto;height:auto;max-width:100%;max-height:100%}
+.rmp-frame.rmp-can-zoom{cursor:zoom-in}
+.rmp-frame.rmp-ba:not(.rmp-is-zoomed){cursor:ew-resize}
+.rmp-frame.rmp-is-zoomed{cursor:grab} .rmp-frame.rmp-is-zoomed.rmp-is-panning{cursor:grabbing}
+.rmp-frame.rmp-is-loading img.rmp-base{filter:blur(14px)}
+.rmp-frame img.rmp-base{transition:filter .4s ease}
+.rmp-spin{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;
+  border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;
+  animation:sp .7s linear infinite;opacity:0;transition:opacity .2s;pointer-events:none}
+.rmp-frame.rmp-is-loading .rmp-spin{opacity:1}
+@keyframes sp{to{transform:rotate(360deg)}}
+.rmp-errbox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:var(--fs-2);color:var(--fg-muted);background:var(--surface);
+  padding:var(--s-3) var(--s-4);border-radius:var(--r-control);box-shadow:var(--sh-1)}
+
+
+/* sayaç — kaç görsel olduğunu her an gösterir */
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* ürün değişiminde yumuşak geçiş */
+.rmp-stage,.rmp-info{transition:opacity .18s ease}
+.rmp-swapping .rmp-stage,.rmp-swapping .rmp-info{opacity:.25}
+
+/* before / after */
+.rmp-ba__after{position:absolute;inset:0;clip-path:inset(0 0 0 var(--pos,50%))}
+.rmp-ba__after img{display:block;width:100%;height:100%;object-fit:cover}
+.rmp-ba__div{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:2px;background:var(--surface);
+  transform:translateX(-1px) scaleX(var(--iz,1));pointer-events:none;
+  box-shadow:0 0 12px rgba(10,37,64,.45)}
+.rmp-ba__knob{position:absolute;top:50%;left:var(--pos,50%);transform:translate(-50%,-50%) scale(var(--iz,1));
+  width:40px;height:40px;border-radius:var(--r-full);background:var(--surface);border:0;padding:0;
+  display:flex;align-items:center;justify-content:center;gap:5px;cursor:ew-resize;
+  box-shadow:var(--sh-chip)}
+.rmp-ba__knob:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.rmp-ba__knob::before,.rmp-ba__knob::after{content:"";width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.rmp-ba__knob::before{border-right:6px solid var(--fg)} .rmp-ba__knob::after{border-left:6px solid var(--fg)}
+.rmp-ba__tag{position:absolute;top:var(--s-3);font-size:11px;font-weight:var(--fw-bold);
+  letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r-full);
+  background:var(--surface);color:var(--n-900);box-shadow:var(--sh-chip);pointer-events:none}
+.rmp-ba__tag.rmp-b{left:var(--s-3)} .rmp-ba__tag.rmp-a{right:var(--s-3)}
+.rmp-frame.rmp-is-zoomed .rmp-ba__tag{opacity:0}
+
+/* video */
+.rmp-vid__poster{position:absolute;inset:0;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;width:100%;text-decoration:none}
+.rmp-vid__play{width:66px;height:66px;border-radius:50%;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-3);
+  transition:transform var(--dur-1) var(--ease)}
+.rmp-vid__poster:hover .rmp-vid__play{transform:scale(1.07)}
+.rmp-vid__poster:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+.rmp-vid__play::after{content:"";border-left:18px solid var(--fg);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px}
+.rmp-vid__src{position:absolute;left:var(--s-3);top:var(--s-3);background:var(--surface);
+  color:var(--n-900);font-size:11px;font-weight:var(--fw-bold);letter-spacing:.05em;
+  text-transform:uppercase;padding:4px 10px;border-radius:var(--r-full);box-shadow:var(--sh-chip)}
+.rmp-frame.rmp-vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.rmp-ig__out{position:absolute;left:0;right:0;bottom:0;padding:14px;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,37,64,.86),transparent)}
+.rmp-ig__cta{display:inline-flex;align-items:center;height:40px;padding:0 var(--s-4);
+  border-radius:var(--r-control);font-size:var(--fs-4);font-weight:var(--fw-semibold);
+  color:var(--fg-on-accent);background:var(--accent);box-shadow:var(--sh-1)}
+
+/* ── sağ: bilgi paneli (okunabilirlik genişliği) ── */
+.rmp-info{
+  background:var(--boxBg);color:var(--fg-body);border-radius:var(--boxR);overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.rmp-info__scroll{flex:1 1 auto;min-height:0;overflow:hidden;
+  /* künye ızgarası panelin GENİŞLİĞİNE göre karar versin — ekran
+     genişliğine değil: panel dar olduğunda iki sütun sığmıyor. */
+  container-type:inline-size;
+  overflow-wrap:anywhere;word-break:normal;
+  display:flex;flex-direction:column;
+  padding:var(--s-6) clamp(var(--s-5),2vw,var(--s-7)) var(--s-5)}
+/* Başlık ve künye SABİT; uzun metinde kaybolmazlar. */
+.rmp-info__top{flex:0 0 auto}
+/* ── başlık bloğu: rozet · paket adı · satıcı ── */
+.rmp-head{margin-bottom:var(--s-5)}
+/* rozet = kaynak sitedeki .chip: 11px, kalın, VERSAL, hap yarıçapı */
+.rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-bottom:var(--s-2)}
+/* emoji: Apple'ın renkli seti öncelikli; rozetin harf aralığından ve
+   VERSAL dönüşümünden etkilenmemeli */
+.rmp-badge .rmp-bi{flex:0 0 auto;font-style:normal;font-size:12px;line-height:1;
+  letter-spacing:0;text-transform:none;font-size:13px;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.rmp-badge{display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:var(--fw-bold);letter-spacing:.05em;text-transform:uppercase;
+  padding:6px 12px;border-radius:var(--r-full);
+  background:var(--accent-bg);color:var(--accent-fg);
+  box-shadow:inset 0 0 0 1px var(--accent-border)}
+/* Varyant yok: kaynak sitede de etiketten bağımsız TEK çip stili var.
+   Farklı zeminler rozetler arasında yapay bir hiyerarşi yaratıyordu. */
+.rmp-info h1{margin:0;overflow-wrap:anywhere;
+  /* kutu kalkınca genişlik açıldı: başlık ölçekte bir kademe yukarı.
+     Dar panelde --fs-8'e iner — kırılmaz, taşmaz. */
+  font-size:clamp(var(--fs-8),8cqw,var(--fs-9));
+  font-weight:var(--fw-bold);letter-spacing:var(--tr-display);
+  line-height:var(--lh-tight);color:var(--fg);text-wrap:balance}
+.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-2);
+  font-size:var(--fs-2);color:var(--fg-muted)}
+.rmp-info .rmp-av{width:24px;height:24px;border-radius:var(--r-full);background:var(--surface-sunken);
+  border:1px solid var(--border);font-size:9px;font-weight:var(--fw-bold);
+  display:grid;place-items:center;color:var(--fg-muted)}
+.rmp-rate{display:inline-flex;align-items:baseline;gap:5px;
+  font-size:var(--fs-3);font-weight:var(--fw-semibold);color:var(--fg);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.rmp-rate .rmp-st{color:var(--star);font-size:var(--fs-4)}
+.rmp-rate em{font-style:normal;font-weight:var(--fw-regular);color:var(--fg-muted)}
+/* puan solda, fiyat sağda — aynı taban çizgisinde */
+.rmp-buyrow{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s-3);margin-bottom:var(--s-4)}
+/* ── künye kutusu: her pakette değişmeyen dört alan ──
+   Dörde bölünmüş tek bir kutu; iç ayraçlar saç teli kalınlığında,
+   dış çerçeve kutuyu bir bütün olarak tutuyor.
+   Zemin marka tonunun bir tutamı; koyu panelde canlı ama sessiz durur. */
+.rmp-facts{
+  list-style:none;margin:var(--s-5) 0 0;padding:0;
+  display:grid;grid-template-columns:1fr 1fr;
+  border:1px solid var(--border);border-radius:var(--r-card);
+  overflow:hidden;background:var(--accent-bg);
+}
+.rmp-facts li{
+  display:flex;align-items:center;gap:7px;min-width:0;
+  /* "Lightroom Classic" dar panelde kırpılıyordu: yatay dolgu ve tip
+     bir kademe indirildi, hücre içine sığdı. */
+  padding:var(--s-3) var(--s-3);
+  font-size:var(--fs-1);font-weight:var(--fw-medium);
+  letter-spacing:var(--tr-body);color:var(--fg-body);
+}
+/* İç ayraçlar — öğe sayısından bağımsız genel kural: son sütunda sağ,
+   son satırda alt çizgi yok; böylece dış çerçeveyle çakışmaz. */
+.rmp-facts li{border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rmp-facts li:nth-child(even){border-right:0}
+.rmp-facts li:nth-last-child(-n+2){border-bottom:0}
+/* Dar panelde iki sütun "Lightroom Classic"i kırpıyordu: tek sütuna iner,
+   ayraçlar da tek sütun düzenine göre yeniden kurulur. */
+/* Eşik ölçümle bulundu: hücre içi genişlik en uzun metni (101px) taşıdığı
+   sürece iki sütun kalır; 300px'in altında tek sütuna iner. */
+@container (max-width:300px){
+  .rmp-facts{grid-template-columns:1fr}
+  /* Tek sütunda "son satır" artık son ÖĞE. nth-last-child kuralı
+     özgüllükte daha güçlü olduğu için aynı seçiciyle geri alınmalı. */
+  .rmp-facts li,.rmp-facts li:nth-last-child(-n+2){
+    border-right:0;border-bottom:1px solid var(--border)}
+  .rmp-facts li:last-child{border-bottom:0}
+}
+.rmp-facts li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmp-facts li b{color:var(--fg);font-weight:var(--fw-semibold)}
+.rmp-facts .rmp-ci{
+  flex:0 0 auto;width:15px;height:15px;display:block;
+  fill:none;stroke:var(--accent-fg);stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* Tek kayan alan burası: metin uzarsa yalnızca açıklama kayar,
+   başlık ve künye yerinde kalır, satın alma bloğu altta sabittir. */
+.rmp-about{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  margin:var(--s-5) 0 0;font-size:var(--fs-4);line-height:var(--lh-relaxed);
+  color:var(--fg-body);
+  /* devamı olduğunu gösteren alt solma — sona gelince kalkar */
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-8)),transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-8)),transparent 100%);
+}
+.rmp-about.rmp-at-end,.rmp-about.rmp-no-scroll{-webkit-mask-image:none;mask-image:none}
+.rmp-about::-webkit-scrollbar{width:8px}
+.rmp-about::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:var(--r-full)}
+.rmp-about p{margin:0 0 var(--s-3)}
+.rmp-about p:last-child{margin:0}
+
+
+/* ── fiyat satırı: tutar, üstü çizili çapa ve indirim ── */
+.rmp-price{display:flex;align-items:baseline;gap:var(--s-2);flex-wrap:wrap;
+  font-variant-numeric:tabular-nums}
+.rmp-price b{font-size:var(--fs-7);font-weight:var(--fw-bold);letter-spacing:var(--tr-heading);
+  line-height:1;color:var(--fg)}
+.rmp-price s{font-size:var(--fs-3);color:var(--fg-muted)}
+
+
+/* satın alma bloğu — panelin altına sabit */
+/* ── satın alma bloğu ──
+   Künye kutusuyla AYNI renk stili: marka tonunun bir tutamı zemin,
+   ışıklı mürekkep. Panelin iki "gerçek" alanı böylece aynı dili konuşur. */
+.rmp-buy{
+  flex:0 0 auto;background:var(--accent-bg);color:var(--fg-body);
+  border-top:1px solid var(--border);
+  /* Alt dolgu geri: sıfırlandığında buton panelin dibine yapışıp
+     kırpılmış gibi duruyordu. Hizayı artık panelin alt kenarı taşıyor —
+     o zaten medya alanının bitiş çizgisiyle aynı yerde. */
+  padding:var(--s-5) clamp(var(--s-5),2vw,var(--s-7));
+}
+
+/* ── ana aksiyon: seçilen tutar butonun İÇİNDE ── */
+/* kaynak sitedeki .btn--primary.btn--lg: 48px, --r-control, --fs-5, --sh-1 */
+.rmp-btn{
+  display:flex;align-items:center;justify-content:center;gap:var(--s-2);
+  font-family:inherit;width:100%;height:48px;padding:0 var(--s-6);margin-top:0;
+  font-size:var(--fs-5);font-weight:var(--fw-semibold);letter-spacing:var(--tr-body);
+  border-radius:var(--r-control);cursor:pointer;border:0;
+  background:var(--accent);color:var(--fg-on-accent);box-shadow:var(--sh-1);
+  transition:background var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease);
+}
+.rmp-btn:hover{background:var(--accent-700);box-shadow:var(--sh-2)}
+.rmp-btn:active{background:var(--accent-700)}
+.rmp-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* yeşil yalnızca burada: eylem tamamlandı */
+.rmp-btn.rmp-done{background:var(--ok);box-shadow:var(--sh-1)}
+/* Eklendikten sonra imleç üstündeyken çıkarma niyeti okunur hâle gelir:
+   metin "Sepetten çıkar"a döner, renk uyarıya kayar.
+   YALNIZCA gerçek imleçli cihazlarda: dokunmatikte tap sonrası :hover
+   takılı kalıyor ve buton anında "Sepetten çıkar" yazıyordu — hem
+   kafa karıştırıcı hem de ikinci dokunuşta kazara silme riski. */
+.rmp-btn .rmp-lb--out,.rmp-btn .rmp-tik--out{display:none}
+@media (hover:hover) and (pointer:fine){
+  .rmp-btn.rmp-done:hover,.rmp-btn.rmp-done:focus-visible{background:var(--danger)}
+  .rmp-btn.rmp-done:hover .rmp-tik--in,.rmp-btn.rmp-done:focus-visible .rmp-tik--in{display:none}
+  .rmp-btn.rmp-done:hover .rmp-tik--out,.rmp-btn.rmp-done:focus-visible .rmp-tik--out{display:block}
+  .rmp-btn.rmp-done:hover .rmp-lb--in,.rmp-btn.rmp-done:focus-visible .rmp-lb--in{display:none}
+  .rmp-btn.rmp-done:hover .rmp-lb--out,.rmp-btn.rmp-done:focus-visible .rmp-lb--out{display:inline}
+}
+/* onay işareti — CSS çubuklarıyla çizilince "v" gibi duruyordu, SVG net */
+.rmp-tik{width:16px;height:16px;flex:0 0 auto;display:block;
+  fill:none;stroke:currentColor;stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round}
+
+.rmp-bag{width:15px;height:14px;border:1.7px solid currentColor;border-radius:2px 2px 4px 4px;position:relative;flex:0 0 auto}
+.rmp-bag::after{content:"";position:absolute;top:-5px;left:2.5px;width:8px;height:6px;border:1.7px solid currentColor;border-bottom:0;border-radius:4px 4px 0 0}
+/* ── ürün okları + kapat ── */
+.rmp-nav{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:6;
+  height:var(--navD);min-width:var(--navD);border-radius:var(--r-full);
+  border:0;padding:0;cursor:pointer;overflow:hidden;
+  /* Zemin koyulaşınca oklar kayboluyordu: yüzey bir kademe açıldı ve
+     kenar çizgisi belirginleşti — abartmadan, sadece seçilir olsun diye. */
+  background:rgba(255,255,255,.10);color:var(--fg);
+  box-shadow:var(--sh-3), inset 0 0 0 1px var(--border-strong);
+  backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);
+  display:flex;align-items:center;
+  transition:background var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease);
+}
+.rmp-nav:hover{background:rgba(255,255,255,.18);
+  box-shadow:var(--sh-3), inset 0 0 0 1px rgba(255,255,255,.34)}
+.rmp-nav:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+/* devre dışıyken açılmasın: sallanan boş bir hap kalıyordu */
+.rmp-nav[disabled]{opacity:.28;cursor:default;pointer-events:none}
+.rmp-nav.rmp-prev{left:calc(var(--navD)*.42)} .rmp-nav.rmp-next{right:calc(var(--navD)*.42)}
+
+/* Simge yuvası TAM KARE ve düğme yüksekliğiyle aynı: daralmış halde
+   chevron kesin merkezde durur. Eskiden döndürülmüş bir kare kenarlığı
+   margin düzeltmeleriyle ortalanmaya çalışılıyor, hep kaçıyordu. */
+.rmp-nav__ic{flex:0 0 auto;width:var(--navD);height:var(--navD);display:grid;place-items:center}
+.rmp-nav__ic svg{
+  width:calc(var(--navD)*.32);height:calc(var(--navD)*.32);display:block;
+  fill:none;stroke:currentColor;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+.rmp-nav .rmp-lbl{
+  display:flex;align-items:center;gap:var(--s-3);
+  max-width:0;opacity:0;overflow:hidden;padding:0;
+  transition:max-width var(--dur-2) var(--ease), opacity var(--dur-1) var(--ease),
+             padding var(--dur-2) var(--ease);
+}
+.rmp-nav:hover .rmp-lbl,.rmp-nav:focus-visible .rmp-lbl{max-width:250px;opacity:1}
+/* etiket yalnızca DIŞ kenarında nefes alır; simge kendi karesinde ortalı */
+.rmp-nav.rmp-prev:hover .rmp-lbl,.rmp-nav.rmp-prev:focus-visible .rmp-lbl{padding-right:var(--s-5)}
+.rmp-nav.rmp-next:hover .rmp-lbl,.rmp-nav.rmp-next:focus-visible .rmp-lbl{padding-left:var(--s-5)}
+
+.rmp-nav .rmp-t{white-space:nowrap;text-align:left}
+.rmp-nav .rmp-t em{display:block;font-style:normal;font-size:var(--fs-1);
+  font-weight:var(--fw-medium);color:var(--fg-muted);
+  letter-spacing:var(--tr-caps);text-transform:uppercase;line-height:1;margin-bottom:4px}
+.rmp-nav .rmp-t span{display:block;font-size:var(--fs-3);font-weight:var(--fw-semibold);
+  letter-spacing:var(--tr-heading);color:var(--fg);line-height:1.15}
+
+.rmp-close{position:fixed;top:14px;right:14px;z-index:7;width:44px;height:44px;border-radius:50%;border:0;
+  /* Oklarla aynı dil: aynı yüzey, aynı kenar çizgisi, aynı çizgi ikon.
+     Eskiden CSS çubuklarıyla çizilmiş, kenarsız ve sönüktü. */
+  cursor:pointer;background:rgba(255,255,255,.10);color:var(--fg);
+  display:grid;place-items:center;
+  box-shadow:var(--sh-3), inset 0 0 0 1px var(--border-strong);
+  transition:background var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease),
+             transform var(--dur-2) var(--ease)}
+.rmp-close svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round}
+.rmp-close:hover{background:rgba(255,255,255,.18);
+  box-shadow:var(--sh-3), inset 0 0 0 1px rgba(255,255,255,.34);
+  transform:rotate(90deg)}
+.rmp-close:active{transform:rotate(90deg) scale(.94)}
+.rmp-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){ .rmp-close{transition:background var(--dur-1) var(--ease)}
+  .rmp-close:hover,.rmp-close:active{transform:none} }
+.rmp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ── mobil: alt alta, ikisi de 4:5 ── */
+@media (max-width:900px){
+  /* Mobilde içerik ekrandan uzun: örtünün kendisi kaydırılabilir olmalı,
+     yoksa gövde kilitliyken alt kısma hiç ulaşılamıyor. */
+  .rmp-pdp{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:0;
+       -webkit-overflow-scrolling:touch}
+  /* align-items:flex-start dikey akista cocuklari ICERIKLERI kadar
+     genisletiyor; serit 472px kalip tum duzeni tasiriyordu.
+     stretch + width kisiti ile hepsi kaba uyar, serit kendi icinde kayar. */
+  .rmp-wrap{
+    --panelH:auto;
+    flex-direction:column;align-items:stretch;height:auto;gap:10px;
+    width:100%;max-width:100%;
+    padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom));
+  }
+  /* Sutunlar tam genislik; sira: medya -> serit -> bilgi.
+     .rmp-stage yuksekligi ORANDAN gelmeli: height:auto + icerigin height:100%
+     olmasi dairesel referans yaratip alani 0px'e dusuruyordu. */
+  .rmp-railcol,.rmp-col,.rmp-infocol{width:100%;height:auto;flex:0 0 auto;gap:8px}
+  .rmp-col{order:1} .rmp-railcol{order:2} .rmp-infocol{order:3}
+  .rmp-stage{width:100%;height:auto;aspect-ratio:4/5}
+  .rmp-railwrap{height:auto}
+    /* min-width:auto flex ogesini icerigi kadar genis tutar ve tum
+     duzeni tasirir; kendi icinde kaymasi icin sifirlanmali. */
+  /* order artik sarmalayicida: sira medya -> serit -> bilgi */
+  .rmp-railwrap{width:100%;min-width:0;height:auto}
+  .rmp-rail{gap:8px}
+  .rmp-rail{
+    width:100%;min-width:0;height:auto;
+    flex-direction:row;overflow-x:auto;overflow-y:hidden;
+  }
+  .rmp-railcol,.rmp-col,.rmp-infocol,.rmp-stage,.rmp-info,.rmp-railwrap{min-width:0;max-width:100%}
+  .rmp-rail button{flex:0 0 auto;width:56px;aspect-ratio:1/1}
+  .rmp-rail button{width:52px;flex:0 0 auto}
+  .rmp-info{width:100%;height:auto;flex:0 0 auto}
+  .rmp-info__scroll{overflow:visible;padding:20px 18px 6px}
+  /* satın alma çubuğu ekranın altına sabit; içerik altında kalmasın */
+  .rmp-buy{
+    position:fixed;left:0;right:0;bottom:0;z-index:7;
+    border-top:1px solid var(--line-2);box-shadow:0 -8px 30px -14px rgba(0,0,0,.6);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  .rmp-buy .rmp-btn{margin-top:10px;padding:13px 20px}
+  /* Satın alma çubuğunun yüksekliği içeriğe göre değişir; JS ölçer. */
+  .rmp-wrap{padding-bottom:calc(var(--buyH,150px) + 22px)}
+  .rmp-nav{top:auto;bottom:calc(var(--buyH,150px) + 16px + env(safe-area-inset-bottom));position:fixed;
+       width:48px;min-width:48px;height:48px;padding:0;border-radius:var(--r-full)}
+  .rmp-nav .rmp-lbl{display:none}
+  .rmp-close{top:calc(14px + env(safe-area-inset-top))}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}

@@ -9,6 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- The product panel a pack opens into. Dropped in as shipped: it brings its
+     own CSS, builds its own markup, and everything it owns is rmp- prefixed,
+     so none of it can reach the page's own .btn / .nav / .price / .rate /
+     .rail / .wrap / .badge / .close. Its tokens are scoped to its own root
+     and never touch this page's :root. -->
+<link rel="stylesheet" href="rm-pdp.css">
+<script src="rm-pdp.js" defer></script>
 <script>document.documentElement.className+=' has-js';</script>
 <style>
 /* ════════════════════════════════════════════════════════════════
@@ -1994,21 +2001,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 #voices.is-2up .vcard{cursor:zoom-out}
 /* it rides the cursor, a little below and to the right, and flips to the
    other side rather than running off the edge of the window */
-/* ── the gallery's stage ──
-   RMGallery caps a picture at the stage's height, which fits anything bigger
-   than the stage and leaves anything smaller floating at its own size in the
-   middle of a black screen. The fit is worked out in JS at the foot of the
-   page — CSS alone cannot do it: given a definite height, max-width clamps
-   the width on its own and takes the picture's shape with it. All that is
-   needed here is to stop the component's ceiling fighting the measurement. */
-.rmg .rmg-frame img.base{max-height:none}
-/* the pointer describes the press it is about to make: a lens with a plus on
-   a picture at rest, a lens with a minus on one that is already close. The
-   component reaches for a grabbing hand there — true of a drag, but the press
-   is the commoner move and it is the one that lets go. The hand comes back
-   the moment something is actually being dragged. */
-.rmg .rmg-frame.is-zoomed{cursor:zoom-out}
-.rmg .rmg-frame.is-zoomed.is-panning{cursor:grabbing}
+/* The words that ride the cursor over a pack's picture. They belonged to the
+   gallery that used to open there and they outlived it: the product panel
+   opens from the same press, and the promise is the same one. */
 .ziphint{
   position:fixed;left:0;top:0;z-index:70;pointer-events:none;
   display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
@@ -8543,131 +8538,119 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 })();
 </script>
 
-<!-- ══════════ THE GALLERY ══════════
-     RMGallery 1.0, dropped in as shipped: it brings its own CSS and its own
-     DOM, and everything it owns is namespaced rmg. The page only hands it
-     pictures.
+<!-- ══════════ THE PRODUCT PANEL ══════════
+     A pack on the shelf opens into RM PDP: the pack's pictures down the left,
+     the stage in the middle, what it is and what it costs on the right.
+
+     The page's whole part in it is this: read what each card is already
+     showing, hand the component that list, and tell it which card was
+     pressed. The component owns everything after that — its markup, its
+     styles, its keys, its history entry, and putting the page back where it
+     was on the way out.
 
      It belongs to the shelf and nowhere else. The before/afters and the
      testimonials keep the press they always had — that one widens the row to
      two across, and it is a different thing to want. -->
-<script src="rm-gallery.js"></script>
 <script>
 (function(){
   var grid = document.getElementById('presetGrid');
-  if(!grid || !window.RMGallery) return;
+  if(!grid) return;
 
-  /* ---- what a card is holding ----
-     Four frames behind one window, one of them showing. The gallery gets all
-     four, opened at the one that was on screen when it was pressed. */
-  function shots(win){
-    return [].map.call(win.querySelectorAll('img'), function(img){
+  /* ---- the shelf, read off the shelf ----
+     Every fact the panel shows is already printed on the card: the name, who
+     made it, the score, the price, the badge, and the four pictures behind
+     the window. So the list is built from the cards rather than written out a
+     second time — one shelf, one truth, and a card that changes takes the
+     panel with it. */
+  function txt(el, sel){ var n = el.querySelector(sel); return n ? n.textContent.trim() : ''; }
+  function money(t){ var m = String(t).match(/([\d.]+)/); return m ? +m[1] : 0; }
+
+  /* the badge a card wears, in the names the component knows its marks by */
+  var BADGE = { 'chip--best':'BESTSELLER', 'chip--hot':'POPÜLER',
+                'chip--new':'YENİ', 'chip--pick':'EDİTÖRÜN SEÇİMİ' };
+  function badgesOf(card){
+    var out = [];
+    [].forEach.call(card.querySelectorAll('.card__img .chip'), function(chip){
+      for(var cls in BADGE) if(chip.classList.contains(cls)) out.push([BADGE[cls], '']);
+    });
+    return out;
+  }
+
+  function shots(card){
+    return [].map.call(card.querySelectorAll('.card__img img'), function(img){
       return { type:'photo', src: img.getAttribute('src'),
                alt: img.getAttribute('alt') || '' };
     }).filter(function(it){ return it.src; });
   }
-  function nameOf(win){
-    var card = win.closest('.card');
-    var t = card && card.querySelector('.card__t');
-    return t ? t.textContent.trim() : '';
-  }
 
-  /* the gallery locks the body and puts the page back with one scrollTo on the
-     way out. This page asks for smooth scrolling in its stylesheet, which turns
-     that one call into a second and a half of the page flying past — it lands
-     in the right place either way, it just should not be watched getting
-     there. Straight while it is up, handed back once it has finished closing:
-     isOpen() turns false when the closing starts, not when it ends. */
-  var de = document.documentElement, straightGo = null;
-  function straight(){
-    de.style.scrollBehavior = 'auto';
-    clearTimeout(straightGo);
-    (function wait(){
-      if(RMGallery.isOpen()) return requestAnimationFrame(wait);
-      straightGo = setTimeout(function(){ de.style.scrollBehavior = ''; }, 800);
-    })();
-  }
-  function swallowNext(){
-    function eat(e){ e.stopPropagation(); e.preventDefault(); }
-    document.addEventListener('click', eat, true);
-    setTimeout(function(){ document.removeEventListener('click', eat, true); }, 0);
-  }
-
-  /* ---- every picture fits the stage, whatever size the file is ----
-     The component caps a picture at the stage's height, which brings a big
-     one down but leaves a small one at its own size in the middle of a black
-     screen. Neither can CSS finish the job: with a definite height, max-width
-     clamps the width by itself and a wide photograph on a narrow screen comes
-     out stretched. So the height is worked out from the picture's own shape —
-     the smaller of the stage's height and what its width allows — and written
-     on. Measured on the way in, whenever the slide changes, as each file
-     arrives, and when the window is resized. */
-  function fit(){
-    var stage = document.getElementById('rmg-viewport');
-    if(!stage) return;
-    var slide = document.querySelector('.rmg-slide');
-    var pad = slide ? parseFloat(getComputedStyle(slide).paddingLeft) * 2 : 0;
-    var maxW = stage.clientWidth - pad, maxH = stage.clientHeight;
-    if(!(maxW > 0 && maxH > 0)) return;
-    [].forEach.call(document.querySelectorAll('.rmg-frame img.base'), function(img){
-      if(!img.naturalWidth || !img.naturalHeight) return;
-      var h = Math.min(maxH, maxW * img.naturalHeight / img.naturalWidth);
-      img.style.height = Math.round(h) + 'px';
-      img.style.width = 'auto';
-    });
-  }
-  var watching = null;
-  function watch(){
-    fit();
-    requestAnimationFrame(fit);                     /* once the stage has been measured */
-    var count = document.getElementById('rmg-count');
-    if(count && !watching){
-      watching = new MutationObserver(fit);         /* the counter changes on every slide */
-      watching.observe(count, {childList:true, characterData:true, subtree:true});
-      document.querySelector('.rmg').addEventListener('load', fit, true);
-      window.addEventListener('resize', function(){ if(RMGallery.isOpen()) fit(); });
-    }
-  }
-
-  function show(win){
-    var items = shots(win);
-    if(!items.length) return false;
-    var on = win.querySelector('img.is-on');
-    var at = on ? Math.max(0, [].indexOf.call(win.querySelectorAll('img'), on)) : 0;
-    RMGallery.open(items, {title: nameOf(win), startIndex: at, trigger: win});
-    straight();
-    watch();
-    return true;
-  }
-
-  /* ---- the picture is the way in, not the card ----
-     Read from the pointer rather than from a click: a tap on a touch screen
-     does not reliably make one, and the click it does make arrives after the
-     gallery is up, where it would land on the overlay. The window also scrubs
-     under a dragging finger, so a pointer that travelled was someone looking
-     through the four, not asking for one of them. */
-  var PRESS = 6, from = null;
-  grid.addEventListener('pointerdown', function(e){
-    var win = e.target.closest('.card__img');
-    from = win ? {x:e.clientX, y:e.clientY, win:win} : null;
-  }, {passive:true});
-  grid.addEventListener('pointercancel', function(){ from = null; }, {passive:true});
-  grid.addEventListener('pointerup', function(e){
-    var held = from; from = null;
-    if(!held) return;
-    if(Math.abs(e.clientX - held.x) >= PRESS || Math.abs(e.clientY - held.y) >= PRESS) return;
-    if(show(held.win)) swallowNext();
+  var PACKS = [].map.call(grid.querySelectorAll('.card'), function(card, i){
+    /* the card keeps its own number, so sorting the shelf cannot make a card
+       open the pack that used to stand in its place */
+    card.dataset.i = i;
+    /* The panel hands focus back to whatever was pressed when it closes, and
+       what was pressed here is an article element, which cannot take focus.
+       Minus one makes
+       it focusable to a script without adding a tab stop: the keyboard order
+       through the shelf is exactly what it was, and closing the panel still
+       puts you back on the card you opened. */
+    card.setAttribute('tabindex', '-1');
+    var rate = txt(card, '.rate');
+    var name = txt(card, '.card__t'), by = txt(card, '.card__by span:not(.avatar)');
+    return {
+      name: name,
+      by: by,
+      av: txt(card, '.avatar'),
+      rating: parseFloat(rate) || 0,
+      reviews: +String(rate).replace(/.*\(([\d,]+)\).*/, '$1').replace(/,/g, '') || 0,
+      price: money(txt(card, '.price b')),
+      old: money(txt(card, '.price s')),
+      /* PLACEHOLDER — the shelf does not carry a preset count yet. One number
+         for every pack rather than twelve invented ones, so it is obvious at
+         a glance that this is not real data. Replace with the real field. */
+      presets: 24,
+      badges: badgesOf(card),
+      /* also standing in for copy the shelf does not carry: this says only
+         what the card already says, and nothing that would have to be made up */
+      about: '<p>' + name + (by ? ' — ' + by : '') + '.</p>'
+    };
   });
-  /* a keyboard's Enter arrives as a click with nothing behind it */
-  grid.addEventListener('click', function(e){
-    var win = e.target.closest('.card__img');
-    if(win && e.detail === 0) show(win);
+  /* the pictures are read at open time, not now: the card swaps which of the
+     four is showing as you sweep across it, and lazy images may not have
+     arrived when the page first settles */
+
+  function packAt(i){
+    var card = grid.querySelector('.card[data-i="' + i + '"]');
+    var p = PACKS[i];
+    if(card && p) p.media = shots(card);
+    return p;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    if(!window.RMPdp) return;
+    /* media is read fresh for whichever pack is opened, and for its
+       neighbours, because the panel walks left and right through the list */
+    PACKS.forEach(function(p, i){ packAt(i); });
+    RMPdp.data = PACKS;
+    /* scoped to the shelf: the plugin cards and the testimonials are not
+       packs and must not open a product panel */
+    RMPdp.attach('#presetGrid .card', function(el){ return +el.dataset.i; });
+  });
+
+  /* ---- Add to cart is not "open the pack" ----
+     The panel is bound to the whole card, which is what makes the picture,
+     the name and the price all lead to the same place. The one control on the
+     card that means something else is the basket button, and its own handler
+     is bound to the button itself — so letting it run and then stopping the
+     press there keeps the basket working and keeps the panel shut. */
+  [].forEach.call(grid.querySelectorAll('.card__add'), function(btn){
+    btn.addEventListener('click', function(e){ e.stopPropagation(); });
   });
 
   /* ---- the mark in the corner, and the words at the pointer ----
-     The corner mark is drawn once per window and only shown while the pointer
-     is on it; the words ride the cursor, the way the before/afters already
-     say what a press will do. */
+     Both kept from the gallery that used to open here: the press still opens
+     something bigger, so the promise still holds. The corner mark is drawn
+     once per window and only shown while the pointer is on it; the words ride
+     the cursor, the way the before/afters already say what a press will do. */
   var FS = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.2H2.2V7"/><path d="M11 2.2h4.8V7"/><path d="M15.8 11v4.8H11"/><path d="M2.2 11v4.8H7"/></svg>';
   [].forEach.call(grid.querySelectorAll('.card__img'), function(win){
     win.insertAdjacentHTML('beforeend', '<span class="card__full" aria-hidden="true">' + FS + '</span>');
@@ -8681,7 +8664,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   function hintOff(){ hint.classList.remove('is-on'); }
   grid.addEventListener('pointermove', function(e){
     if(e.pointerType !== 'mouse') return hintOff();
-    if(RMGallery.isOpen()) return hintOff();
+    if(window.RMPdp && RMPdp.isOpen()) return hintOff();
     if(!e.target.closest('.card__img')) return hintOff();
     var w = hint.offsetWidth, h = hint.offsetHeight;
     var flip = e.clientX + 18 + w > window.innerWidth - 8;

@@ -1,0 +1,705 @@
+/*! RM PDP Lightbox — Retouch Market ürün detay galerisi
+ *  Tek dosya, bağımlılıksız. Tüm sınıf ve id'ler `rmp-` ön ekiyle
+ *  ad alanına alındı: host'un .btn/.nav/.price/.rate/.rail/.wrap
+ *  sınıflarıyla çakışmaz, host'un stillerini de etkilemez.
+ *
+ *  Kullanım:
+ *    RMPdp.open(URUNLER, 0)                 // doğrudan aç
+ *    RMPdp.attach('.card', el => +el.dataset.i)   // tıklamayı bağla
+ *    RMPdp.close() / RMPdp.isOpen()
+ *
+ *  Ürün nesnesi:
+ *    { name, by, av, rating, reviews, price, old, presets,
+ *      badges:[['BESTSELLER','']],            // ikon adı otomatik eşlenir
+ *      about:'<p>…</p>',
+ *      apps:['Lightroom Classic','Camera Raw'],   // opsiyonel
+ *      media:[ {type:'photo', src, alt}
+ *            | {type:'ba', before, after, alt}
+ *            | {type:'youtube', id, poster}
+ *            | {type:'instagram', url, poster} ] }
+ */
+
+(function(){
+'use strict';
+
+/* Lightbox işaretlemesi buradan kurulur: host'a HTML yapıştırtmıyoruz. */
+var _kok = document.createElement('div');
+_kok.innerHTML = '<div class="rmp-pdp" id="rmp-pdp" role="dialog" aria-modal="true" aria-label="Ürün detayı">'+
+'  <div class="rmp-pdp__scrim" data-close></div>'+
+'  <div class="rmp-wrap">'+
+'  <div class="rmp-railcol">'+
+'  <div class="rmp-railwrap" id="rmp-railwrap">'+
+'    <div class="rmp-rail" id="rmp-rail" role="group" aria-label="Görseller"></div>'+
+'  </div>'+
+'    <div class="rmp-cap rmp-cap--count" id="rmp-count"></div>'+
+'  </div>'+
+'  <div class="rmp-col">'+
+'    <div class="rmp-stage"><div class="rmp-track" id="rmp-track"></div></div>'+
+'    <div class="rmp-cap">'+
+'      <span class="rmp-k">↑↓</span> Fotoğrafı değiştir <span class="rmp-sep"></span>'+
+'      <span class="rmp-k">←→</span> Paketi değiştir <span class="rmp-sep"></span>'+
+'      <span class="rmp-k">⤢</span> Tıkla yakınlaş'+
+'    </div>'+
+'  </div>'+
+'  <div class="rmp-infocol">'+
+'    <aside class="rmp-info">'+
+'      <div class="rmp-info__scroll" id="rmp-info"></div>'+
+'      <div class="rmp-buy" id="rmp-buy"></div>'+
+'    </aside>'+
+'    <button class="rmp-cap rmp-cap--link" type="button" id="rmp-bundle">'+
+'      Get 5, pay 3 bundle'+
+'      <svg class="rmp-kic rmp-kic--go" viewBox="0 0 24 24" aria-hidden="true">'+
+'        <path d="M8 16 16 8"/><path d="M9.5 8H16v6.5"/></svg>'+
+'    </button>'+
+'  </div>'+
+'  </div>'+
+'<button class="rmp-nav rmp-prev" id="rmp-prev"><span class="rmp-nav__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19"/></svg></span><span class="rmp-lbl">'+
+'  <span class="rmp-t"><em>Önceki paket</em><span id="rmp-prevName"></span></span></span></button>'+
+'<button class="rmp-nav rmp-next" id="rmp-next"><span class="rmp-lbl">'+
+'  <span class="rmp-t"><em>Sonraki paket</em><span id="rmp-nextName"></span></span></span><span class="rmp-nav__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 L16 12 L9 19"/></svg></span></button>'+
+'<button class="rmp-close" id="rmp-close" aria-label="Kapat">'+
+'  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'+
+'</button>'+
+'<p class="rmp-sr" id="rmp-live" aria-live="polite"></p>'+
+'</div>';
+while(_kok.firstChild) document.body.appendChild(_kok.firstChild);
+
+
+var TYPE={photo:'Fotoğraf',ba:'Karşılaştırma',youtube:'Video',instagram:'Reels'};
+/* Küçük resim etiketi: simge yerine kısa metin — tek bakışta okunur.
+   Video türleri en-boy oranıyla anılır, kullanıcı ne göreceğini bilir. */
+var ETIKET={photo:'IMG', ba:'B/A', youtube:'16:9', instagram:'9:16'};
+/* Rozet ikonları — kaynak sitedeki chip'lerle aynı semboller, emoji olarak.
+   Ürün verisine değil buraya yazılır: aynı etiket her yerde aynı ikonu alır. */
+var ROZET_IK={
+  'BESTSELLER':'🏆', 'POPÜLER':'🔥', 'EDİTÖRÜN SEÇİMİ':'💎', 'YENİ':'🎉'
+};
+
+/* Künye çipi ikonları — emoji değil, sistemin kendi çizgi ikonları:
+   hepsi 24'lük ızgarada, currentColor konturlu, aynı kalınlıkta. */
+function ikon(d){
+  return '<svg class="rmp-ci" viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>';
+}
+var IK={
+  /* katman yığını — preset sayısı */
+  preset:ikon('<path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z"/><path d="M3 12.5 12 17l9-4.5"/>'+
+              '<path d="M3 17.5 12 22l9-4.5"/>'),
+  /* sonsuzluk — ömür boyu */
+  omur:ikon('<path d="M8.5 12c0 1.9-1.5 3.4-3.2 3.4S2 13.9 2 12s1.5-3.4 3.3-3.4c1.4 0 2.4.9 3.2 1.9'+
+            'l2.9 3c.8 1 1.8 1.9 3.2 1.9C18.5 15.4 20 13.9 20 12s-1.5-3.4-3.4-3.4c-1.4 0-2.4.9-3.2 1.9'+
+            'l-2.9 3c-.8 1-1.8 1.9-3.2 1.9"/>'),
+  /* ekran — masaüstü uygulaması */
+  uygulama:ikon('<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8.5 21h7"/><path d="M12 17v4"/>'),
+  /* indirme oku */
+  indir:ikon('<path d="M12 3v13"/><path d="M7 12l5 5 5-5"/><path d="M5 20h14"/>'),
+  /* şimşek */
+  simsek:ikon('<path d="M13 2 5 13h6l-1 9 8-11h-6l1-9Z"/>')
+};
+
+var PRODUCTS=[];
+
+
+var rail=document.getElementById('rmp-rail'), railwrap=document.getElementById('rmp-railwrap'),
+    track=document.getElementById('rmp-track'),
+    countEl=document.getElementById('rmp-count'),
+    info=document.getElementById('rmp-info'), buy=document.getElementById('rmp-buy'),
+    prevB=document.getElementById('rmp-prev'), nextB=document.getElementById('rmp-next'),
+    closeB=document.getElementById('rmp-close'), live=document.getElementById('rmp-live');
+
+var pi=0, mi=0, zoom=1, panX=0, panY=0, zf=null;
+var drag=null, start=null, pts=new Map(), pinch=null, spyRAF=null;
+var MAXZ=5.3, CLICKZ=3.45;
+var coarse=matchMedia('(pointer:coarse)').matches;
+
+/* ═══ render ═══ */
+function render(){
+  var p=PRODUCTS[pi];
+  killVideos();                       /* ürün değişince ses arkada kalmasın */
+  buildTrack(p); buildRail(p); buildInfo(p); buildBuy(p);
+
+  prevB.disabled=(pi===0); nextB.disabled=(pi===PRODUCTS.length-1);
+  fillNav('prev', pi>0?PRODUCTS[pi-1]:null);
+  fillNav('next', pi<PRODUCTS.length-1?PRODUCTS[pi+1]:null);
+  setCount(); railShadow();
+  live.textContent=p.name+', '+p.media.length+' görsel';
+}
+function goProduct(d){ goProductTo(pi+d); }
+/* Doğrudan bir pakete git — oklar da, üst bardaki seçici de buradan geçer. */
+function goProductTo(n){
+  if(n<0||n>=PRODUCTS.length||n===pi) return;
+  document.body.classList.add('rmp-swapping');
+  setTimeout(function(){
+    pi=n; mi=0; resetZoom(); render(); track.scrollTop=0; sizeRail();
+    document.body.classList.remove('rmp-swapping');
+  },180);
+}
+/* Ok etiketi yalnızca adı taşır: mini ürün kutusu görseli kaldırıldı,
+   hangi pakete gidileceğini adı zaten söylüyordu. */
+function fillNav(which, p){
+  document.getElementById('rmp-'+which+'Name').textContent = p ? p.name : '';
+}
+
+/* ── sayaç ──
+   İçeriğin üstünde belirip solan ipucu balonları kaldırıldı: aynı bilgi
+   zaten sütun altındaki sabit bilgi çubuğunda duruyor. */
+function setCount(){ countEl.textContent=(mi+1)+' / '+PRODUCTS[pi].media.length; }
+function sizeRail(){ railShadow(); }
+function railShadow(){
+  var over=rail.scrollHeight>rail.clientHeight+1;
+  var atEnd = rail.scrollTop >= rail.scrollHeight-rail.clientHeight-2;
+  rail.classList.toggle('rmp-at-end', !over || atEnd);
+}
+/* Mobilde sabit satın alma çubuğunun gerçek yüksekliğini yayınla:
+   oklar ve sayfa dolgusu buna göre yerleşsin. */
+function syncBuyH(){
+  var h=buy.getBoundingClientRect().height;
+  if(h) pdp.style.setProperty('--buyH', Math.round(h)+'px');
+}
+new ResizeObserver(syncBuyH).observe(buy);
+addEventListener('resize',syncBuyH);
+
+rail.addEventListener('scroll',railShadow,{passive:true});
+addEventListener('resize',sizeRail);
+new ResizeObserver(sizeRail).observe(railwrap);
+
+/* ── medya: her öğe sahnenin tam yüksekliği ── */
+function buildTrack(p){
+  track.innerHTML='';
+  p.media.forEach(function(it,i){
+    var cell=document.createElement('div'); cell.className='rmp-cell'; cell.dataset.i=i;
+    cell.appendChild(buildFrame(it,i));
+    track.appendChild(cell);
+  });
+  track.scrollTop=0;
+  track.removeEventListener('scroll',onScroll);
+  track.addEventListener('scroll',onScroll,{passive:true});
+}
+function wireYT(f,it){
+  var pst=f.querySelector('.rmp-vid__poster'); if(!pst) return;
+  pst.addEventListener('click',function(){
+    f.querySelector('.rmp-vid__poster').remove();
+    var sr=f.querySelector('.rmp-vid__src'); if(sr) sr.remove();
+    var fr=document.createElement('iframe');
+    fr.src='https://www.youtube-nocookie.com/embed/'+it.id+'?autoplay=1&rel=0';
+    fr.title='Video'; fr.allow='autoplay;encrypted-media;picture-in-picture'; fr.allowFullscreen=true;
+    f.appendChild(fr); f.dataset.playing='1';
+  });
+}
+function buildFrame(it,i){
+  var f=document.createElement('div');
+  f.className='frame is-loading'+(it.type==='ba'?' ba':'')+
+    ((it.type==='youtube'||it.type==='instagram')?' vid':'');
+  if(it.type==='photo'||it.type==='ba') f.classList.add('rmp-can-zoom');
+  f.dataset.i=i;
+  var src=it.type==='photo'?it.src:it.type==='ba'?it.before:it.poster;
+  var img=new Image();
+  img.className='rmp-base'; img.alt=it.alt||''; img.decoding='async'; img.draggable=false;
+  img.addEventListener('load',function(){f.classList.remove('rmp-is-loading');},{once:true});
+  img.addEventListener('error',function(){
+    f.classList.remove('rmp-is-loading');
+    f.insertAdjacentHTML('beforeend','<span class="rmp-errbox">Görsel yüklenemedi</span>');},{once:true});
+  img.src=src; f.appendChild(img);
+  f.insertAdjacentHTML('beforeend','<span class="rmp-spin"></span>');
+
+  if(it.type==='ba'){
+    f.style.setProperty('--pos','50%');
+    var af=document.createElement('span'); af.className='rmp-ba__after';
+    var ai=new Image(); ai.alt=''; ai.decoding='async'; ai.draggable=false; ai.src=it.after;
+    af.appendChild(ai); f.appendChild(af);
+    f.insertAdjacentHTML('beforeend','<span class="rmp-ba__div"></span>'+
+      '<button class="rmp-ba__knob" aria-label="Karşılaştırma çizgisi"></button>'+
+      '<span class="rmp-ba__tag rmp-b">ÖNCE</span><span class="rmp-ba__tag rmp-a">SONRA</span>');
+  }
+  if(it.type==='youtube'){
+    f.insertAdjacentHTML('beforeend','<span class="rmp-vid__src">▶ YOUTUBE</span>'+
+      '<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
+    wireYT(f,it);
+  }
+  if(it.type==='instagram'){
+    f.insertAdjacentHTML('beforeend','<span class="rmp-vid__src">◎ INSTAGRAM</span>'+
+      '<a class="rmp-vid__poster" href="'+it.url+'" target="_blank" rel="noopener" aria-label="Instagram\'da aç"><span class="rmp-vid__play"></span></a>'+
+      '<span class="rmp-ig__out"><span class="rmp-ig__cta">Instagram\'da aç ↗</span></span>');
+  }
+  return f;
+}
+
+/* ── şerit ── */
+function buildRail(p){
+  rail.innerHTML='';
+  p.media.forEach(function(it,i){
+    var s=it.thumb||(it.type==='photo'?it.src:it.type==='ba'?it.after:it.poster);
+    var b=document.createElement('button'); b.dataset.i=i;
+    b.setAttribute('aria-label',(i+1)+'. görsel, '+TYPE[it.type]);
+    b.innerHTML='<img src="'+s+'" alt="">'+
+      '<span class="rmp-bdg">'+(ETIKET[it.type]||'IMG')+'</span>';
+    rail.appendChild(b);
+  });
+  markRail();
+}
+/* ══════════ MEDYAYA GİT — tek giriş noktası ══════════
+   Şerit tıklaması, klavye ve oklar hep buradan geçer. Üç kural:
+   1) hedef ANINDA aktif olur (sayaç ve şerit animasyonu beklemez),
+   2) kaydırma boyunca snap kapalıdır (aradaki karelerde takılmaz),
+   3) casus (updateActive) susar — yoksa animasyonun ortasındaki ara
+      kareyi aktif sanıp şeridi ileri geri oynatıyordu.               */
+var navBusy=false, navTok=0, navTimer=null;
+function goToMedia(i,ani){
+  var son=PRODUCTS[pi].media.length-1;
+  i=Math.max(0,Math.min(son,i));
+  var c=track.querySelector('.rmp-cell[data-i="'+i+'"]'); if(!c) return;
+  /* offsetTop tam sayıya yuvarlanıyor; hücre yükseklikleri kesirli
+     olduğu için 1px artık kalıyordu ve snap geri açılınca kare
+     yerine oturmaya çalışıp "takılma" hissi veriyordu. Kesin ölçüm: */
+  var hedef=track.scrollTop+(c.getBoundingClientRect().top-track.getBoundingClientRect().top);
+  if(i!==mi){ mi=i; sonrasi(); }
+  if(Math.abs(track.scrollTop-hedef)<1) return;
+  var tok=++navTok; navBusy=true;
+  track.classList.add('rmp-no-snap');
+  /* 3 kareden uzak hedefte önce hedefin bir kare berisine ışınlanıp
+     oradan akıcı kayarız: 20 kare boyu animasyon beklenmez ama geçiş
+     yine sürekli hissedilir (iOS'un uzun listelerde yaptığı numara). */
+  var h=track.clientHeight||1;
+  if(ani!==false && Math.abs(hedef-track.scrollTop)/h > 3)
+    track.scrollTop = hedef + (hedef>track.scrollTop ? -h : h);
+  track.scrollTo({top:hedef, behavior: ani===false?'auto':'smooth'});
+  clearTimeout(navTimer);
+  (function bekle(){
+    if(tok!==navTok) return;                       /* yeni hedef devraldı */
+    if(Math.abs(track.scrollTop-hedef)<1.5){ bitir(tok); return; }
+    navTimer=setTimeout(bekle,60);
+  })();
+  /* emniyet: animasyon hiç oturmazsa 1sn sonra kilidi aç */
+  setTimeout(function(){ if(tok===navTok) bitir(tok); },1000);
+}
+function bitir(tok){
+  if(tok!==navTok) return;
+  clearTimeout(navTimer); navTimer=null;
+  /* artığı ölçerek sıfırla: hedef ile gerçek konum arasında kalan
+     kesir, snap geri açıldığında tarayıcıyı yeniden oynatıyordu */
+  var c=track.querySelector('.rmp-cell[data-i="'+mi+'"]');
+  if(c) track.scrollTop+=c.getBoundingClientRect().top-track.getBoundingClientRect().top;
+  track.classList.remove('rmp-no-snap');
+  navBusy=false;
+}
+function sonrasi(){ setCount(); markRail(); unmountAway(); }
+
+/* Kullanıcı şeridi elle gezerken otomatik ortalama devreye girmemeli. */
+var railEl=0;
+['wheel','pointerdown','touchstart'].forEach(function(ev){
+  rail.addEventListener(ev,function(){ railEl=Date.now(); },{passive:true});
+});
+function markRail(){
+  Array.prototype.forEach.call(rail.children,function(b,i){b.setAttribute('aria-current',i===mi);});
+  var a=rail.children[mi]; if(!a) return;
+  if(Date.now()-railEl<1200) return;              /* elini çekmesini bekle */
+  var yatay=rail.scrollWidth>rail.clientWidth+1,
+      dikey=rail.scrollHeight>rail.clientHeight+1;
+  if(!yatay&&!dikey) return;
+  var rr=rail.getBoundingClientRect(), br=a.getBoundingClientRect();
+  /* İLERİ BAKIŞ PAYI.
+     Salt "en yakına kaydır" kareyi şeridin tam kenarına yaslıyordu: seçili
+     karenin arkasında ne olduğu görünmüyor, liste bitmiş gibi duruyordu.
+     Shopify/Amazon davranışı: seçili kare kenara değil, kenardan yaklaşık
+     bir buçuk kare içeride durur — devamı hep göz ucuyla görülür.
+     (Ortalamak da yapılmaz; kullanıcı listede yerini kaybeder.) */
+  var oku=function(x){ return parseFloat(x)||0; };
+  var stil=getComputedStyle(rail);
+  if(dikey){
+    var bir=br.height+oku(stil.rowGap), bak=bir*1.2;
+    var ust=br.top-rr.top, alt=rr.bottom-br.bottom;
+    if(ust>=bak && alt>=bak) return;          /* iki yanda da bağlam var */
+    railTo(rail.scrollTop + (ust<bak ? ust-bak : bak-alt), false);
+  }else{
+    var birX=br.width+oku(stil.columnGap), bakX=birX*1.2;
+    var sol=br.left-rr.left, sag=rr.right-br.right;
+    if(sol>=bakX && sag>=bakX) return;
+    railTo(rail.scrollLeft + (sol<bakX ? sol-bakX : bakX-sag), true);
+  }
+}
+function railTo(v,yatay){
+  var max=yatay?rail.scrollWidth-rail.clientWidth:rail.scrollHeight-rail.clientHeight;
+  v=Math.max(0,Math.min(max,v));
+  var o={behavior:'smooth'}; o[yatay?'left':'top']=v;
+  rail.scrollTo(o);
+}
+rail.addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  /* Tıklama açık bir SEÇİMDİR, gezinme değil: "kullanıcı şeridi elle
+     geziyor" koruması burada susturulur. Yoksa yarım görünen bir kareye
+     tıklandığında klavyenin yaptığı otomatik kaydırma yapılmıyordu.
+     Ortalama davranışı kalktığı için bu artık kareyi fırlatmaz —
+     yalnızca tam görünür olacak kadar kaydırır. */
+  railEl=0;
+  goToMedia(+b.dataset.i);
+});
+
+/* ── aktif görsel: snap sonrası hangi hücre görünüyorsa ── */
+function updateActive(){
+  spyRAF=null;
+  if(navBusy) return;                  /* programatik kaydırma sürüyor */
+  var h=track.clientHeight; if(!h) return;
+  var i=Math.round(track.scrollTop/h);
+  i=Math.max(0,Math.min(PRODUCTS[pi].media.length-1,i));
+  if(i!==mi){ mi=i; sonrasi(); }
+}
+/* Görünürden çıkan videoyu söker: arkada ses çalmaz ve poster
+   geri gelince tekerlekle kaydırma yine mümkün olur. */
+function unmountAway(){
+  track.querySelectorAll('.rmp-frame.vid[data-playing]').forEach(function(f){
+    if(+f.dataset.i===mi) return;
+    restorePoster(f);
+  });
+}
+function killVideos(){ track.querySelectorAll('iframe').forEach(function(x){x.remove();}); }
+function restorePoster(f){
+  var it=PRODUCTS[pi].media[+f.dataset.i]; if(!it) return;
+  var fr=f.querySelector('iframe'); if(fr) fr.remove();
+  delete f.dataset.playing;
+  f.insertAdjacentHTML('beforeend','<span class="rmp-vid__src">▶ YOUTUBE</span>'+
+    '<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
+  wireYT(f,it);
+}
+function onScroll(){ if(!spyRAF) spyRAF=requestAnimationFrame(updateActive); }
+
+/* ── sağ panel ── */
+function buildInfo(p){
+  info.innerHTML=
+   /* Ürün kutusu görseli kaldırıldı: aynı paketin görselleri zaten
+      solda tam boy duruyordu. Kazanılan genişlik başlığa gidiyor. */
+   /* SABİT bölüm: başlık ve künye her zaman görünür kalır. */
+   '<div class="rmp-info__top">'+
+     '<div class="rmp-head">'+
+       (p.badges.length?'<div class="rmp-badges">'+p.badges.map(function(b){
+          var ik=ROZET_IK[b[0]];
+          return '<span class="rmp-badge '+b[1]+'">'+
+                 (ik?'<i class="rmp-bi" aria-hidden="true">'+ik+'</i>':'')+b[0]+'</span>';
+        }).join('')+'</div>':'')+
+       /* Başlığın kendisi menü tetikleyicisi: görüntülenen paketin adına
+          tıklanıp başka bir preset/LUT'a tek hamlede geçilir. */
+       '<h1 class="rmp-pick" id="rmp-pick">'+
+         '<button class="rmp-pick__btn" id="rmp-pickBtn" type="button" aria-haspopup="listbox"'+
+         ' aria-expanded="false" aria-controls="pickMenu">'+
+           '<span id="rmp-pickName">'+p.name+'</span>'+
+           '<svg class="rmp-pick__ch" viewBox="0 0 24 24" aria-hidden="true">'+
+           '<path d="m6 9 6 6 6-6"/></svg>'+
+         '</button>'+
+         '<div class="rmp-pick__menu" id="rmp-pickMenu" role="listbox" aria-label="Paket seç" hidden></div>'+
+       '</h1>'+
+       '<div class="rmp-by"><span class="rmp-av">'+p.av+'</span> '+p.by+'</div>'+
+     '</div>'+
+   /* Akordiyon yok: açıklama açıkta, altında dört künye çipi.
+      Ömür boyu lisans buraya taşındı — üstteki rozet satırında da
+      dursaydı aynı panelde iki kez söylenmiş olurdu. */
+   /* Künye her pakette aynı dört alanı taşır — değişken bir liste değil,
+      sabit bir tablo. O yüzden çip yığını değil, dörde bölünmüş bir kutu.
+      Açıklamadan ÖNCE gelir: önce ne aldığın, sonra nasıl bir ton. */
+   '<ul class="rmp-facts">'+
+     '<li>'+IK.preset   +'<span><b>'+p.presets+'</b> preset</span></li>'+
+     '<li>'+IK.omur     +'<span>Ömür boyu lisans</span></li>'+
+     '<li>'+IK.uygulama +'<span>Lightroom Classic</span></li>'+
+     '<li>'+IK.uygulama +'<span>Camera Raw</span></li>'+
+     '<li>'+IK.indir    +'<span>Instant Download</span></li>'+
+     '<li>'+IK.simsek   +'<span>1 click install</span></li>'+
+   '</ul>'+
+   '</div>'+
+   /* KAYAN bölüm: metin uzasa bile yalnızca burası kayar. */
+   '<div class="rmp-about" id="rmp-about">'+p.about+'</div>';
+  info.scrollTop=0;
+  /* Bir kare BEKLE: innerHTML'in hemen ardından esnek yükseklikler daha
+     hesaplanmamış oluyor, clientHeight içerik boyuna eşit görünüyor ve
+     "taşmıyor" sanılıyordu. */
+  requestAnimationFrame(aboutGolge);
+}
+/* Açıklama taşmıyorsa ya da sonuna gelindiyse alt solma kalkar. */
+function aboutGolge(){
+  var a=info.querySelector('#rmp-about'); if(!a) return;
+  var tasar=a.scrollHeight>a.clientHeight+1;
+  a.classList.toggle('rmp-no-scroll', !tasar);
+  a.classList.toggle('rmp-at-end', tasar && a.scrollTop>=a.scrollHeight-a.clientHeight-2);
+}
+info.addEventListener('scroll',aboutGolge,{passive:true,capture:true});
+addEventListener('resize',aboutGolge);
+/* panel yeniden boyutlanınca ve yazı tipi geç yüklenince kendini düzeltir */
+new ResizeObserver(aboutGolge).observe(info);
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(aboutGolge);
+function buildBuy(p){
+  buy.innerHTML=
+   /* Kaynak karttaki düzen: solda puan, sağda fiyat, altında tam
+      genişlikte aksiyon. Puan buraya taşındı — başlıkta da dursaydı
+      aynı panelde iki kez söylenirdi. */
+   '<div class="rmp-buyrow">'+
+     '<span class="rmp-rate"><span class="rmp-st">★</span> '+p.rating.toFixed(1)+
+       ' <em>('+p.reviews.toLocaleString('tr-TR')+')</em></span>'+
+     '<span class="rmp-price"><b>$'+p.price+'</b><s>$'+p.old+'</s></span>'+
+   '</div>'+
+   '<button class="rmp-btn" id="rmp-add"></button>';
+  var btn=buy.querySelector('#rmp-add');
+  /* Durum ÜRÜNE bağlı: paket değişince buton o paketin durumunu gösterir,
+     eskiden hep sıfırlanıyordu. Aynı butona tekrar basmak sepetten çıkarır. */
+  ciz(btn, !!SEPET[p.name]);
+  btn.addEventListener('click',function(){
+    var vardi=!!SEPET[p.name];
+    if(vardi) delete SEPET[p.name]; else SEPET[p.name]=true;
+    ciz(btn, !vardi);
+    live.textContent = p.name + (vardi ? ' sepetten çıkarıldı' : ' sepete eklendi');
+  });
+  syncBuyH();
+}
+/* ── üst bardaki paket seçici ──
+   Referanstaki mantık: görüntülenen paketin adı tıklanır, açılan listeden
+   başka bir preset/LUT'a tek hamlede geçilir. */
+/* Başlık her paket değişiminde yeniden çizildiği için düğüm referansları
+   ÖNBELLEĞE ALINMAZ — her seferinde canlı sorgulanır. */
+function pickEl(){ return document.getElementById('rmp-pick'); }
+function pickBtnEl(){ return document.getElementById('rmp-pickBtn'); }
+function pickMenuEl(){ return document.getElementById('rmp-pickMenu'); }
+
+function pickKur(){
+  var pickMenu=pickMenuEl(); if(!pickMenu) return;
+  pickMenu.innerHTML=PRODUCTS.map(function(p,i){
+    return '<button type="button" role="option" data-i="'+i+'"'+
+           ' aria-selected="'+(i===pi)+'">'+
+           '<svg class="rmp-pick__tik" viewBox="0 0 24 24" aria-hidden="true">'+
+           '<path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'+p.name+'</button>';
+  }).join('');
+}
+function pickAc(ac){
+  var pick=pickEl(), pickBtn=pickBtnEl(), pickMenu=pickMenuEl();
+  if(!pick) return;
+  pick.classList.toggle('rmp-open',ac);
+  pickBtn.setAttribute('aria-expanded',ac?'true':'false');
+  pickMenu.hidden=!ac;
+  if(ac){ pickKur(); var s=pickMenu.querySelector('[aria-selected="true"]'); if(s) s.focus(); }
+}
+function pickAcikMi(){ var p=pickEl(); return !!p && p.classList.contains('rmp-open'); }
+
+/* Dinleyiciler DELEGASYONLA: düğümler yeniden kurulsa da çalışır. */
+info.addEventListener('click',function(e){
+  if(e.target.closest('#rmp-pickBtn')){ e.stopPropagation(); pickAc(!pickAcikMi()); return; }
+  var b=e.target.closest('#rmp-pickMenu button[data-i]'); if(!b) return;
+  var i=+b.dataset.i; pickAc(false); pickBtnEl().focus();
+  if(i!==pi) goProductTo(i);
+});
+/* menü içinde yukarı/aşağı gezinme — liste kutusu davranışı */
+info.addEventListener('keydown',function(e){
+  var pickMenu=pickMenuEl();
+  if(!pickMenu||pickMenu.hidden||!pickMenu.contains(e.target)) return;
+  var ogeler=[].slice.call(pickMenu.querySelectorAll('button'));
+  var k=ogeler.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'){ e.preventDefault(); e.stopPropagation();
+    ogeler[Math.min(ogeler.length-1,k+1)].focus(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation();
+    ogeler[Math.max(0,k-1)].focus(); }
+  else if(e.key==='Home'){ e.preventDefault(); ogeler[0].focus(); }
+  else if(e.key==='End'){ e.preventDefault(); ogeler[ogeler.length-1].focus(); }
+});
+/* boşluğa tıklayınca menü kapanır — lightbox kapanmaz */
+document.addEventListener('click',function(e){
+  var p=pickEl();
+  if(pickAcikMi() && p && !p.contains(e.target)) pickAc(false);
+});
+
+/* Sepetteki paketler — ürün adına göre; oturum boyunca korunur. */
+var SEPET={};
+/* Butonun üç yüzü: ekle · eklendi (imleç üstünde "Çıkar") */
+function ciz(btn, icinde){
+  btn.classList.toggle('rmp-done', icinde);
+  btn.setAttribute('aria-pressed', icinde?'true':'false');
+  btn.innerHTML = icinde
+    ? '<svg class="rmp-tik rmp-tik--in" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'+
+      '<svg class="rmp-tik rmp-tik--out" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'+
+      '<span class="lb rmp-lb--in">Sepete eklendi</span>'+
+      '<span class="lb rmp-lb--out">Sepetten çıkar</span>'
+    : '<span class="rmp-bag"></span> Sepete ekle';
+}
+
+/* ═══ zoom ═══ */
+function applyZoom(){
+  if(!zf) return;
+  zf.style.transform= zoom>1?'translate3d('+panX+'px,'+panY+'px,0) scale('+zoom+')':'';
+  zf.style.setProperty('--iz',String(1/zoom));
+  zf.classList.toggle('rmp-is-zoomed',zoom>1);
+  zf.style.transition= drag==='pan'?'none':'transform .26s cubic-bezier(.22,.61,.36,1)';
+  track.classList.toggle('rmp-locked',zoom>1);
+}
+function clampPan(){
+  if(!zf||zoom<=1){panX=panY=0;return;}
+  var vw=track.clientWidth, vh=track.clientHeight;
+  var ox=Math.max(0,(zf.offsetWidth*zoom-vw)/2), oy=Math.max(0,(zf.offsetHeight*zoom-vh)/2);
+  panX=Math.max(-ox,Math.min(ox,panX)); panY=Math.max(-oy,Math.min(oy,panY));
+}
+function setZoom(z,cx,cy,f){
+  if(f) zf=f; if(!zf) return;
+  var o=zoom; z=Math.max(1,Math.min(MAXZ,z)); if(z===o) return;
+  if(z===1) panX=panY=0;
+  else if(cx!=null){
+    var r=zf.getBoundingClientRect(), dx=cx-(r.left+r.width/2), dy=cy-(r.top+r.height/2), k=z/o;
+    panX=(panX-dx)*k+dx; panY=(panY-dy)*k+dy;
+  }
+  zoom=z; clampPan(); applyZoom(); if(z===1) zf=null;
+}
+function resetZoom(){
+  zoom=1;panX=panY=0;
+  track.querySelectorAll('.rmp-frame').forEach(function(f){
+    f.style.transform=''; f.style.removeProperty('--iz'); f.classList.remove('rmp-is-zoomed','is-panning');});
+  track.classList.remove('rmp-locked'); zf=null;
+}
+
+/* ═══ before/after ═══ */
+function setBA(f,p){ f.style.setProperty('--pos',Math.max(0,Math.min(100,p))+'%'); }
+function baPct(f,x){ var r=f.getBoundingClientRect(); return (x-r.left)/r.width*100; }
+
+track.addEventListener('pointermove',function(e){
+  if(coarse||e.buttons!==0) return;
+  var f=e.target.closest('.rmp-frame.ba'); if(!f||f.classList.contains('rmp-is-zoomed')&&false) return;
+  setBA(f,baPct(f,e.clientX));
+});
+track.addEventListener('pointerdown',function(e){
+  if(e.target.closest('.rmp-vid__poster')) return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===2){ var a=[]; pts.forEach(function(v){a.push(v);});
+    pinch={d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),z:zoom}; drag='pinch'; return; }
+  var f=e.target.closest('.rmp-frame');
+  start={x:e.clientX,y:e.clientY,moved:false,f:f};
+  if(!f){ drag=null; return; }
+  try{ track.setPointerCapture(e.pointerId); }catch(err){}
+  if(e.target.closest('.rmp-ba__knob')){ drag='ba'; return; }
+  if(zoom>1&&f===zf){ drag='pan'; f.classList.add('rmp-is-panning'); return; }
+  drag='tap';
+},{passive:true});
+track.addEventListener('pointermove',function(e){
+  if(!pts.has(e.pointerId)) return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(drag==='pinch'&&pinch&&pts.size===2){
+    var a=[]; pts.forEach(function(v){a.push(v);});
+    setZoom(pinch.z*(Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)/pinch.d),
+      (a[0].x+a[1].x)/2,(a[0].y+a[1].y)/2,start&&start.f); return;
+  }
+  if(!start) return;
+  var dx=e.clientX-start.x, dy=e.clientY-start.y;
+  if(Math.abs(dx)>10||Math.abs(dy)>10) start.moved=true;
+  if(drag==='ba'&&start.f){ setBA(start.f,baPct(start.f,e.clientX)); return; }
+  if(drag==='pan'){ panX+=e.clientX-(start.lx||start.x); panY+=e.clientY-(start.ly||start.y);
+    start.lx=e.clientX; start.ly=e.clientY; clampPan(); applyZoom(); }
+},{passive:true});
+function endPtr(e){
+  pts.delete(e.pointerId);
+  if(drag==='pinch'){ if(pts.size<2){drag=null;pinch=null; if(zoom<=1.03) setZoom(1);} return; }
+  if(drag==='pan'&&start&&start.f){ start.f.classList.remove('rmp-is-panning'); if(!start.moved) setZoom(1); }
+  if(drag==='tap'&&start&&!start.moved&&start.f){
+    var it=PRODUCTS[pi].media[+start.f.dataset.i];
+    if(it&&(it.type==='photo'||it.type==='ba')){
+      if(zoom>1) setZoom(1); else setZoom(CLICKZ,e.clientX,e.clientY,start.f);
+    }
+  }
+  drag=null; start=null;
+}
+track.addEventListener('pointerup',endPtr,{passive:true});
+track.addEventListener('pointercancel',function(e){pts.delete(e.pointerId);
+  if(start&&start.f) start.f.classList.remove('rmp-is-panning'); drag=null;start=null;},{passive:true});
+track.addEventListener('wheel',function(e){
+  if(zoom<=1) return;                     /* normal: dikey kaydırma + snap */
+  e.preventDefault();
+  if(e.ctrlKey){ setZoom(zoom*(e.deltaY<0?1.12:.89),e.clientX,e.clientY); return; }
+  panX-=e.deltaX; panY-=e.deltaY; clampPan(); applyZoom();
+},{passive:false});
+
+/* ═══ klavye ═══ */
+document.addEventListener('keydown',function(e){
+  var k=document.activeElement&&document.activeElement.classList.contains('rmp-ba__knob');
+  if(!isOpen) return;
+  /* Escape sırası: açık menü > yakınlaştırma > lightbox. Menü açıkken
+     doğrudan lightbox'ın kapanması kullanıcıyı şaşırtıyordu. */
+  if(e.key==='Escape'){ e.preventDefault();
+    if(pickAcikMi()){ pickAc(false); pickBtnEl().focus(); }
+    else if(zoom>1) setZoom(1); else closePDP(); return; }
+  /* menü açıkken ok tuşları listede gezinir, medyayı/paketi değiştirmez */
+  if(pickAcikMi()) return;
+  if(k&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){
+    var f=document.activeElement.closest('.rmp-frame');
+    var c=parseFloat(f.style.getPropertyValue('--pos'))||50;
+    setBA(f,c+(e.key==='ArrowRight'?4:-4)); e.preventDefault(); return;
+  }
+  /* Bilgi panelinde gezinirken ok tuslari urunu DEGISTIRMEZ */
+  var inInfo = document.activeElement && document.activeElement.closest &&
+               document.activeElement.closest('.rmp-info');
+  if(!inInfo && e.key==='ArrowRight'){e.preventDefault();goProduct(1);}
+  if(!inInfo && e.key==='ArrowLeft'){e.preventDefault();goProduct(-1);}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    if(zoom>1) return;
+    e.preventDefault();
+    goToMedia(mi+(e.key==='ArrowDown'?1:-1));
+  }
+});
+prevB.onclick=function(){goProduct(-1);}; nextB.onclick=function(){goProduct(1);};
+
+/* ═══ lightbox aç / kapat ═══ */
+var pdp=document.getElementById('rmp-pdp'), lastTrigger=null, scrollY=0, isOpen=false;
+function bgNodes(){
+  return Array.prototype.filter.call(document.body.children,function(n){
+    return n!==pdp && n.tagName!=='SCRIPT' && n.tagName!=='STYLE';});
+}
+function openPDP(i, from){
+  pi=i; mi=0; lastTrigger=from||null; resetZoom(); render();
+  track.scrollTop=0;
+  pdp.classList.add('rmp-open');
+  scrollY=window.scrollY;
+  document.body.style.position='fixed'; document.body.style.top=(-scrollY)+'px';
+  document.body.style.left='0'; document.body.style.right='0';
+  document.body.classList.add('rmp-locked');
+  bgNodes().forEach(function(n){ n.setAttribute('aria-hidden','true'); n.inert=true; });
+  requestAnimationFrame(function(){ pdp.classList.add('rmp-vis'); sizeRail(); });
+  isOpen=true; closeB.focus();
+  try{ history.pushState({pdp:1},''); pushed=true; }catch(e){}
+}
+var pushed=false;
+function closePDP(fromPop){
+  if(!isOpen) return; isOpen=false;
+  killVideos();
+  pdp.classList.remove('rmp-vis');
+  setTimeout(function(){
+    pdp.classList.remove('rmp-open');
+    document.body.classList.remove('rmp-locked');
+    ['position','top','left','right'].forEach(function(k){document.body.style[k]='';});
+    window.scrollTo(0,scrollY);
+    bgNodes().forEach(function(n){ n.removeAttribute('aria-hidden'); n.inert=false; });
+    if(lastTrigger) lastTrigger.focus();
+  },200);
+  if(pushed&&!fromPop){ pushed=false; try{history.back();}catch(e){} } else pushed=false;
+}
+addEventListener('popstate',function(){ if(isOpen) closePDP(true); });
+
+/* kapatma noktaları: çarpı · boşluk · Esc · tarayıcı geri */
+closeB.onclick=function(){ closePDP(); };
+pdp.addEventListener('click',function(e){
+  if(e.target.hasAttribute('data-close')) closePDP();
+});
+
+/* ══════════ dışa açık API ══════════ */
+function acVeri(urunler, i, tetikleyen){
+  if(!urunler || !urunler.length) throw new Error('RMPdp.open: ürün listesi boş');
+  PRODUCTS = urunler;
+  openPDP(Math.max(0, Math.min(urunler.length-1, i|0)), tetikleyen || null);
+}
+var API = {
+  open:  function(urunler, i, tetikleyen){ acVeri(urunler, i, tetikleyen); },
+  close: function(){ closePDP(); },
+  isOpen:function(){ return isOpen; },
+  /* Bir liste görünümündeki tıklamaları bağlar. indeksAl(el) -> sayı */
+  attach:function(secici, indeksAl, urunler){
+    document.addEventListener('click', function(e){
+      var el = e.target.closest ? e.target.closest(secici) : null;
+      if(!el) return;
+      e.preventDefault();
+      var liste = urunler || API.data;
+      if(!liste) throw new Error('RMPdp.attach: ürün listesi verilmedi (RMPdp.data ya da 3. argüman)');
+      acVeri(liste, indeksAl ? indeksAl(el) : 0, el);
+    });
+  },
+  data: null           /* attach için varsayılan liste */
+};
+/* Kuyruğa alınmış çağrılar: host betiği bu dosyadan ÖNCE çalışmış olabilir. */
+var kuyruk = (window.RMPdp && window.RMPdp._q) || [];
+window.RMPdp = API;
+kuyruk.forEach(function(c){ try{ API[c[0]].apply(API, c[1]); }catch(e){ console.error(e); } });
+})();
