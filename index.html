@@ -631,6 +631,104 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   background:radial-gradient(62% 52% at 50% 44%, rgba(5,8,18,.30) 0%, rgba(5,8,18,.10) 62%, rgba(5,8,18,0) 100%);
 }
 
+/* ── the wall of photographs behind the closing call ──────────────
+   Four rails of 4:5 portraits, laid at a slant across the whole band and
+   drifting — the odd ones one way, the even ones the other, none of them
+   in step. Each rail holds the same run of pictures twice and travels
+   exactly half its own width, so the loop closes on itself: there is no
+   seam to catch and no gap at the corners, whatever size the window is.
+
+   Two walls, not one. The one underneath is the room the words stand in:
+   dark, desaturated, quiet. The one on top is the same wall in full
+   colour with every frame invisible, and the frame under the pointer is
+   the only thing turned up. Lighting a photograph is then a fade between
+   two things that were already drawn, rather than a filter being animated
+   — which is what keeps it smooth with sixty pictures on screen.
+
+   Nothing here is a panel, a box or a new gradient: the band's own dark
+   centre is the one it already had. */
+.cta--wall{overflow:clip;isolation:isolate}
+/* the wall is the room now: the pools, the parallax blob and the dot lattice
+   this band used to stand in are gone from it, and the ground is the page's
+   own #080C18 again with the photographs laid over it */
+.cta--wall::before{background:linear-gradient(145deg,rgba(104,88,255,.08),rgba(255,255,255,.02) 45%,rgba(45,92,210,.05))}
+.wall{
+  position:absolute;top:50%;left:50%;z-index:-3;
+  width:162vw;min-width:1780px;
+  transform:translate(-50%,-50%) rotate(-7deg);
+  pointer-events:none;
+}
+/* the room: turned down, and the colour taken out of it */
+.wall--dark{opacity:.56;filter:brightness(.8) saturate(.78)}
+/* the same wall again, in its own window, with nothing showing yet */
+.wall__lit{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.wall__lit .wall{position:absolute;z-index:auto;opacity:1;filter:none}
+.wall__rail{
+  display:flex;width:max-content;margin:8px 0;
+  animation:wallLeft var(--dur,78s) linear infinite;
+}
+/* alternating directions, none of the four in step, and each one started
+   from a different place so the columns never line up into a grid */
+.wall__rail:nth-child(2){--dur:92s;margin-left:-190px;animation-name:wallRight}
+.wall__rail:nth-child(3){--dur:84s;margin-left:-80px}
+.wall__rail:nth-child(4){--dur:96s;margin-left:-250px;animation-name:wallRight}
+/* flex-start on both, or the rows stretch their children to the tallest of
+   them and the 4:5 is quietly lost — the frames came out at 0.84 */
+.wall__rail,.wall__run{align-items:flex-start}
+.wall__run{display:flex;flex:none;gap:10px;padding-right:10px}
+.wall__shot{
+  position:relative;flex:none;width:154px;aspect-ratio:4/5;margin:0;
+  overflow:hidden;border-radius:12px;background:var(--n-100);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 18px 38px rgba(0,0,0,.42);
+}
+.wall__shot img{
+  width:100%;height:100%;display:block;object-fit:cover;
+  filter:saturate(.82) contrast(.94) brightness(.86);transform:scale(1.02);
+}
+/* in the lit wall the pictures are their own colour again — and every one
+   of them is invisible until the pointer is on it */
+.wall__lit .wall__shot{
+  opacity:0;transform:scale(1);
+  border-color:rgba(255,255,255,.30);
+  box-shadow:0 0 0 1px rgba(167,162,255,.18), 0 0 24px rgba(99,91,255,.18), 0 16px 40px rgba(0,0,0,.38);
+  transition:opacity .28s var(--ease), transform .24s ease-out;
+}
+.wall__lit .wall__shot img{filter:none;transform:scale(1.02)}
+/* --light and --zoom are written by the script: full under the pointer,
+   easing to nothing as the picture reaches the words */
+.wall__lit .wall__shot.is-lit{opacity:var(--light,1);transform:scale(var(--zoom,1.025))}
+@keyframes wallLeft{to{transform:translateX(-50%)}}
+@keyframes wallRight{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+/* the band's own dark middle, kept: the words are read off this and not off
+   a panel drawn behind them */
+.cta--wall::after{
+  background:
+    radial-gradient(ellipse 45% 78% at 50% 49%,
+      rgba(5,8,18,.96) 0%, rgba(5,8,18,.84) 42%, rgba(5,8,18,.28) 72%, transparent 100%),
+    linear-gradient(90deg, rgba(8,12,24,.15), transparent 23%, transparent 77%, rgba(8,12,24,.15));
+}
+@media (max-width:900px){
+  .wall{width:230vw;min-width:1480px}
+  .wall--dark{opacity:.46}
+  .wall__shot{width:146px}
+}
+@media (max-width:620px){
+  /* narrower frames and a steeper slant, so the wall still reads as a wall
+     on a phone rather than as one column of pictures */
+  .wall{width:390vw;min-width:1320px;transform:translate(-50%,-50%) rotate(-9deg)}
+  .wall--dark{opacity:.42}
+  .wall__shot{width:132px}
+  .cta--wall::after{
+    background:radial-gradient(ellipse 74% 72% at 50% 50%,
+      rgba(5,8,18,.97), rgba(5,8,18,.84) 52%, rgba(5,8,18,.24) 82%, transparent);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .wall__rail{animation-play-state:paused}
+  .wall__lit .wall__shot{transition:none}
+}
+
 /* the mask has to be able to reach the corners the dots sit in */
 /* Every layer lives inside a box that is exactly the band, so the drift and
    the blob can hang past the corners without any of it counting as width the
@@ -2001,6 +2099,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 #voices.is-2up .vcard{cursor:zoom-out}
 /* it rides the cursor, a little below and to the right, and flips to the
    other side rather than running off the edge of the window */
+/* the way out, in the page's own colour for "this closes" */
+.rmp-pdp .rmp-close:hover,.rmp-pdp .rmp-close:focus-visible{
+  background:var(--danger);color:#fff;
+}
+
 /* ── before/after in the panel, the way it works on the page ─────
    Explore Presets has had a comparison for as long as the page has, and it
    is the one people on this site have already learned: two small dark
@@ -5568,15 +5671,30 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      the offers rather than a new one arriving at the end.
      ════════════════════════════════════════════════════════════════ -->
 <section class="section section--last" id="start" aria-labelledby="startTitle" lang="tr">
-  <div class="cta pbuy--dark" data-lit data-reveal>
-    <span class="cta__sky" aria-hidden="true"></span>
-    <span class="cta__spot" aria-hidden="true"></span>
+  <div class="cta cta--wall pbuy--dark" data-lit data-reveal>
+    <!-- The wall of photographs, built twice.
+         The one underneath is the room: dark, desaturated, drifting. The one
+         on top is exactly the same wall in full colour, with every frame
+         invisible — and the single frame the pointer is on is turned up.
+         Lighting a photograph is therefore not a filter being animated on
+         it, which is expensive and shows; it is one copy fading in over
+         another that was there all along. -->
+    <div class="wall wall--dark" aria-hidden="true" data-wall>
+      <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+      <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+    </div>
+    <div class="wall__lit" aria-hidden="true">
+      <div class="wall" data-wall>
+        <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+        <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+      </div>
+    </div>
     <div class="wrap">
       <div class="cta__in">
         <p class="cta__rate"><span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span><b class="tnum">4,8</b><span class="cta__rate-n tnum">&#183; 15.000+ de&#287;erlendirme</span><span class="vh">5 &#252;zerinden 4,8, 15.000+ de&#287;erlendirmeye g&#246;re</span></p>
         <p class="cta__faces" aria-hidden="true"><span class="cta__ring"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"></span></p>
         <p class="eyebrow">10.000+ Profesyonel Fotoğrafçının Tercihi</p>
-        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>imza renklerini oluşturmak ve <br>daha hızlı çalışmak için RetouchMarket&#8217;i seçiyor.</h2>
+        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket&#8217;i seçiyor.</h2>
         <a class="btn btn--primary btn--lg cta__go" href="#offer">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           Kendi paketini oluştur
@@ -8677,18 +8795,18 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   /* ════════════════════════════════════════════════════════════════
      PREVIEW MATERIAL — not the shop's data, and marked so nobody
      mistakes it for it.
-     The shelf carries four photographs a pack and one short line, so
-     nothing on the page shows what the panel does with a long strip, a
-     long description, or anything that is not a photograph. This puts
-     all of that in front of you, built only out of pictures that are
-     already on this page and one video that is genuinely ours.
 
-       pack 1 · the hard case  — 18 items, every type, a long description
-       pack 2 · the usual case — a photo, a comparison, both videos
-       pack 3 · one video among the photographs
-       the other nine are left exactly as the shelf has them.
+     The shelf carries four photographs a pack and no description at all,
+     so nothing on the page showed what the panel does with a long strip,
+     a short one, a long piece of writing or a single line — or with
+     anything that is not a photograph. Every pack now carries between six
+     and fifteen items, no two packs the same, mixing photographs,
+     before/after comparisons, a film and a Reel; and the descriptions run
+     from one sentence to five paragraphs.
 
-     Delete this whole block to go back to four photographs a pack.
+     Built only out of pictures already on this page and one film that is
+     genuinely ours. Delete this whole block to go back to four
+     photographs a pack and no description.
      ════════════════════════════════════════════════════════════════ */
   var BA = [
     ['images/lora/1-sunflowers-before.webp', 'images/lora/1-sunflowers-after.webp', 'Sunflowers, ungraded and graded'],
@@ -8696,61 +8814,69 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     ['images/lora/3-street-before.webp',     'images/lora/3-street-after.webp',     'Street, ungraded and graded'],
     ['images/lora/4-bamboo-before.webp',     'images/lora/4-bamboo-after.webp',     'Bamboo, ungraded and graded']
   ];
-  function ba(i){ return { type:'ba', before:BA[i][0], after:BA[i][1], alt:BA[i][2] }; }
-  var POSTER = 'images/lora/2-firstdance-after.webp';
-  /* dur: how long the film runs. The component labels a video by its shape
-     today (16:9 / 9:16) rather than by its length, so this field is carried
-     but not yet shown — it is here so the label has something to read the
-     moment it asks for it. */
-  function tube(dur){ return { type:'youtube', id:'EBNI8JHmJ4o', poster:POSTER, dur:dur }; }
+  function ba(i){ i = i % BA.length;
+    return { type:'ba', before:BA[i][0], after:BA[i][1], alt:BA[i][2] }; }
+  /* dur: how long the film runs. The component names a video by its shape
+     today (16:9 / 9:16) rather than by its length, so the field is carried
+     but not yet shown — it is here for the moment the label asks for it. */
+  function tube(dur){ return { type:'youtube', id:'EBNI8JHmJ4o',
+                               poster:'images/lora/2-firstdance-after.webp', dur:dur }; }
   function reels(dur){ return { type:'instagram', url:'https://www.instagram.com/retouchmarket/',
                                 poster:'images/lora/3-street-after.webp', dur:dur }; }
-  /* every photograph the shelf is holding, so a long strip can be built out
-     of real pictures rather than the same four repeated */
+
+  /* every photograph the shelf is holding, so a long strip is built out of
+     real pictures rather than the same four repeated */
   var ALL = PACKS.reduce(function(a, p){ return a.concat(p.media); }, []);
 
-  var LONG =
-    '<p>Lora is the set we reach for first on a bright day. It was cut on ' +
-    'sunlit weddings and daylight portraits, and it is built to keep skin ' +
-    'where you left it: warmth comes up in the highlights, the shadows stay ' +
-    'open, and nothing in the frame goes green when the light bounces off ' +
-    'grass.</p>' +
-    '<p>Every preset in the pack is a starting point rather than a finish. ' +
-    'They are built on curves and colour mixing rather than on a single ' +
-    'strong grade, so exposure, white balance and grain all stay yours to ' +
-    'move afterwards without the look falling apart.</p>' +
+  /* how many items each pack carries, and where its description sits on the
+     scale — no two packs alike, so every length can be seen somewhere */
+  var HOW = [15, 6, 9, 7, 12, 8, 14, 6, 13, 10, 11, 9];
+  var SAY = [4,  0, 1, 2, 3,  1, 4,  0, 2,  3,  1,  2];
+
+  var SHORT = '<p>Bright, natural skin and a warm daylight base.</p>';
+  var MID =
+    '<p>Cut on sunlit weddings and daylight portraits, and built to keep ' +
+    'skin where you left it: warmth comes up in the highlights and the ' +
+    'shadows stay open.</p>';
+  var TWO = MID +
+    '<p>Every preset is a starting point rather than a finish, so exposure, ' +
+    'white balance and grain all stay yours to move afterwards without the ' +
+    'look falling apart.</p>';
+  var THREE = TWO +
+    '<p>Installs into Lightroom Classic and Camera Raw in one click, on raw ' +
+    'files from every current body we could get our hands on. The licence ' +
+    'is yours for life and every update to the pack is included.</p>';
+  var LONG = THREE +
     '<p>The set covers four families: clean daylight for ceremonies, a ' +
     'warmer pass for golden hour, a low-contrast option for flat overcast ' +
     'light, and a deeper one for receptions lit by tungsten. Each has a ' +
     'lighter and a stronger version, so a whole gallery can be graded ' +
     'consistently and then pushed a little further on the frames that ' +
     'deserve it.</p>' +
-    '<p>Installs into Lightroom Classic and Camera Raw in one click. Works ' +
-    'on raw files from every current body we could get our hands on, and ' +
-    'on JPEGs where the file allows it. The licence is yours for life, on ' +
-    'as many of your own machines as you use, and every update to the pack ' +
-    'is included.</p>' +
     '<p><em>This description is preview material: it is here to show what a ' +
     'long one looks like in this panel, and should be replaced with the ' +
     'real copy.</em></p>';
+  var SAYS = [SHORT, MID, TWO, THREE, LONG];
 
-  if(PACKS[0]){
-    PACKS[0].media = [
-      ba(0), PACKS[0].media[0], tube('9:32'), PACKS[0].media[1],
-      ba(1), PACKS[0].media[2], reels('0:48'), PACKS[0].media[3],
-      ba(2), ALL[4], ALL[8], ALL[12],
-      ba(3), ALL[16], ALL[20], ALL[24],
-      ALL[28], ALL[32]
-    ].filter(Boolean);
-    PACKS[0].about = LONG;
-  }
-  if(PACKS[1]){
-    PACKS[1].media = [PACKS[1].media[0], ba(1), PACKS[1].media[1],
-                      tube('4:07'), PACKS[1].media[2], reels('1:12')].filter(Boolean);
-  }
-  if(PACKS[2]){
-    PACKS[2].media = PACKS[2].media.concat([reels('0:36')]);
-  }
+  PACKS.forEach(function(p, i){
+    var want = HOW[i % HOW.length], own = p.media.slice();
+    var out = [], b = i, t = 0;
+    for(var n = 0; n < want; n++){
+      /* a comparison every fourth item, a film a third of the way in and a
+         Reel two thirds of the way in — so every pack has a rhythm rather
+         than a block of photographs with the odd thing at the end */
+      /* the two videos claim their place first: on a long strip their spot
+         can land on a comparison's, and the comparison was winning — pack
+         one ended up with eighteen items and no film in it */
+      if(n === Math.floor(want / 3) && want >= 7){ out.push(tube(['9:32','4:07','2:18','6:45'][i % 4])); continue; }
+      if(n === Math.floor(want * 2 / 3) && want >= 9){ out.push(reels(['0:48','1:12','0:36','0:59'][i % 4])); continue; }
+      if(n % 4 === 2){ out.push(ba(b++)); continue; }
+      /* its own photographs first, then the rest of the shelf's */
+      out.push(own.length ? own.shift() : ALL[(i * 5 + t++) % ALL.length]);
+    }
+    p.media = out.filter(Boolean);
+    p.about = SAYS[SAY[i % SAY.length]];
+  });
 
   /* ---- the page must be where it was, not somewhere near it ----
      The panel remembers the scroll position, pins the body while it is up,
@@ -8867,6 +8993,122 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   }, {passive:true});
   grid.addEventListener('pointerleave', hintOff);
   window.addEventListener('scroll', hintOff, {passive:true});
+})();
+</script>
+
+<script>
+/* ══════════ THE WALL BEHIND THE CLOSING CALL ══════════
+   Two walls of the same photographs, and one job: keep the picture under
+   the pointer lit, and take that light away again as it reaches the words.
+
+   The pictures are the ones the six photographers on this page gave us,
+   already in the page's own images folder — five each, thirty in all, laid
+   out so no two neighbours in a rail come from the same shoot.
+   ══════════════════════════════════════════════════════ */
+(function(){
+  var band = document.querySelector('.cta--wall');
+  if(!band) return;
+  var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  var WHO = ['dugunumuzvar','zariffilm','ugurdemir','ekrulila','celalcanik','mucahitguney'];
+  var SHOTS = [];
+  /* by frame number rather than by person, so a rail never runs two pictures
+     from the same shoot side by side */
+  for(var n = 1; n <= 5; n++)
+    for(var w = 0; w < WHO.length; w++)
+      SHOTS.push('images/testimonials/' + WHO[w] + '/' + n + '.webp');
+
+  var PER = 12;                       /* pictures in one run of a rail */
+  function run(from){
+    var el = document.createElement('div');
+    el.className = 'wall__run';
+    for(var i = 0; i < PER; i++){
+      var fig = document.createElement('figure');
+      fig.className = 'wall__shot';
+      var img = new Image();
+      img.src = SHOTS[(i + from) % SHOTS.length];
+      img.alt = ''; img.decoding = 'async'; img.loading = 'lazy';
+      img.onerror = function(){ this.style.display = 'none'; };
+      fig.appendChild(img);
+      el.appendChild(fig);
+    }
+    return el;
+  }
+  /* the same run twice in every rail: the animation travels exactly half the
+     rail's width, so the second copy is standing where the first began and
+     the loop has no seam and no gap at either end */
+  [].forEach.call(band.querySelectorAll('[data-rail]'), function(rail, i){
+    var from = (i % 4) * 7;
+    rail.appendChild(run(from));
+    rail.appendChild(run(from));
+  });
+
+  var dark = [].slice.call(band.querySelectorAll('.wall--dark .wall__shot'));
+  var lit  = [].slice.call(band.querySelectorAll('.wall__lit .wall__shot'));
+  var title = document.getElementById('startTitle');
+  var on = -1;
+
+  function light(i){
+    if(i === on) return;
+    if(on >= 0 && lit[on]){
+      lit[on].classList.remove('is-lit');
+      lit[on].style.removeProperty('--light');
+      lit[on].style.removeProperty('--zoom');
+    }
+    on = i;
+    if(on >= 0 && lit[on]) lit[on].classList.add('is-lit');
+  }
+
+  /* which picture is under the pointer. Read off the dark wall, because that
+     is the one that is actually laid out — the lit copy sits exactly on top
+     of it. A rotated, animated element has no useful offsetParent, so this
+     asks each rectangle rather than doing the arithmetic. */
+  band.addEventListener('pointermove', function(e){
+    if(e.pointerType === 'touch') return;      /* a finger is scrolling, not pointing */
+    var hit = -1;
+    for(var i = 0; i < dark.length; i++){
+      var r = dark[i].getBoundingClientRect();
+      if(r.width && e.clientX >= r.left && e.clientX <= r.right &&
+         e.clientY >= r.top && e.clientY <= r.bottom){ hit = i; break; }
+    }
+    light(hit);
+  }, {passive:true});
+  band.addEventListener('pointerleave', function(){ light(-1); });
+
+  /* ---- the words come first ----
+     The safe zone is not drawn and it is not a shape anyone chose: it is the
+     heading's own rectangle, asked for fresh every frame, so it follows the
+     text when the window changes, when the type refits, or when the words
+     themselves are edited. As a lit picture moves into it, the light and the
+     small growth are taken back in proportion to how much of the picture is
+     over the words — and by the time it is properly behind them, it is back
+     to being part of the dark wall. */
+  var tick = 0;
+  function keepClear(){
+    tick = 0;
+    if(on >= 0 && lit[on] && dark[on] && title){
+      var c = dark[on].getBoundingClientRect(), t = title.getBoundingClientRect();
+      var padX = Math.max(8, Math.min(14, t.width * .016));
+      var padY = Math.max(6, Math.min(10, t.height * .06));
+      var w = Math.max(0, Math.min(c.right, t.right + padX) - Math.max(c.left, t.left - padX));
+      var h = Math.max(0, Math.min(c.bottom, t.bottom + padY) - Math.max(c.top, t.top - padY));
+      var over = (w * h) / Math.max(1, c.width * c.height);
+      /* fully out by the time the picture is 43% over the words, so it is
+         dark well before it is behind anything anyone is reading */
+      var l = Math.max(0, 1 - Math.min(1, over) * 2.35);
+      lit[on].style.setProperty('--light', l.toFixed(3));
+      lit[on].style.setProperty('--zoom', (1 + l * .025).toFixed(3));
+    }
+    if(on >= 0) tick = requestAnimationFrame(keepClear);
+  }
+  /* only while something is lit: nothing to measure the rest of the time */
+  band.addEventListener('pointermove', function(){
+    if(on >= 0 && !tick) tick = requestAnimationFrame(keepClear);
+  }, {passive:true});
+
+  /* motion turned down: the rails are already stopped in CSS, and a still
+     wall has nothing to move into the words either */
+  if(still) light(-1);
 })();
 </script>
 

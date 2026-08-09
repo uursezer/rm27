@@ -108,7 +108,7 @@ var rail=document.getElementById('rmp-rail'), railwrap=document.getElementById('
 
 var pi=0, mi=0, zoom=1, panX=0, panY=0, zf=null;
 var drag=null, start=null, pts=new Map(), pinch=null, spyRAF=null;
-var MAXZ=5.3, CLICKZ=3.45;
+var MAXZ=5.3, CLICKZ=1.5;   /* bir tik %50 yaklasir; ikinci tik fit'e doner */
 var coarse=matchMedia('(pointer:coarse)').matches;
 
 /* ═══ render ═══ */
@@ -187,8 +187,8 @@ function wireYT(f,it){
 }
 function buildFrame(it,i){
   var f=document.createElement('div');
-  f.className='frame is-loading'+(it.type==='ba'?' ba':'')+
-    ((it.type==='youtube'||it.type==='instagram')?' vid':'');
+  f.className='rmp-frame rmp-is-loading'+(it.type==='ba'?' rmp-ba':'')+
+    ((it.type==='youtube'||it.type==='instagram')?' rmp-vid':'');
   if(it.type==='photo'||it.type==='ba') f.classList.add('rmp-can-zoom');
   f.dataset.i=i;
   var src=it.type==='photo'?it.src:it.type==='ba'?it.before:it.poster;
@@ -345,7 +345,7 @@ function updateActive(){
 /* Görünürden çıkan videoyu söker: arkada ses çalmaz ve poster
    geri gelince tekerlekle kaydırma yine mümkün olur. */
 function unmountAway(){
-  track.querySelectorAll('.rmp-frame.vid[data-playing]').forEach(function(f){
+  track.querySelectorAll('.rmp-frame.rmp-vid[data-playing]').forEach(function(f){
     if(+f.dataset.i===mi) return;
     restorePoster(f);
   });
@@ -551,7 +551,7 @@ function baPct(f,x){ var r=f.getBoundingClientRect(); return (x-r.left)/r.width*
 
 track.addEventListener('pointermove',function(e){
   if(coarse||e.buttons!==0) return;
-  var f=e.target.closest('.rmp-frame.ba'); if(!f||f.classList.contains('rmp-is-zoomed')&&false) return;
+  var f=e.target.closest('.rmp-frame.rmp-ba'); if(!f||f.classList.contains('rmp-is-zoomed')&&false) return;
   setBA(f,baPct(f,e.clientX));
 });
 track.addEventListener('pointerdown',function(e){
