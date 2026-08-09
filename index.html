@@ -2001,6 +2001,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 #voices.is-2up .vcard{cursor:zoom-out}
 /* it rides the cursor, a little below and to the right, and flips to the
    other side rather than running off the edge of the window */
+/* ── the product panel's ground, as an experiment ────────────────
+   The component paints its scrim fully opaque on purpose: half-transparent
+   and blurred, it found the page's coloured cards haloing through the gaps
+   between the columns. Asked for here is the other feeling — still dark,
+   but with the page alive underneath rather than switched off.
+   So: not clear, .94 of the same near-black, and a real blur behind it. At
+   that strength a white section behind reads as the faintest lift in the
+   corners rather than as a page; the blur is what makes it feel like a
+   layer over something instead of a wall.
+   This is the page overriding the component, not a change to it. Delete
+   these four lines and the panel is fully opaque again. */
+.rmp-pdp__scrim{
+  background:rgba(7,10,17,.94);
+  -webkit-backdrop-filter:blur(20px) saturate(115%);
+  backdrop-filter:blur(20px) saturate(115%);
+}
+
 /* The words that ride the cursor over a pack's picture. They belonged to the
    gallery that used to open there and they outlived it: the product panel
    opens from the same press, and the promise is the same one. */
@@ -8589,11 +8606,19 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     card.dataset.i = i;
     /* The panel hands focus back to whatever was pressed when it closes, and
        what was pressed here is an article element, which cannot take focus.
-       Minus one makes
-       it focusable to a script without adding a tab stop: the keyboard order
-       through the shelf is exactly what it was, and closing the panel still
-       puts you back on the card you opened. */
+       Minus one makes it focusable to a script without adding a tab stop: the
+       keyboard order through the shelf is exactly what it was, and closing
+       the panel still puts you back on the card you opened. */
     card.setAttribute('tabindex', '-1');
+    /* …but focusing something scrolls it into view by default, and the panel
+       has just put the page back where it was. The card would then be dragged
+       to the top of the screen and you would land somewhere you never chose.
+       We asked for the card to be focusable, so the consequence is ours to
+       answer: this card's focus never scrolls. Focus still moves — only the
+       scrolling that would have come with it is dropped. */
+    card.focus = function(o){
+      HTMLElement.prototype.focus.call(this, {preventScroll:true});
+    };
     var rate = txt(card, '.rate');
     var name = txt(card, '.card__t'), by = txt(card, '.card__by span:not(.avatar)');
     return {
@@ -8611,25 +8636,120 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       badges: badgesOf(card),
       /* also standing in for copy the shelf does not carry: this says only
          what the card already says, and nothing that would have to be made up */
-      about: '<p>' + name + (by ? ' — ' + by : '') + '.</p>'
+      about: '<p>' + name + (by ? ' — ' + by : '') + '.</p>',
+      media: shots(card)
     };
   });
-  /* the pictures are read at open time, not now: the card swaps which of the
-     four is showing as you sweep across it, and lazy images may not have
-     arrived when the page first settles */
 
-  function packAt(i){
-    var card = grid.querySelector('.card[data-i="' + i + '"]');
-    var p = PACKS[i];
-    if(card && p) p.media = shots(card);
-    return p;
+  /* ════════════════════════════════════════════════════════════════
+     PREVIEW MATERIAL — not the shop's data, and marked so nobody
+     mistakes it for it.
+     The shelf carries four photographs a pack and one short line, so
+     nothing on the page shows what the panel does with a long strip, a
+     long description, or anything that is not a photograph. This puts
+     all of that in front of you, built only out of pictures that are
+     already on this page and one video that is genuinely ours.
+
+       pack 1 · the hard case  — 18 items, every type, a long description
+       pack 2 · the usual case — a photo, a comparison, both videos
+       pack 3 · one video among the photographs
+       the other nine are left exactly as the shelf has them.
+
+     Delete this whole block to go back to four photographs a pack.
+     ════════════════════════════════════════════════════════════════ */
+  var BA = [
+    ['images/lora/1-sunflowers-before.webp', 'images/lora/1-sunflowers-after.webp', 'Sunflowers, ungraded and graded'],
+    ['images/lora/2-firstdance-before.webp', 'images/lora/2-firstdance-after.webp', 'First dance, ungraded and graded'],
+    ['images/lora/3-street-before.webp',     'images/lora/3-street-after.webp',     'Street, ungraded and graded'],
+    ['images/lora/4-bamboo-before.webp',     'images/lora/4-bamboo-after.webp',     'Bamboo, ungraded and graded']
+  ];
+  function ba(i){ return { type:'ba', before:BA[i][0], after:BA[i][1], alt:BA[i][2] }; }
+  var POSTER = 'images/lora/2-firstdance-after.webp';
+  /* dur: how long the film runs. The component labels a video by its shape
+     today (16:9 / 9:16) rather than by its length, so this field is carried
+     but not yet shown — it is here so the label has something to read the
+     moment it asks for it. */
+  function tube(dur){ return { type:'youtube', id:'EBNI8JHmJ4o', poster:POSTER, dur:dur }; }
+  function reels(dur){ return { type:'instagram', url:'https://www.instagram.com/retouchmarket/',
+                                poster:'images/lora/3-street-after.webp', dur:dur }; }
+  /* every photograph the shelf is holding, so a long strip can be built out
+     of real pictures rather than the same four repeated */
+  var ALL = PACKS.reduce(function(a, p){ return a.concat(p.media); }, []);
+
+  var LONG =
+    '<p>Lora is the set we reach for first on a bright day. It was cut on ' +
+    'sunlit weddings and daylight portraits, and it is built to keep skin ' +
+    'where you left it: warmth comes up in the highlights, the shadows stay ' +
+    'open, and nothing in the frame goes green when the light bounces off ' +
+    'grass.</p>' +
+    '<p>Every preset in the pack is a starting point rather than a finish. ' +
+    'They are built on curves and colour mixing rather than on a single ' +
+    'strong grade, so exposure, white balance and grain all stay yours to ' +
+    'move afterwards without the look falling apart.</p>' +
+    '<p>The set covers four families: clean daylight for ceremonies, a ' +
+    'warmer pass for golden hour, a low-contrast option for flat overcast ' +
+    'light, and a deeper one for receptions lit by tungsten. Each has a ' +
+    'lighter and a stronger version, so a whole gallery can be graded ' +
+    'consistently and then pushed a little further on the frames that ' +
+    'deserve it.</p>' +
+    '<p>Installs into Lightroom Classic and Camera Raw in one click. Works ' +
+    'on raw files from every current body we could get our hands on, and ' +
+    'on JPEGs where the file allows it. The licence is yours for life, on ' +
+    'as many of your own machines as you use, and every update to the pack ' +
+    'is included.</p>' +
+    '<p><em>This description is preview material: it is here to show what a ' +
+    'long one looks like in this panel, and should be replaced with the ' +
+    'real copy.</em></p>';
+
+  if(PACKS[0]){
+    PACKS[0].media = [
+      ba(0), PACKS[0].media[0], tube('9:32'), PACKS[0].media[1],
+      ba(1), PACKS[0].media[2], reels('0:48'), PACKS[0].media[3],
+      ba(2), ALL[4], ALL[8], ALL[12],
+      ba(3), ALL[16], ALL[20], ALL[24],
+      ALL[28], ALL[32]
+    ].filter(Boolean);
+    PACKS[0].about = LONG;
   }
+  if(PACKS[1]){
+    PACKS[1].media = [PACKS[1].media[0], ba(1), PACKS[1].media[1],
+                      tube('4:07'), PACKS[1].media[2], reels('1:12')].filter(Boolean);
+  }
+  if(PACKS[2]){
+    PACKS[2].media = PACKS[2].media.concat([reels('0:36')]);
+  }
+
+  /* ---- the page must be where it was, not somewhere near it ----
+     The panel remembers the scroll position, pins the body while it is up,
+     and puts the page back with a single scrollTo on the way out. This page
+     asks for smooth scrolling in its stylesheet, which turns that one call
+     into a second of the page flying somewhere — it lands in the right place
+     eventually, but you have watched it travel and you no longer know where
+     you are. Straight while the panel is up, and handed back a beat after it
+     has finished closing, because the close is animated and the scrollTo
+     happens at the end of it. */
+  var de = document.documentElement, giveBack = null;
+  function straight(){
+    de.style.scrollBehavior = 'auto';
+    clearTimeout(giveBack);
+    /* Wait for it to OPEN before waiting for it to close. Asking isOpen() on
+       the click itself always answers no — the panel goes up after this
+       handler — and handing the smooth scrolling straight back there left the
+       page free to animate its way home a second later, which is the part
+       that reads as being thrown down the page. If the press turns out not to
+       open anything, the fallback below gives it back anyway. */
+    var opened = false, t0 = Date.now();
+    (function wait(){
+      var up = !!(window.RMPdp && RMPdp.isOpen());
+      if(up) opened = true;
+      if(up || (!opened && Date.now() - t0 < 1500)) return requestAnimationFrame(wait);
+      giveBack = setTimeout(function(){ de.style.scrollBehavior = ''; }, 700);
+    })();
+  }
+  grid.addEventListener('click', function(){ straight(); }, true);
 
   document.addEventListener('DOMContentLoaded', function(){
     if(!window.RMPdp) return;
-    /* media is read fresh for whichever pack is opened, and for its
-       neighbours, because the panel walks left and right through the list */
-    PACKS.forEach(function(p, i){ packAt(i); });
     RMPdp.data = PACKS;
     /* scoped to the shelf: the plugin cards and the testimonials are not
        packs and must not open a product panel */
