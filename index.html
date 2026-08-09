@@ -663,7 +663,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    in front of them, which is the wrong way round for a wall. Quiet enough to
    be texture, and the one the pointer lifts still jumps out of it, because
    that copy is untouched. */
-.wall--dark{opacity:.40;filter:brightness(.60) saturate(.55)}
+.wall--dark{opacity:.30;filter:brightness(.46) saturate(.42)}
 /* the same wall again, in its own window, with nothing showing yet */
 .wall__lit{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
 .wall__lit .wall{position:absolute;z-index:auto;opacity:1;filter:none}
@@ -723,14 +723,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 @media (max-width:900px){
   .wall{width:230vw;min-width:1480px}
-  .wall--dark{opacity:.34}
+  .wall--dark{opacity:.26}
   .wall__shot{width:146px}
 }
 @media (max-width:620px){
   /* narrower frames and a steeper slant, so the wall still reads as a wall
      on a phone rather than as one column of pictures */
   .wall{width:390vw;min-width:1320px;transform:translate(-50%,-50%) rotate(-9deg)}
-  .wall--dark{opacity:.30}
+  .wall--dark{opacity:.22}
   .wall__shot{width:132px}
   .cta--wall::after{
     background:radial-gradient(ellipse 60% 62% at 50% 50%,
@@ -1071,6 +1071,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   position:relative;flex:1 1 0;min-width:0;
   display:inline-flex;align-items:center;justify-content:center;gap:var(--s-3);
 }
+/* the disc is a cap height taller than the first line, so it rides that line
+   rather than the middle of a two-line block */
+.ptabs button .ptab__no{align-self:flex-start;margin-top:1px}
 /* a disc and two badges want more room than a word does — written with the
    track's own class so it outranks .os button further down the sheet */
 .os.ptabs button{
@@ -1082,7 +1085,21 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   transition:color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
 .os.ptabs button:hover{color:var(--fg)}
+/* ── the name, and one line saying what it is ────────────────────
+   The number keeps the left; everything else becomes a column beside it, so
+   the sentence sits under the name rather than under the number. The tab's
+   own row is centred, so the column is what carries the two lines. */
+.ptab__c{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+.ptab__l{display:inline-flex;align-items:center;gap:var(--s-3);min-width:0}
 .ptab__nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* the sentence under it: the page's smallest body size, in the muted ink it
+   uses for a line that explains rather than names. It stays that ink on the
+   live tab too — two accents stacked would make the tab shout. */
+.ptab__d{
+  font-size:var(--fs-2);font-weight:var(--fw-regular);line-height:var(--lh-snug);
+  color:var(--fg-muted);letter-spacing:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
 /* the count in front of the name: three plugins, and this is the first */
 .ptab__no{
   flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:var(--r-full);
@@ -2113,9 +2130,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 #voices.is-2up .vcard{cursor:zoom-out}
 /* it rides the cursor, a little below and to the right, and flips to the
    other side rather than running off the edge of the window */
-/* the way out, in the page's own colour for "this closes" */
+/* The description scrolls when it is long, and its bar was drawn over the
+   last characters of every line. Reserving the gutter takes that width out
+   of the text's own measure instead, so nothing is ever underneath it — and
+   it is reserved whether or not the bar is showing, so a short description
+   and a long one are set to the same measure. */
+.rmp-pdp #rmp-about{scrollbar-gutter:stable;padding-right:var(--s-3)}
+.rmp-pdp #rmp-about::-webkit-scrollbar{width:6px}
+.rmp-pdp #rmp-about::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:999px}
+.rmp-pdp #rmp-about::-webkit-scrollbar-track{background:transparent}
+
+/* The way out, in the page's own colour for "this closes" — the quiet one.
+   On a dark ground the page never fills with --danger; it draws the pale red
+   as ink inside a hairline of the same, which is what the offer band's own
+   remove control does. A filled red disc up there read as a warning. */
 .rmp-pdp .rmp-close:hover,.rmp-pdp .rmp-close:focus-visible{
-  background:var(--danger);color:#fff;
+  background:rgba(192,57,46,.14);color:var(--danger-fg);
+  box-shadow:inset 0 0 0 1px var(--danger-fg);
 }
 
 /* ── before/after in the panel, the way it works on the page ─────
@@ -2177,6 +2208,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .rmp-pdp .rmp-frame.rmp-ba:not(.rmp-is-zoomed){cursor:ew-resize}
 .rmp-pdp .rmp-frame.rmp-is-zoomed{cursor:grab}
 .rmp-pdp .rmp-frame.rmp-is-zoomed.rmp-is-panning{cursor:grabbing}
+/* …and the track has to say it too. A drag captures the pointer on the
+   track, and from then on the cursor is the capturing element's — so the
+   closed hand on the frame never got a chance to show and it fell back to
+   the arrow. The track wears it for as long as something inside it is being
+   dragged. */
+#rmp-track:has(.rmp-is-panning),
+#rmp-track:has(.rmp-is-panning) *{cursor:grabbing}
 
 /* The words that ride the cursor over a pack's picture. They belonged to the
    gallery that used to open there and they outlived it: the product panel
@@ -2454,6 +2492,22 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    page's one warning colour and nothing else — a refusal that shouts is
    worse than the thing it is refusing. */
 .tipbox__warn{flex:none;font-style:normal;font-size:15px;line-height:1}
+/* "we are here": a dot with a ring leaving it. The ring is a pseudo-element
+   so the dot itself never moves — and it is drawn in the page's own success
+   green rather than a green picked for the occasion. */
+.tipbox__live{
+  position:relative;flex:none;width:8px;height:8px;border-radius:var(--r-full);
+  background:var(--ok);box-shadow:0 0 0 2px rgba(22,163,74,.22);
+}
+.tipbox__live::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:var(--ok);animation:tipLive 1.9s var(--ease) infinite;
+}
+@keyframes tipLive{
+  0%{transform:scale(1);opacity:.55}
+  70%,100%{transform:scale(2.6);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){.tipbox__live::after{animation:none;opacity:0}}
 /* a refusal is not an answer, so it does not take the answering colour. Nor
    is it an error — nothing has gone wrong, there is just an order to do it
    in — so it wears the page's warm colour rather than its red, darkened to
@@ -2690,6 +2744,31 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   font-size:var(--fs-5);line-height:var(--lh-normal);color:rgba(255,255,255,.88);
   text-wrap:pretty;
 }
+/* ── a line that runs long ────────────────────────────────────────
+   Three lines is what this strip can carry before it starts covering the
+   picture it is describing. Past that it is folded, and a button says so.
+   The fold is line-based rather than height-based, so it lands on a line
+   and never mid-word, and it is only applied once the script has measured
+   that there is something to fold — a clamp on a short line would still
+   cost it a layout mode it does not need. */
+.player__desc.is-fold{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;
+  overflow:hidden;
+}
+/* `unset` on -webkit-line-clamp is not reliably a reset — `none` is. */
+.player__desc.is-fold.is-open{display:block;-webkit-line-clamp:none;overflow:visible}
+.player__more{
+  display:inline-flex;align-items:center;gap:6px;margin-top:var(--s-2);
+  color:#fff;font-size:var(--fs-3);font-weight:var(--fw-semibold);
+  text-decoration:underline;text-underline-offset:3px;
+  text-decoration-color:rgba(255,255,255,.45);
+  transition:text-decoration-color var(--dur-1) var(--ease), opacity var(--dur-1) var(--ease);
+}
+.player__more:hover{text-decoration-color:#fff}
+.player__more:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:4px}
+.player__more svg{width:11px;height:11px;flex:none;transition:transform var(--dur-2) var(--ease)}
+.player__more[aria-expanded="true"] svg{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.player__more svg{transition:none}}
 /* it opens rather than appears: the pane you land on gives you the name at
    once and the sentence a beat later. Scoped to the deck, so a player that
    stands on its own simply shows its line. */
@@ -3779,7 +3858,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    band's ambient pair — a soft purple lift in two corners — which is why it
    read as a gradient rather than as a ground. Both the layer and the rule
    that drew it are gone; this is the whole background now. */
-.footer{background:#05060D;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
+.footer{background:#06080F;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
 /* the solid a menu opens onto here: the footer's own ground, one step up so
    the menu still reads as standing on it rather than cut out of it */
 .footer,.offer2{--pop:#161B33}
@@ -4007,11 +4086,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   position:relative;overflow:hidden;width:100%;height:540px;
   border:7px solid #111620;border-radius:38px;background:#09110E;
   box-shadow:0 35px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.17), inset 0 1px 0 rgba(255,255,255,.08);
-  transform:rotate(.6deg) scale(1);
+  /* square on at rest. The tilt was the pose and the pointer straightened
+     it, which is backwards: standing still it should look like a phone
+     standing still, and the lean is part of what answering the pointer
+     means. */
+  transform:rotate(0deg) scale(1);
   transition:transform var(--dur-3) cubic-bezier(.16,.72,.3,1), box-shadow var(--dur-3) var(--ease);
 }
 .wa__phonewrap:hover .wa__phone{
-  transform:rotate(.15deg) scale(1.025);
+  transform:rotate(.9deg) scale(1.025);
   box-shadow:0 42px 100px rgba(0,0,0,.58), 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 0 rgba(255,255,255,.08);
 }
 .wa__head{
@@ -4061,7 +4144,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   animation:waBob 5s ease-in-out infinite;
 }
-.wa__live-e{display:grid;width:35px;height:35px;flex:none;place-items:center;border-radius:9px;background:rgba(59,224,138,.12);font-size:19px}
+/* the same green the join button is filled with, so the card's one coloured
+   thing and the section's one action are visibly the same offer */
+.wa__live-e{display:grid;width:35px;height:35px;flex:none;place-items:center;border-radius:9px;background:var(--em);font-size:19px}
 .wa__live-c{transition:opacity var(--dur-1) var(--ease)}
 .wa__live-c span{font-size:12px;color:var(--fg-muted)}
 .wa__live-c b{display:block;color:#fff;font-size:var(--fs-2);font-weight:var(--fw-semibold)}
@@ -4082,7 +4167,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .wa__feats{display:grid}
   .wa__feats li{justify-content:center}
   .wa__go{width:100%}
-  .wa__phone{height:510px;border-radius:34px;transform:none}
+  .wa__phone{height:510px;border-radius:34px}
   .wa__live{right:-2px;bottom:50px}
   .wa__faces img{width:35px;height:35px}
   .wa__pattern{opacity:.48;background-size:210px 147px}
@@ -4091,7 +4176,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 @media (prefers-reduced-motion:reduce){
   .wa__msgs,.wa__live{animation:none}
   .wa__go,.wa__phone,.wa__feats li{transition:none}
-  .wa__phonewrap:hover .wa__phone{transform:rotate(.6deg)}
+  .wa__phonewrap:hover .wa__phone{transform:none}
   .wa__pattern{-webkit-mask:none;mask:none;opacity:.18}
 }
 
@@ -4482,9 +4567,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     </div>
     </div>
     <div class="os ptabs" role="tablist" aria-label="Plugins" id="pluginTabs">
-      <button type="button" role="tab" aria-selected="true" aria-controls="pp-0" id="pt-0"><span class="ptab__no" aria-hidden="true">1</span><span class="ptab__nm">RetouchX Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span><span class="ptab__app"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="14" height="9.2" rx="1.6" stroke="currentColor" stroke-width="1.4"/><path d="M8 11.4v3M5.4 14.4h5.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span></span><span class="vh"> — for Photoshop and desktop</span></button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="pp-1" id="pt-1" tabindex="-1"><span class="ptab__no" aria-hidden="true">2</span><span class="ptab__nm">Lightroom Ai Color Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">LrC</span></span><span class="vh"> — for Lightroom Classic</span></button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="pp-2" id="pt-2" tabindex="-1"><span class="ptab__no" aria-hidden="true">3</span><span class="ptab__nm">US Photoshop Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span></span><span class="vh"> — for Photoshop</span></button>
+      <button type="button" role="tab" aria-selected="true" aria-controls="pp-0" id="pt-0"><span class="ptab__no" aria-hidden="true">1</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">RetouchX Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span><span class="ptab__app"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="14" height="9.2" rx="1.6" stroke="currentColor" stroke-width="1.4"/><path d="M8 11.4v3M5.4 14.4h5.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span></span></span><span class="ptab__d">Otomatik ve toplu rötuş app&#8217;i.</span></span><span class="vh"> — for Photoshop and desktop</span></button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="pp-1" id="pt-1" tabindex="-1"><span class="ptab__no" aria-hidden="true">2</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">Lightroom Ai Color Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">LrC</span></span></span><span class="ptab__d">LrC profesyonel renk efekti plugin&#8217;i</span></span><span class="vh"> — for Lightroom Classic</span></button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="pp-2" id="pt-2" tabindex="-1"><span class="ptab__no" aria-hidden="true">3</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">US Photoshop Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span></span></span><span class="ptab__d">PS hızlı ve kolay rötuş plugin&#8217;i</span></span><span class="vh"> — for Photoshop</span></button>
     </div>
       <div class="panel is-on" id="pp-0" role="tabpanel" aria-labelledby="pt-0">
         <div class="deck" data-deck role="group" aria-roledescription="carousel" aria-label="RetouchX Plugin walkthroughs">
@@ -4496,7 +4581,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
                 <span class="player__dur tnum">4:12</span>
                 <div class="player__foot">
                   <span class="player__cap">RetouchX Plugin — 40 portraits, one pass</span>
-                  <p class="player__desc">One pass over a full gallery: skin, teeth and eyes are evened out on every frame while the grain and the pores stay exactly where they were.</p>
+                  <p class="player__desc">Every frame comes back as a before and after you can step through, so nothing leaves the machine unseen. The queue writes a sidecar next to each original rather than touching the file itself, which means a pass can be undone a week later without hunting for a backup. Presets applied by the queue are the same presets you would apply by hand — there is no second, secret set of settings for batch work — so a frame you fix afterwards and a frame the queue fixed land in the same place. Failures are reported per file with the reason next to them: a raw the decoder does not know, a layered file that would have to be flattened, a frame with no face in it. Nothing is skipped quietly. The whole run is logged, and the log is a text file you can read.</p>
                 </div>
               </div>
             </div>
@@ -4507,7 +4592,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
                 <span class="player__dur tnum">1:12</span>
                 <div class="player__foot">
                   <span class="player__cap">Setting up a batch queue</span>
-                  <p class="player__desc">Drop a folder in, pick the pass you want, and leave it running.</p>
+                  <p class="player__desc">Drop a folder in and leave it running.</p>
                 </div>
               </div>
             </div>
@@ -4518,7 +4603,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
                 <span class="player__dur tnum">0:48</span>
                 <div class="player__foot">
                   <span class="player__cap">Keeping skin texture</span>
-                  <p class="player__desc">The smoothing runs under the texture rather than over it, so pores survive at 100%.</p>
+                  <p class="player__desc">One pass over a full gallery: skin, teeth and eyes are evened out on every frame while the grain stays exactly where it was.</p>
                 </div>
               </div>
             </div>
@@ -4536,7 +4621,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
                 <span class="player__dur tnum">1:33</span>
                 <div class="player__foot">
                   <span class="player__cap">Reviewing before export</span>
-                  <p class="player__desc">Every frame comes back as a before and after you can step through, so nothing leaves the queue unseen. Flag the two or three that want a hand and send the rest straight out, with the pass already applied.</p>
+                  <p class="player__desc">The smoothing runs under the texture rather than over it, so pores survive at 100%. Frequency separation is done per-frame rather than once for the set, which is what keeps a bride lit by a window and a groom lit by a lamp from ending up with the same skin.</p>
                 </div>
               </div>
             </div>
@@ -4547,7 +4632,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
                 <span class="player__dur tnum">1:57</span>
                 <div class="player__foot">
                   <span class="player__cap">Masking hair edges</span>
-                  <p class="player__desc">Edge detection keeps the flyaway strands rather than painting them into the background — the part every automatic mask usually loses.</p>
+                  <p class="player__desc">Edge detection keeps the flyaway strands rather than painting them into the background. It works on the alpha it builds from the frame rather than on a hard selection, so a strand that crosses a bright window and a dark suit in the same photograph stays a strand in both. Hair against a busy background is the case that breaks most tools, and it is the case this one was cut on: backlit ceremonies, veils over dark jackets, curls against foliage. The mask is generated at full resolution and kept, so the same frame re-run a month later gives the same result rather than a slightly different one. Where it is not sure, it says so — the frame comes back flagged with the region it could not resolve, rather than confidently wrong. You can paint a correction in and the correction is remembered for the rest of the run, which is usually enough to carry a whole set shot in the same light. None of this runs in the cloud: the files stay on your machine, and the machine does not need to be online.</p>
                 </div>
               </div>
             </div>
@@ -5978,7 +6063,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
               <h4>Need help?</h4>
               <p>Send us your question via a screen recording with voiceover.</p>
             </div>
-            <a class="btn btn--primary helpme__go-btn" href="#" aria-label="Email support">Email <svg class="helpme__out" width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.4 9.6L9.9 4.1M5.2 4.1h4.7v4.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="btn btn--primary helpme__go-btn" href="#" aria-label="Email support" data-tip="We usually reply within the day &#10084;&#65039;" data-tip-live>Email <svg class="helpme__out" width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.4 9.6L9.9 4.1M5.2 4.1h4.7v4.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           </div>
           <ul class="helpme__has">
             <li><svg viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M10.1 1.6L3.6 10.1h4.1l-.4 6.3 6.6-8.6H9.7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Fast response</li>
@@ -7144,6 +7229,65 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      dot click all land in the same place, and the row still works with JS
      off. This layer only keeps the dots in sync and runs the countdown. */
   var DECK_MS = 6000;
+  /* ---- a caption that runs long folds, and says it folded ----
+     Three lines is what the strip under a video can carry before it starts
+     covering the picture. Past that the line is folded and a button offers
+     the rest — and the fold is only applied once it has been MEASURED to be
+     needed, so a short line is left as plain text.
+
+     Measured, not counted: the same sentence is three lines on a wide window
+     and five on a narrow one, so it is re-measured whenever the window
+     changes and the button appears or goes accordingly. */
+  (function(){
+    var CHEV = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.2L6 7.8l3.5-3.6"/></svg>';
+    var MORE = 'Read more', LESS = 'Show less';
+    var seen = [];
+    function measure(p){
+      var more = p.nextElementSibling;
+      if(!more || !more.classList.contains('player__more')) return;
+      /* fold first, then ask: an unfolded paragraph is never taller than
+         itself and would always answer "no" */
+      var wasOpen = p.classList.contains('is-open');
+      p.classList.add('is-fold'); p.classList.remove('is-open');
+      var over = p.scrollHeight > p.clientHeight + 1;
+      more.hidden = !over;
+      if(!over){ p.classList.remove('is-fold'); return; }
+      if(wasOpen) p.classList.add('is-open');
+      more.setAttribute('aria-expanded', String(!!wasOpen));
+      more.firstChild.textContent = wasOpen ? LESS : MORE;
+    }
+    function wire(p){
+      if(p.dataset.fold) return;
+      p.dataset.fold = '1';
+      var more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'player__more';
+      more.setAttribute('aria-expanded', 'false');
+      more.innerHTML = '<span>' + MORE + '</span>' + CHEV;
+      /* the caption sits on the picture and the whole pane is a step
+         control, so the press must not also step the deck */
+      more.addEventListener('click', function(e){
+        e.stopPropagation();
+        var open = p.classList.toggle('is-open');
+        more.setAttribute('aria-expanded', String(open));
+        more.firstChild.textContent = open ? LESS : MORE;
+      });
+      p.insertAdjacentElement('afterend', more);
+      seen.push(p);
+      measure(p);
+    }
+    [].forEach.call(document.querySelectorAll('.player__desc'), wire);
+    var again = null;
+    window.addEventListener('resize', function(){
+      clearTimeout(again);
+      again = setTimeout(function(){ seen.forEach(measure); }, 180);
+    }, {passive:true});
+    /* the type arrives after the markup does, and a line count measured
+       before it lands is a guess */
+    if(document.fonts && document.fonts.ready)
+      document.fonts.ready.then(function(){ seen.forEach(measure); });
+  })();
+
   /* ---- the neighbours say which way they go ----
      A pane either side of the one playing is the control for stepping one
      video left or right — it has said so with a pointer for a while, but a
@@ -8675,6 +8819,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     var n = el.getAttribute('data-tip-n');
     tipBox.textContent = '';
     tipBox.classList.toggle('is-warn', el.hasAttribute('data-tip-warn'));
+    if(el.hasAttribute('data-tip-live')){
+      /* someone is actually there — the dot says it without a sentence */
+      var live2 = document.createElement('i');
+      live2.className = 'tipbox__live';
+      live2.setAttribute('aria-hidden', 'true');
+      tipBox.appendChild(live2);
+    }
     if(el.hasAttribute('data-tip-warn')){
       var warn = document.createElement('i');
       warn.className = 'tipbox__warn';
@@ -8721,7 +8872,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   window.addEventListener('scroll', tipOff, {passive:true});
 
   /* anything else that carries words for the pointer gets the same bubble */
-  document.querySelectorAll('.pbuy__art [data-tip], .oproof__faces [data-tip]').forEach(function(el){
+  document.querySelectorAll('.pbuy__art [data-tip], .oproof__faces [data-tip], .helpme [data-tip]').forEach(function(el){
     el.addEventListener('pointerenter', function(){ tipShow(el); });
     el.addEventListener('pointerleave', tipOff);
     el.addEventListener('focus', function(){ tipShow(el); });
@@ -9177,10 +9328,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     document.addEventListener('pointerout', function(e){
       var f = e.target.closest && e.target.closest('.rmp-frame.rmp-ba');
       if(!f || f.contains(e.relatedTarget)) return;
-      /* zoomed in you are looking closely at one place; snapping the
-         comparison back to the middle underneath you is not a rest, it is a
-         jump */
-      if(f.classList.contains('rmp-is-zoomed')) return;
+      /* Ask the geometry, not the event. Zooming moves the picture out from
+         under the pointer, and the browser reports that as the pointer
+         leaving — so the comparison was snapping back to the middle at the
+         exact moment you zoomed in, which is the one moment you were looking
+         at a particular place. It has only really left if it is outside the
+         frame. */
+      var r = f.getBoundingClientRect();
+      if(e.clientX >= r.left && e.clientX <= r.right &&
+         e.clientY >= r.top  && e.clientY <= r.bottom) return;
       f.style.setProperty('--pos', '50%');
     }, {passive:true});
   })();
