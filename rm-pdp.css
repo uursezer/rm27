@@ -155,7 +155,7 @@ body.rmp-locked{overflow:hidden}
 .rmp-pick__btn:hover{background:var(--accent-bg);
   box-shadow:inset 0 0 0 1px var(--accent-border)}
 .rmp-pick__btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.rmp-pick__ch{width:.62em;height:.62em;flex:0 0 auto;margin-top:.12em;
+.rmp-pick__ch{width:.5em;height:.5em;flex:0 0 auto;margin-top:.1em;
   fill:none;stroke:var(--fg-muted);stroke-width:2.4;
   stroke-linecap:round;stroke-linejoin:round;
   transition:transform var(--dur-2) var(--ease),stroke var(--dur-1) var(--ease)}
@@ -360,7 +360,7 @@ body.rmp-locked{overflow:hidden}
    görülür. --rmp-dir ileri giderken 1, geri giderken -1'dir.
    Sadece opaklık ve transform: ikisi de düzen hesaplatmaz. */
 .rmp-railcol,.rmp-col,.rmp-infocol{
-  transition:opacity .18s var(--ease), transform .18s var(--ease);
+  transition:opacity .11s var(--ease), transform .11s var(--ease);
 }
 .rmp-swapping .rmp-railcol,
 .rmp-swapping .rmp-col,
@@ -371,9 +371,9 @@ body.rmp-locked{overflow:hidden}
   from{opacity:0;transform:translateX(calc(var(--rmp-dir,1) * 24px)) scale(.985)}
   to  {opacity:1;transform:none}
 }
-.rmp-swapped .rmp-railcol{animation:rmpSwapIn .30s var(--ease) both}
-.rmp-swapped .rmp-col    {animation:rmpSwapIn .30s var(--ease) .05s both}
-.rmp-swapped .rmp-infocol{animation:rmpSwapIn .30s var(--ease) .10s both}
+.rmp-swapped .rmp-railcol{animation:rmpSwapIn .20s var(--ease) both}
+.rmp-swapped .rmp-col    {animation:rmpSwapIn .20s var(--ease) .03s both}
+.rmp-swapped .rmp-infocol{animation:rmpSwapIn .20s var(--ease) .06s both}
 /* hareketi azaltmak isteyene aynı bilgi, kaymadan: sadece sönüp yanar */
 @media (prefers-reduced-motion:reduce){
   .rmp-swapping .rmp-railcol,
@@ -435,26 +435,22 @@ body.rmp-locked{overflow:hidden}
 .rmp-info__top{flex:0 0 auto}
 /* ── başlık bloğu: rozet · paket adı · satıcı ── */
 .rmp-head{margin-bottom:var(--s-5)}
-/* ── başlığın üstü: ne olduğu · adı ve rozetleri · kim yaptığı ──
-   1) TÜR. Tek kelime, ana renkte, başlığın üstünde duran bir kaş. */
+/* ── başlığın üstü: üst satır · ad · kim yaptığı ──
+   1) ÜST SATIR. Solda TÜR — tek kelime, ana renkte. Sağda rozetler, satırın
+      öbür ucuna yaslı. İkisi aynı orta çizgide durur. */
+.rmp-kindrow{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-4);flex-wrap:wrap;margin-bottom:var(--s-5);
+}
 .rmp-kind{
-  margin:0 0 var(--s-2);
-  font-size:12px;font-weight:var(--fw-bold);letter-spacing:.09em;
+  margin:0;min-width:0;
+  font-size:13px;font-weight:var(--fw-bold);letter-spacing:.12em;
   text-transform:uppercase;color:var(--accent-fg);
 }
-/* 2) AD ve ROZETLER aynı satırda. Rozetler adın büyük harf ortasına
-      oturur — satır kutusuna değil: satır kutusu, harflerin hiç kullanmadığı
-      alt uzantı payını taşır ve rozeti aşağı kaydırırdı. Ölçüldü, kondu.
-      Ad uzarsa rozetler alt satıra iner, kesilmez. */
-.rmp-titlerow{
-  display:flex;align-items:center;flex-wrap:wrap;
-  gap:var(--s-3) var(--s-3);min-width:0;
-}
-.rmp-titlerow .rmp-pick{min-width:0}
-/* rozet = kaynak sitedeki .chip: 11px, kalın, VERSAL, hap yarıçapı */
-.rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);
-  /* satır kutusuna göre ortalanınca 0.7px aşağı düşüyordu — ölçüldü, kondu */
-  position:relative;top:-0.7px}
+/* 2) AD, kendi satırında ve tam boyunda */
+.rmp-pick{min-width:0}
+/* rozet = kaynak sitedeki .chip: kalın, VERSAL, hap yarıçapı */
+.rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-left:auto}
 /* emoji: Apple'ın renkli seti öncelikli; rozetin harf aralığından ve
    VERSAL dönüşümünden etkilenmemeli */
 .rmp-badge .rmp-bi{flex:0 0 auto;font-style:normal;font-size:12px;line-height:1;
@@ -470,14 +466,14 @@ body.rmp-locked{overflow:hidden}
 .rmp-info h1{margin:0;overflow-wrap:anywhere;
   /* kutu kalkınca genişlik açıldı: başlık ölçekte bir kademe yukarı.
      Dar panelde --fs-8'e iner — kırılmaz, taşmaz. */
-  font-size:clamp(var(--fs-8),10cqw,var(--fs-10));
+  font-size:clamp(var(--fs-9),13cqw,var(--fs-10));
   font-weight:var(--fw-bold);letter-spacing:var(--tr-display);
   line-height:var(--lh-tight);color:var(--fg);text-wrap:balance}
-.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-2);
-  font-size:var(--fs-2);color:var(--fg-muted)}
-.rmp-info .rmp-av{width:24px;height:24px;border-radius:var(--r-full);background:var(--surface-sunken);
-  border:1px solid var(--border);font-size:9px;font-weight:var(--fw-bold);
-  display:grid;place-items:center;color:var(--fg-muted)}
+.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-3);margin-top:var(--s-5);
+  font-size:var(--fs-4);color:var(--fg-muted)}
+.rmp-info .rmp-av{width:34px;height:34px;border-radius:var(--r-full);background:var(--surface-sunken);
+  border:1px solid var(--border);font-size:11px;font-weight:var(--fw-bold);letter-spacing:.02em;
+  display:grid;place-items:center;color:var(--fg-muted);flex:none}
 .rmp-rate{display:inline-flex;align-items:baseline;gap:5px;
   font-size:var(--fs-3);font-weight:var(--fw-semibold);color:var(--fg);
   font-variant-numeric:tabular-nums;white-space:nowrap}

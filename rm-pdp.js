@@ -154,8 +154,8 @@ function goProductTo(n){
     /* Çıkış sınıfı kalkarken giriş animasyonu aynı karede başlamalı,
        yoksa arada tek kare tam opak bir sıçrama görünüyor. */
     pdp.classList.add('rmp-swapped');
-    swapT2=setTimeout(function(){ pdp.classList.remove('rmp-swapped'); },460);
-  },180);
+    swapT2=setTimeout(function(){ pdp.classList.remove('rmp-swapped'); },340);
+  },110);
 }
 /* Ok etiketi yalnızca adı taşır: mini ürün kutusu görseli kaldırıldı,
    hangi pakete gidileceğini adı zaten söylüyordu. */
@@ -282,15 +282,26 @@ function goToMedia(i,ani){
   var h=track.clientHeight||1;
   if(ani!==false && Math.abs(hedef-track.scrollTop)/h > 3)
     track.scrollTop = hedef + (hedef>track.scrollTop ? -h : h);
-  track.scrollTo({top:hedef, behavior: ani===false?'auto':'smooth'});
+  /* KENDİ ANİMASYONUMUZ. behavior:'smooth' tarayıcının seçtiği süreyi
+     kullanıyor — burada yarım saniyeye yakın, ve bir kare ilerlemek için
+     beklenmeyecek kadar uzun. Süreyi kendimiz veriyoruz: 190ms, sondan
+     yumuşayan bir eğriyle. Kaydırma bittiği an biliniyor, yoklamaya da
+     emniyet zamanlayıcısına da gerek kalmıyor. */
   clearTimeout(navTimer);
-  (function bekle(){
-    if(tok!==navTok) return;                       /* yeni hedef devraldı */
-    if(Math.abs(track.scrollTop-hedef)<1.5){ bitir(tok); return; }
-    navTimer=setTimeout(bekle,60);
-  })();
-  /* emniyet: animasyon hiç oturmazsa 1sn sonra kilidi aç */
-  setTimeout(function(){ if(tok===navTok) bitir(tok); },1000);
+  kaydir(hedef, ani===false?0:190, function(){ bitir(tok); }, function(){ return tok===navTok; });
+}
+var animRAF=null;
+function kaydir(hedef, sure, bitince, gecerliMi){
+  if(animRAF) cancelAnimationFrame(animRAF);
+  var bas=track.scrollTop, fark=hedef-bas, t0=null;
+  if(!sure || Math.abs(fark)<1){ track.scrollTop=hedef; bitince(); return; }
+  animRAF=requestAnimationFrame(function adim(t){
+    if(!gecerliMi()){ animRAF=null; return; }     /* yeni hedef devraldı */
+    if(t0===null) t0=t;
+    var k=Math.min(1,(t-t0)/sure);
+    track.scrollTop = bas + fark * (1-Math.pow(1-k,3));
+    if(k<1) animRAF=requestAnimationFrame(adim); else { animRAF=null; bitince(); }
+  });
 }
 function bitir(tok){
   if(tok!==navTok) return;
@@ -389,28 +400,29 @@ function buildInfo(p){
    /* SABİT bölüm: başlık ve künye her zaman görünür kalır. */
    '<div class="rmp-info__top">'+
      '<div class="rmp-head">'+
-       /* 1) ne olduğu — tek kelime, ana renkte */
-       (paketTuru(p)?'<p class="rmp-kind">'+paketTuru(p)+'</p>':'')+
-       /* 2) adı, ve HEMEN YANINDA rozetleri: aynı satır, aynı orta çizgi.
-          Başlığın kendisi menü tetikleyicisi — adına tıklanıp başka bir
-          preset/LUT'a tek hamlede geçilir. Ad artık yalnızca ad: "Presets"
-          ya da "LUTs" kelimesi üstteki satırda zaten söylendi. */
-       '<div class="rmp-titlerow">'+
-         '<h1 class="rmp-pick" id="rmp-pick">'+
-           '<button class="rmp-pick__btn" id="rmp-pickBtn" type="button" aria-haspopup="listbox"'+
-           ' aria-expanded="false" aria-controls="pickMenu">'+
-             '<span id="rmp-pickName">'+paketAdi(p)+'</span>'+
-             '<svg class="rmp-pick__ch" viewBox="0 0 24 24" aria-hidden="true">'+
-             '<path d="m6 9 6 6 6-6"/></svg>'+
-           '</button>'+
-           '<div class="rmp-pick__menu" id="rmp-pickMenu" role="listbox" aria-label="Paket seç" hidden></div>'+
-         '</h1>'+
+       /* 1) ÜST SATIR: solda ne olduğu, sağda rozetleri. İkisi bir satırı
+             paylaşır ve satırın iki ucuna yaslanır — başlık böylece kendi
+             satırına, tam boyuna kavuşur. */
+       '<div class="rmp-kindrow">'+
+         '<p class="rmp-kind">'+(paketTuru(p)||'')+'</p>'+
          (p.badges.length?'<div class="rmp-badges">'+p.badges.map(function(b){
             var ik=ROZET_IK[b[0]];
             return '<span class="rmp-badge '+b[1]+'">'+
                    (ik?'<i class="rmp-bi" aria-hidden="true">'+ik+'</i>':'')+b[0]+'</span>';
           }).join('')+'</div>':'')+
        '</div>'+
+       /* 2) AD, tek başına ve tam boyunda. Başlığın kendisi menü tetikleyicisi
+             — adına tıklanıp başka bir preset/LUT'a tek hamlede geçilir. Ad
+             yalnızca ad: "Presets"/"LUTs" üstteki satırda zaten söylendi. */
+       '<h1 class="rmp-pick" id="rmp-pick">'+
+         '<button class="rmp-pick__btn" id="rmp-pickBtn" type="button" aria-haspopup="listbox"'+
+         ' aria-expanded="false" aria-controls="pickMenu">'+
+           '<span id="rmp-pickName">'+paketAdi(p)+'</span>'+
+           '<svg class="rmp-pick__ch" viewBox="0 0 24 24" aria-hidden="true">'+
+           '<path d="m6 9 6 6 6-6"/></svg>'+
+         '</button>'+
+         '<div class="rmp-pick__menu" id="rmp-pickMenu" role="listbox" aria-label="Paket seç" hidden></div>'+
+       '</h1>'+
        /* 3) kim yaptı */
        '<div class="rmp-by"><span class="rmp-av">'+p.av+'</span> '+p.by+'</div>'+
      '</div>'+
@@ -701,11 +713,11 @@ function tekerlek(e){
   /* BIR HAMLE BIR KARE. Tekerlek 140ms sussa yeni bir hamle sayilir; aksi
      halde tek bir fiskenin sonundaki ataletli onlarca olay kareyi ucar
      yedi geciyordu. Ayni hamle icinde parmagini durdurmadan cevirmeye
-     devam edene 600ms'de bir kare daha verilir: gezinmek isteyen gezinir,
+     devam edene 300ms'de bir kare daha verilir: gezinmek isteyen gezinir,
      tek fiske atan bir kare gider. */
-  if(now-wLast>140){ wAcc=0; wStep=0; }
+  if(now-wLast>120){ wAcc=0; wStep=0; }
   wLast=now;
-  if(now-wStep<600){ wAcc=0; return; }
+  if(now-wStep<300){ wAcc=0; return; }
   wAcc+=dy;
   if(Math.abs(wAcc)<24) return;
   var yon=wAcc>0?1:-1; wAcc=0; wStep=now;
