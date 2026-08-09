@@ -202,7 +202,6 @@ function wireYT(f,it){
   var pst=f.querySelector('.rmp-vid__poster'); if(!pst) return;
   pst.addEventListener('click',function(){
     f.querySelector('.rmp-vid__poster').remove();
-    var sr=f.querySelector('.rmp-vid__src'); if(sr) sr.remove();
     var fr=document.createElement('iframe');
     fr.src='https://www.youtube-nocookie.com/embed/'+it.id+'?autoplay=1&rel=0';
     fr.title='Video'; fr.allow='autoplay;encrypted-media;picture-in-picture'; fr.allowFullscreen=true;
@@ -235,13 +234,11 @@ function buildFrame(it,i){
       '<span class="rmp-ba__tag rmp-b">ÖNCE</span><span class="rmp-ba__tag rmp-a">SONRA</span>');
   }
   if(it.type==='youtube'){
-    f.insertAdjacentHTML('beforeend','<span class="rmp-vid__src">▶ YOUTUBE</span>'+
-      '<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
+    f.insertAdjacentHTML('beforeend','<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
     wireYT(f,it);
   }
   if(it.type==='instagram'){
-    f.insertAdjacentHTML('beforeend','<span class="rmp-vid__src">◎ INSTAGRAM</span>'+
-      '<a class="rmp-vid__poster" href="'+it.url+'" target="_blank" rel="noopener" aria-label="Instagram\'da aç"><span class="rmp-vid__play"></span></a>'+
+    f.insertAdjacentHTML('beforeend','<a class="rmp-vid__poster" href="'+it.url+'" target="_blank" rel="noopener" aria-label="Instagram\'da aç"><span class="rmp-vid__play"></span></a>'+
       '<span class="rmp-ig__out"><span class="rmp-ig__cta">Instagram\'da aç ↗</span></span>');
   }
   return f;
@@ -379,8 +376,7 @@ function restorePoster(f){
   var it=PRODUCTS[pi].media[+f.dataset.i]; if(!it) return;
   var fr=f.querySelector('iframe'); if(fr) fr.remove();
   delete f.dataset.playing;
-  f.insertAdjacentHTML('beforeend','<span class="rmp-vid__src">▶ YOUTUBE</span>'+
-    '<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
+  f.insertAdjacentHTML('beforeend','<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
   wireYT(f,it);
 }
 function onScroll(){ if(!spyRAF) spyRAF=requestAnimationFrame(updateActive); }

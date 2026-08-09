@@ -1525,8 +1525,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .compare__after{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--x)) 0 0)}
 .compare__tag{
   position:absolute;top:var(--s-3);z-index:2;
-  font-size:10px;font-weight:var(--fw-semibold);letter-spacing:.14em;text-transform:uppercase;
-  color:#fff;padding:3px var(--s-2);border-radius:5px;background:rgba(8,20,36,.62);
+  font-size:12px;font-weight:var(--fw-semibold);letter-spacing:.14em;text-transform:uppercase;
+  color:#fff;padding:5px 11px;border-radius:6px;background:rgba(8,20,36,.62);
   backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 }
 .compare__tag--a{left:var(--s-3)}
@@ -2174,14 +2174,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   top:var(--s-3);z-index:2;
   font-size:0;                      /* the component's own word steps aside */
   font-weight:var(--fw-semibold);text-transform:uppercase;
-  color:#fff;padding:3px var(--s-2);border-radius:5px;
+  color:#fff;padding:5px 11px;border-radius:6px;
   background:rgba(8,20,36,.62);box-shadow:none;
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
 }
 /* …and the page's own words take its place, in the page's own language */
 /* the tracking has to live here too: .14em of a zero font size is zero, and
    the label came out unspaced */
-.rmp-pdp .rmp-ba__tag::before{font-size:10px;line-height:1.6;letter-spacing:.14em}
+.rmp-pdp .rmp-ba__tag::before{font-size:12px;line-height:1.6;letter-spacing:.14em}
 .rmp-pdp .rmp-ba__tag.rmp-b::before{content:"Before"}
 .rmp-pdp .rmp-ba__tag.rmp-a::before{content:"After"}
 .rmp-pdp .rmp-ba__tag.rmp-b{left:var(--s-3);right:auto}
@@ -2767,6 +2767,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 /* `unset` on -webkit-line-clamp is not reliably a reset — `none` is. */
 .player__desc.is-fold.is-open{display:block;-webkit-line-clamp:none;overflow:visible}
+/* `hidden` puts display:none in the browser's own sheet, and ANY author rule
+   that sets display beats it. This one did, so a caption that had nothing
+   more to show still wore a Read more that opened onto nothing. The
+   attribute is given its meaning back, here, next to the rule that took it. */
+.player__more[hidden]{display:none}
 .player__more{
   display:inline-flex;align-items:center;gap:6px;margin-top:var(--s-2);
   color:#fff;font-size:var(--fs-3);font-weight:var(--fw-semibold);
@@ -3864,11 +3869,24 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* ════════════════════════════════════════════════════════════════
    10 · FOOTER
    ════════════════════════════════════════════════════════════════ */
-/* one flat colour, and nothing over it. The footer used to carry the head
-   band's ambient pair — a soft purple lift in two corners — which is why it
-   read as a gradient rather than as a ground. Both the layer and the rule
-   that drew it are gone; this is the whole background now. */
-.footer{background:#06080F;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
+/* one flat ground, and one very quiet light on it. The footer used to carry
+   the head band's ambient pair — a purple lift in two corners — which read
+   as a gradient rather than as a ground; that is gone. What is here instead
+   is a single soft ellipse sitting on the bottom edge, centred, mostly below
+   the page: just enough colour to keep the black from reading as a printed
+   block. It never moves and never answers the pointer. */
+.footer{position:relative;overflow:hidden;
+  background:#06080F;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
+.footer::after{
+  content:"";position:absolute;left:50%;bottom:0;z-index:0;pointer-events:none;
+  width:min(1180px,92vw);height:min(340px,30vw);
+  transform:translate(-50%,54%);border-radius:50%;
+  background:radial-gradient(closest-side,
+    rgba(99,91,255,.15), rgba(99,91,255,.06) 50%, rgba(99,91,255,0) 76%);
+  filter:blur(44px);
+}
+/* the words stand on the light, not under it */
+.footer > .wrap{position:relative;z-index:1}
 /* the solid a menu opens onto here: the footer's own ground, one step up so
    the menu still reads as standing on it rather than cut out of it */
 .footer,.offer2{--pop:#161B33}
