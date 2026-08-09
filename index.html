@@ -2186,6 +2186,35 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .rmp-pdp .rmp-ba__tag.rmp-a::before{content:"After"}
 .rmp-pdp .rmp-ba__tag.rmp-b{left:var(--s-3);right:auto}
 .rmp-pdp .rmp-ba__tag.rmp-a{right:var(--s-3);left:auto}
+/* ── the panel's marks wear the page's own badge ────────────────────
+   Solid accent, white lettering, a hairline of white around it and the
+   same travelling highlight the free packs and the basket wear: one
+   conic sweep on the shared --ring, on the same 2.4s beat, so a mark in
+   the lightbox is lit by the same light as a mark on the shelf. */
+.rmp-pdp .rmp-badge{
+  position:relative;
+  background:var(--accent);color:var(--fg-on-accent);
+  border:1px solid rgba(255,255,255,.34);box-shadow:
+    0 8px 22px rgba(105,87,255,.46), 0 0 0 3px rgba(99,91,255,.18);
+}
+.rmp-pdp .rmp-badge::after{
+  content:"";position:absolute;inset:-1px;z-index:1;pointer-events:none;
+  border-radius:var(--r-full);padding:1.5px;
+  background:conic-gradient(from var(--ring),
+    rgba(255,255,255,0) 0deg, rgba(255,255,255,0) 178deg,
+    rgba(255,255,255,.5) 224deg, #FFFFFF 250deg, rgba(255,255,255,.45) 276deg,
+    rgba(255,255,255,0) 322deg, rgba(255,255,255,0) 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+  animation:freeRing 2.4s linear infinite;
+}
+/* the words sit above the sweep */
+.rmp-pdp .rmp-badge > *{position:relative;z-index:2}
+@media (prefers-reduced-motion:reduce){
+  .rmp-pdp .rmp-badge::after{animation:none}
+}
+
 /* the line and its handle: the page's hairline and 36px disc with two
    chevrons drawn on it, rather than the panel's 40px disc with triangles */
 .rmp-pdp .rmp-ba__div{
@@ -9286,35 +9315,150 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      real pictures rather than the same four repeated */
   var ALL = PACKS.reduce(function(a, p){ return a.concat(p.media); }, []);
 
-  /* how many items each pack carries, and where its description sits on the
-     scale — no two packs alike, so every length can be seen somewhere */
+  /* how many items each pack carries — no two alike, so a short strip and a
+     long one can both be seen. (Its description no longer comes from a scale:
+     every pack has its own, below.) */
   var HOW = [15, 6, 9, 7, 12, 8, 14, 6, 13, 10, 11, 9];
-  var SAY = [4,  0, 1, 2, 3,  1, 4,  0, 2,  3,  1,  2];
 
-  var SHORT = '<p>Bright, natural skin and a warm daylight base.</p>';
-  var MID =
-    '<p>Cut on sunlit weddings and daylight portraits, and built to keep ' +
-    'skin where you left it: warmth comes up in the highlights and the ' +
-    'shadows stay open.</p>';
-  var TWO = MID +
-    '<p>Every preset is a starting point rather than a finish, so exposure, ' +
-    'white balance and grain all stay yours to move afterwards without the ' +
-    'look falling apart.</p>';
-  var THREE = TWO +
-    '<p>Installs into Lightroom Classic and Camera Raw in one click, on raw ' +
-    'files from every current body we could get our hands on. The licence ' +
-    'is yours for life and every update to the pack is included.</p>';
-  var LONG = THREE +
-    '<p>The set covers four families: clean daylight for ceremonies, a ' +
-    'warmer pass for golden hour, a low-contrast option for flat overcast ' +
-    'light, and a deeper one for receptions lit by tungsten. Each has a ' +
-    'lighter and a stronger version, so a whole gallery can be graded ' +
-    'consistently and then pushed a little further on the frames that ' +
-    'deserve it.</p>' +
-    '<p><em>This description is preview material: it is here to show what a ' +
-    'long one looks like in this panel, and should be replaced with the ' +
-    'real copy.</em></p>';
-  var SAYS = [SHORT, MID, TWO, THREE, LONG];
+  /* ────────────────────────────────────────────────────────────────
+     PREVIEW COPY — every pack carries its own description, written to
+     show the panel at every length it will really meet: one paragraph,
+     two, three, four. NONE OF IT IS THE SHOP'S OWN WORDING. Replace the
+     whole table with the real copy before this goes live; nothing else
+     in the panel has to change when you do.
+     ──────────────────────────────────────────────────────────────── */
+  var P = function(){ return [].slice.call(arguments).map(function(t){
+    return '<p>' + t + '</p>'; }).join(''); };
+
+  var COPY = {
+    'Lora Presets': P(
+      'Built for sunlit weddings and daylight portraits, and tuned to leave skin ' +
+      'where you found it. Warmth comes up in the highlights, the shadows stay ' +
+      'open, and nothing is pushed far enough to start eating detail in a white ' +
+      'dress or a linen suit.',
+      'Every preset is a starting point rather than a finish. Exposure, white ' +
+      'balance and grain are all left on the table, so you can move a frame two ' +
+      'stops either way and the look holds together instead of falling apart.',
+      'Twenty-four looks across four families — clean daylight, a warmer pass for ' +
+      'golden hour, a low-contrast option for flat overcast light, and a deeper ' +
+      'one for receptions lit by tungsten. Each comes in a lighter and a stronger ' +
+      'version, so a whole gallery can be graded consistently and then pushed a ' +
+      'little further on the frames that deserve it.'),
+
+    'Solis Presets': P(
+      'A bright, sun-forward set for the middle of the day, when the light is ' +
+      'harsh and most presets make it worse. Contrast is held back in the ' +
+      'highlights so skies keep their gradient, and the shadow tint leans warm ' +
+      'rather than blue, which is what stops midday shade from going grey. Skin ' +
+      'stays where it should: a little colour in the cheeks, no orange in the ' +
+      'foreheads. It is the set to reach for when you have no choice about the ' +
+      'hour and every choice about the frame.'),
+
+    'Terra Presets': P(
+      'Earth tones, worked from the ground up rather than dropped on top. Greens ' +
+      'are pulled towards olive, reds towards brick, and the whole frame sits on ' +
+      'a slightly warm neutral so sand, stone and skin belong to the same ' +
+      'afternoon.',
+      'It suits travel and documentary work, where a roll can cross four kinds ' +
+      'of light in an hour. The tone curve is deliberately gentle in the ' +
+      'quarter-tones, so a frame shot in shade and a frame shot in sun can be ' +
+      'brought together with nothing more than exposure.'),
+
+    'Jardin Presets': P(
+      'Made for gardens, greenhouses and anything with more leaves than sky. ' +
+      'Green is the hardest colour to hold in a portrait, so it is split here: ' +
+      'foliage is deepened and desaturated a touch while skin is protected by a ' +
+      'separate mask, which keeps faces from picking up the reflected colour of ' +
+      'everything around them. Best on overcast days, where it does most of its ' +
+      'work.'),
+
+    'Mely Presets': P(
+      'A soft, honeyed set for portraits shot close. It was cut on 85mm and 105mm ' +
+      'work at wide apertures, where the background is already doing very little ' +
+      'and the grade has to carry the frame without shouting.',
+      'Skin is the whole point. Highlights on the cheek and nose are rolled off ' +
+      'about half a stop earlier than the rest of the frame, so a face lit from ' +
+      'one side keeps its shape instead of flattening into a bright patch. Reds ' +
+      'are held down slightly in luminance, which is what stops the warm cast ' +
+      'from turning into sunburn.',
+      'The set includes six neutral variants for when a client wants the picture ' +
+      'and not the look — same curve, no colour move — so a gallery can be split ' +
+      'between the two without a visible seam.',
+      'Everything installs into Lightroom Classic and Camera Raw in one click and ' +
+      'works on raw files from every current body we could get our hands on. The ' +
+      'licence is yours for life and every update to the pack is included.'),
+
+    'Onyx Presets': P(
+      'Dark, close and deliberately unbalanced. Blacks are lifted just enough to ' +
+      'keep texture and then cooled, while the warm end of the frame is left ' +
+      'alone — the split is what gives the set its weight without ever going near ' +
+      'a filter look.',
+      'It is not a set for everything. On a bright beach it will fight you. On a ' +
+      'reception, a rehearsal, a rain-lit street or anything shot after sunset it ' +
+      'does in one move what usually takes four.'),
+
+    'Doré Presets': P(
+      'Golden hour, without the orange. The warmth here is built from the ' +
+      'highlights down rather than laid across the whole frame, so the sun looks ' +
+      'like it is coming from somewhere instead of from the slider.',
+      'Skin is protected through the hue range where warm grades usually break — ' +
+      'the narrow band between a tan and a traffic cone — and greens are pulled ' +
+      'slightly yellow so grass and leaves sit in the same light as everything ' +
+      'else. The result holds up on backlit frames, which is where most golden ' +
+      'presets come apart.',
+      'Twenty-four looks, each with a lighter and a stronger version. Exposure and ' +
+      'white balance stay yours to move afterwards.'),
+
+    'Olbia LUTs': P(
+      'A .cube set for video, cut to sit on top of a normal Rec.709 delivery ' +
+      'rather than replace it. The looks are graded in the shadows and the ' +
+      'quarter-tones and left almost alone above middle grey, so faces keep their ' +
+      'separation from a bright wall or a window behind them.',
+      'They load in Premiere, Resolve, Final Cut and anything else that reads a ' +
+      '.cube, at both 33 and 65 points. Log footage gets its own conversion set ' +
+      'so you are not stacking a look on top of a transform and hoping.'),
+
+    'Demo Presets': P(
+      'A free sampler: four looks pulled from across the catalogue so you can see ' +
+      'how the sets behave on your own files before you buy one. It installs the ' +
+      'same way, works on the same bodies, and carries the same licence — the ' +
+      'only difference is the number of presets in it.'),
+
+    'Vela Presets': P(
+      'Airy and coastal. Whites are kept genuinely white, the blues are pulled ' +
+      'back from cyan, and there is a small lift in the blacks that reads as sea ' +
+      'haze rather than as a faded filter.',
+      'It was built for open shade and overcast coastline, the two conditions ' +
+      'where a frame can be technically correct and still look like nothing. The ' +
+      'contrast is placed in the upper mid-tones, which is what puts the shape ' +
+      'back into a flat sky.',
+      'Twenty-four presets, including six that leave colour untouched and work ' +
+      'only on tone — useful when a location has already given you the palette ' +
+      'and all you need is the light.'),
+
+    'Nord Presets': P(
+      'A cool, restrained set for northern light. Nothing here is pushed: the ' +
+      'move is mostly a shift in the shadow tint and a flatter tone curve, which ' +
+      'is enough to make a grey afternoon read as deliberate rather than as ' +
+      'underexposed.',
+      'It works well on architecture and on portraits shot against concrete, ' +
+      'water or snow, where a warmer set would put a colour into the frame that ' +
+      'was never there.'),
+
+    'Aster LUTs': P(
+      'A small, opinionated .cube set — six looks rather than sixty, each one cut ' +
+      'for a specific kind of scene: interview, night exterior, overcast wide, ' +
+      'tungsten interior, mixed fluorescent, and one clean contrast curve with no ' +
+      'colour move at all.',
+      'Everything is delivered at 33 and 65 points, with a matching set for log ' +
+      'footage, and the strength is meant to be dialled back — most of these sit ' +
+      'best somewhere between sixty and eighty percent.')
+  };
+
+  var GENEL = P(
+    'A twenty-four preset pack for Lightroom Classic and Camera Raw, installed ' +
+    'in one click and licensed for life. Exposure, white balance and grain all ' +
+    'stay yours to move afterwards.');
 
   PACKS.forEach(function(p, i){
     var want = HOW[i % HOW.length], own = p.media.slice();
@@ -9333,7 +9477,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       out.push(own.length ? own.shift() : ALL[(i * 5 + t++) % ALL.length]);
     }
     p.media = out.filter(Boolean);
-    p.about = SAYS[SAY[i % SAY.length]];
+    p.about = COPY[p.name] || GENEL;
   });
 
   /* ---- the page must be where it was, not somewhere near it ----
