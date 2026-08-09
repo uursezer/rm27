@@ -1122,6 +1122,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    room the capitals beside them never use — so they land about a pixel low.
    Measured off the rendered pixels, not guessed, and put back. */
 .ptab__apps .ptab__app,.ptabs .ptab__no{position:relative;top:-0.8px}
+/* …but that descender room is a fact about TYPE. A drawn mark has none, so
+   the same padding pushed the screen icon 1.75px below its own box. It gets
+   its box back and is simply centred in it. */
+.ptab__app:has(svg){padding-top:0}
 /* the eyebrow can carry the apps it runs in: the same three marks the plugin
    tabs wear, so the badge for "this works in Photoshop" is one thing on this
    page and not two. They keep their own case against the eyebrow's caps —
@@ -1136,7 +1140,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    the page below it shifts when the slide changes */
 #hero .eyebrow{min-height:22px;display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-3)}
 .ptab__app{
-  display:grid;place-items:center;width:24px;height:22px;padding:4px 0 0;
+  display:grid;place-items:center;width:24px;height:22px;padding:3.4px 0 0;
   /* filled, not outlined — the same pair the number disc beside them wears,
      so the row reads as one set of marks rather than two kinds of box */
   border-radius:5px;border:1px solid transparent;
@@ -7248,16 +7252,43 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     var CHEV = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.2L6 7.8l3.5-3.6"/></svg>';
     var MORE = 'Read more', LESS = 'Show less';
     var seen = [];
+    var FOLD_AT = 2;                     /* lines shown when it is folded */
+    /* COUNT the lines; do not ask a clamped box whether it overflows.
+       scrollHeight and clientHeight are whole numbers, and a line box is
+       almost never one — two lines of 27.2px measure 54 against 55 and the
+       box answers "yes, there is more" when there is nothing. That is how a
+       two-line caption ended up wearing a Read more that opened onto the
+       same two lines. So: unfold it, measure the whole thing, divide by one
+       line, and fold only when a third line really exists. */
+    function lines(p){
+      var cs = getComputedStyle(p);
+      var lh = parseFloat(cs.lineHeight);
+      if(!(lh > 0)) lh = parseFloat(cs.fontSize) * 1.5;
+      var inner = p.scrollHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      return Math.round(inner / lh);
+    }
     function measure(p){
       var more = p.nextElementSibling;
       if(!more || !more.classList.contains('player__more')) return;
-      /* fold first, then ask: an unfolded paragraph is never taller than
-         itself and would always answer "no" */
+      /* A caption in a tab that is not open has no width, and a line count
+         taken there is zero — which would quietly strip the button off a
+         long description and leave it stripped. No width, no measurement,
+         no change: whatever it decided while it was visible stands. */
+      if(!p.clientWidth) return;
+      /* While the lightbox is open the page is pinned and its scrollbar is
+         gone, so every column is fifteen pixels wider than it really is.
+         Re-deciding a fold on that width changes the height of a page nobody
+         can see, and the panel then puts you back three pixels from where
+         you left. The width comes back when the panel closes, and the watcher
+         below measures again then. */
+      if(document.body.classList.contains('rmp-locked')) return;
       var wasOpen = p.classList.contains('is-open');
-      p.classList.add('is-fold'); p.classList.remove('is-open');
-      var over = p.scrollHeight > p.clientHeight + 1;
+      /* unfolded and unclamped, so what is measured is the whole text */
+      p.classList.remove('is-fold'); p.classList.remove('is-open');
+      var over = lines(p) > FOLD_AT;
       more.hidden = !over;
-      if(!over){ p.classList.remove('is-fold'); return; }
+      if(!over) return;                  /* two lines or fewer: nothing to open */
+      p.classList.add('is-fold');
       if(wasOpen) p.classList.add('is-open');
       more.setAttribute('aria-expanded', String(!!wasOpen));
       more.firstChild.textContent = wasOpen ? LESS : MORE;
@@ -7292,6 +7323,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
        before it lands is a guess */
     if(document.fonts && document.fonts.ready)
       document.fonts.ready.then(function(){ seen.forEach(measure); });
+    /* A pane that is not the open one has no size at all, so a count taken
+       there is zero and the caption would keep that answer for ever — the
+       second and third plugin never folded, or folded onto nothing. Watch
+       the paragraphs instead of the window: the moment one is given a width
+       (its tab opened, the column resized) it is measured again. Folding
+       changes height, never width, so this cannot chase its own tail. */
+    if(window.ResizeObserver){
+      var ro = new ResizeObserver(function(list){
+        list.forEach(function(en){
+          var el = en.target, w = Math.round(en.contentRect.width);
+          if(!w || w === el._foldW) return;
+          el._foldW = w;
+          measure(el);
+        });
+      });
+      seen.forEach(function(el){ ro.observe(el); });
+    }
   })();
 
   /* ---- the neighbours say which way they go ----

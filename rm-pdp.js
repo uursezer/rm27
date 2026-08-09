@@ -75,6 +75,21 @@ var ROZET_IK={
   'BESTSELLER':'🏆', 'POPÜLER':'🔥', 'EDİTÖRÜN SEÇİMİ':'💎', 'YENİ':'🎉'
 };
 
+/* Bir paketin İKİ adı var: ne olduğu (PRESETS / LUTs) ve ne diye anıldığı
+   (Solis). Veri ikisini ayrı taşırsa (p.kind / p.short) o kullanılır; yoksa
+   addaki son kelimeden okunur — "Solis Presets" → PRESETS + "Solis". */
+function paketTuru(p){
+  if(p.kind) return p.kind;
+  var m=String(p.name||'').match(/(LUTs?|Presets?)\s*$/i);
+  if(!m) return '';
+  return /lut/i.test(m[1]) ? 'LUTs' : 'PRESETS';
+}
+function paketAdi(p){
+  if(p.short) return p.short;
+  var k=String(p.name||'').replace(/\s*(LUTs?|Presets?)\s*$/i,'').trim();
+  return k || p.name || '';
+}
+
 /* Künye çipi ikonları — emoji değil, sistemin kendi çizgi ikonları:
    hepsi 24'lük ızgarada, currentColor konturlu, aynı kalınlıkta. */
 function ikon(d){
@@ -378,22 +393,29 @@ function buildInfo(p){
    /* SABİT bölüm: başlık ve künye her zaman görünür kalır. */
    '<div class="rmp-info__top">'+
      '<div class="rmp-head">'+
-       (p.badges.length?'<div class="rmp-badges">'+p.badges.map(function(b){
-          var ik=ROZET_IK[b[0]];
-          return '<span class="rmp-badge '+b[1]+'">'+
-                 (ik?'<i class="rmp-bi" aria-hidden="true">'+ik+'</i>':'')+b[0]+'</span>';
-        }).join('')+'</div>':'')+
-       /* Başlığın kendisi menü tetikleyicisi: görüntülenen paketin adına
-          tıklanıp başka bir preset/LUT'a tek hamlede geçilir. */
-       '<h1 class="rmp-pick" id="rmp-pick">'+
-         '<button class="rmp-pick__btn" id="rmp-pickBtn" type="button" aria-haspopup="listbox"'+
-         ' aria-expanded="false" aria-controls="pickMenu">'+
-           '<span id="rmp-pickName">'+p.name+'</span>'+
-           '<svg class="rmp-pick__ch" viewBox="0 0 24 24" aria-hidden="true">'+
-           '<path d="m6 9 6 6 6-6"/></svg>'+
-         '</button>'+
-         '<div class="rmp-pick__menu" id="rmp-pickMenu" role="listbox" aria-label="Paket seç" hidden></div>'+
-       '</h1>'+
+       /* 1) ne olduğu — tek kelime, ana renkte */
+       (paketTuru(p)?'<p class="rmp-kind">'+paketTuru(p)+'</p>':'')+
+       /* 2) adı, ve HEMEN YANINDA rozetleri: aynı satır, aynı orta çizgi.
+          Başlığın kendisi menü tetikleyicisi — adına tıklanıp başka bir
+          preset/LUT'a tek hamlede geçilir. Ad artık yalnızca ad: "Presets"
+          ya da "LUTs" kelimesi üstteki satırda zaten söylendi. */
+       '<div class="rmp-titlerow">'+
+         '<h1 class="rmp-pick" id="rmp-pick">'+
+           '<button class="rmp-pick__btn" id="rmp-pickBtn" type="button" aria-haspopup="listbox"'+
+           ' aria-expanded="false" aria-controls="pickMenu">'+
+             '<span id="rmp-pickName">'+paketAdi(p)+'</span>'+
+             '<svg class="rmp-pick__ch" viewBox="0 0 24 24" aria-hidden="true">'+
+             '<path d="m6 9 6 6 6-6"/></svg>'+
+           '</button>'+
+           '<div class="rmp-pick__menu" id="rmp-pickMenu" role="listbox" aria-label="Paket seç" hidden></div>'+
+         '</h1>'+
+         (p.badges.length?'<div class="rmp-badges">'+p.badges.map(function(b){
+            var ik=ROZET_IK[b[0]];
+            return '<span class="rmp-badge '+b[1]+'">'+
+                   (ik?'<i class="rmp-bi" aria-hidden="true">'+ik+'</i>':'')+b[0]+'</span>';
+          }).join('')+'</div>':'')+
+       '</div>'+
+       /* 3) kim yaptı */
        '<div class="rmp-by"><span class="rmp-av">'+p.av+'</span> '+p.by+'</div>'+
      '</div>'+
    /* Akordiyon yok: açıklama açıkta, altında dört künye çipi.

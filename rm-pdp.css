@@ -438,8 +438,26 @@ body.rmp-locked{overflow:hidden}
 .rmp-info__top{flex:0 0 auto}
 /* ── başlık bloğu: rozet · paket adı · satıcı ── */
 .rmp-head{margin-bottom:var(--s-5)}
+/* ── başlığın üstü: ne olduğu · adı ve rozetleri · kim yaptığı ──
+   1) TÜR. Tek kelime, ana renkte, başlığın üstünde duran bir kaş. */
+.rmp-kind{
+  margin:0 0 var(--s-2);
+  font-size:12px;font-weight:var(--fw-bold);letter-spacing:.09em;
+  text-transform:uppercase;color:var(--accent-fg);
+}
+/* 2) AD ve ROZETLER aynı satırda. Rozetler adın büyük harf ortasına
+      oturur — satır kutusuna değil: satır kutusu, harflerin hiç kullanmadığı
+      alt uzantı payını taşır ve rozeti aşağı kaydırırdı. Ölçüldü, kondu.
+      Ad uzarsa rozetler alt satıra iner, kesilmez. */
+.rmp-titlerow{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:var(--s-3) var(--s-3);min-width:0;
+}
+.rmp-titlerow .rmp-pick{min-width:0}
 /* rozet = kaynak sitedeki .chip: 11px, kalın, VERSAL, hap yarıçapı */
-.rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-bottom:var(--s-2)}
+.rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);
+  /* satır kutusuna göre ortalanınca 0.7px aşağı düşüyordu — ölçüldü, kondu */
+  position:relative;top:-0.7px}
 /* emoji: Apple'ın renkli seti öncelikli; rozetin harf aralığından ve
    VERSAL dönüşümünden etkilenmemeli */
 .rmp-badge .rmp-bi{flex:0 0 auto;font-style:normal;font-size:12px;line-height:1;
