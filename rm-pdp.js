@@ -551,7 +551,11 @@ function baPct(f,x){ var r=f.getBoundingClientRect(); return (x-r.left)/r.width*
 
 track.addEventListener('pointermove',function(e){
   if(coarse||e.buttons!==0) return;
-  var f=e.target.closest('.rmp-frame.rmp-ba'); if(!f||f.classList.contains('rmp-is-zoomed')&&false) return;
+  /* `&&false` disabled this guard, so a zoomed frame kept following the
+     pointer — and the percentage is worked out from the frame's rectangle,
+     which the zoom has scaled and panned. The divider jumped every time you
+     zoomed in or out. Zoomed in, the gesture is panning, not comparing. */
+  var f=e.target.closest('.rmp-frame.rmp-ba'); if(!f||f.classList.contains('rmp-is-zoomed')) return;
   setBA(f,baPct(f,e.clientX));
 });
 track.addEventListener('pointerdown',function(e){

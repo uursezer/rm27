@@ -716,9 +716,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     /* narrower and gentler than it was: the core is pulled in so more of the
        wall stays visible either side of the column, and the fall is spread
        over five stops instead of three so there is no edge to the dark */
-    radial-gradient(ellipse 38% 72% at 50% 49%,
-      rgba(5,8,18,.94) 0%, rgba(5,8,18,.86) 26%, rgba(5,8,18,.62) 46%,
-      rgba(5,8,18,.30) 66%, rgba(5,8,18,.10) 84%, transparent 100%),
+    radial-gradient(ellipse 34% 64% at 50% 49%,
+      rgba(5,8,18,.90) 0%, rgba(5,8,18,.80) 24%, rgba(5,8,18,.56) 44%,
+      rgba(5,8,18,.28) 64%, rgba(5,8,18,.09) 83%, transparent 100%),
     linear-gradient(90deg, rgba(8,12,24,.15), transparent 23%, transparent 77%, rgba(8,12,24,.15));
 }
 @media (max-width:900px){
@@ -733,9 +733,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .wall--dark{opacity:.30}
   .wall__shot{width:132px}
   .cta--wall::after{
-    background:radial-gradient(ellipse 66% 68% at 50% 50%,
-      rgba(5,8,18,.95), rgba(5,8,18,.86) 30%, rgba(5,8,18,.60) 52%,
-      rgba(5,8,18,.26) 74%, rgba(5,8,18,.08) 88%, transparent);
+    background:radial-gradient(ellipse 60% 62% at 50% 50%,
+      rgba(5,8,18,.92), rgba(5,8,18,.82) 28%, rgba(5,8,18,.56) 50%,
+      rgba(5,8,18,.24) 72%, rgba(5,8,18,.07) 87%, transparent);
   }
 }
 @media (prefers-reduced-motion:reduce){
@@ -3834,114 +3834,224 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .urail__b svg{width:21px;height:21px}
 }
 /* ════════════════════════════════════════════════════════════════
-   WHATSAPP — the band above the footer
-   The closing call's own band, in another light. .cta gives it the shell,
-   the column, the heading, the button and the note; everything here is the
-   part that is genuinely new — the green the section is lit in, and the
-   field of padlocks that turns to keys wherever the pointer goes.
+   WHATSAPP — the community band above the footer
+   Two columns: what the group is on the left, what it looks like on the
+   right. Everything here is scoped to .wa and written in the page's own
+   tokens — the type scale, the 4pt spacing, the radii, the shadows and the
+   button — so the section cannot drift away from the rest of the site.
+   The green and the deep navy are the only values of its own.
    ════════════════════════════════════════════════════════════════ */
 .wa{
-  --ink:#080C18;                      /* the footer's own ground: this band ends the page with it */
-  /* the same names the page uses, given the band's own values — the way the
-     plugin band does it, so every component inside reads correctly without
-     being told about this section at all */
-  /* the greys are the ones every other dark band on this page is written in.
-     They were tinted green, which made the sentence under the heading and the
-     line under the button read as a different kind of text from the one under
-     the bundle's heading — they are the same kind of text. */
+  --em:#3BE08A; --em-deep:#25C173; --em-soft:#8FF0BE;
+  --ink:#080C18;
   --fg:#FFFFFF; --fg-body:#D3DAE8; --fg-muted:#9AA6BF;
-  --accent-fg:#3BE08A; --border:rgba(255,255,255,.12);
-  --em:#3BE08A; --em-deep:#25C173;
-  /* where the light rests when nobody is on the band. The closing call above
-     puts it in the middle, because that is where its column of words is; here
-     the words want a quiet ground behind them, so the light stands off to the
-     left of them instead. The pointer still takes it anywhere. */
-  --px:22%; --py:52%;
+  --border:rgba(255,255,255,.11);
+  /* where the pointer's light waits when nobody is on the band */
+  --px:53%; --py:25%;
+  position:relative;isolation:isolate;overflow:clip;
+  padding:var(--section-y) var(--gutter);
+  border-block:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(108deg,#0A1020 0%,#070B16 48%,#050812 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025), inset 0 0 180px rgba(1,3,10,.36);
   color:var(--fg-body);
 }
-/* ── and the words get a bed of their own ─────────────────────────
-   The monogram is a texture, not something to read past. The closing call's
-   own bed is light because its ground is quiet; this one carries a field of
-   marks, so the bed under the words is a good deal deeper — enough that the
-   heading and the two lines under it sit on near-black, while the marks come
-   back up at the edges where there is nothing to read. Five stops rather
-   than two, so it lands as a softening rather than as a dark ellipse. */
+/* the green that follows the pointer, and under it the room's own purple:
+   a wide one leaning in from the left and a small one at the top right */
+.wa::before{
+  content:"";position:absolute;inset:0;z-index:-3;pointer-events:none;
+  background:radial-gradient(560px circle at var(--px) var(--py),
+    rgba(40,206,127,.19) 0%, rgba(37,193,115,.095) 34%, rgba(37,193,115,.035) 58%, transparent 78%);
+}
 .wa::after{
-  background:radial-gradient(66% 68% at 50% 47%,
-    rgba(6,10,22,.90) 0%,
-    rgba(6,10,22,.80) 28%,
-    rgba(6,10,22,.54) 50%,
-    rgba(6,10,22,.24) 70%,
-    rgba(6,10,22,.06) 87%,
-    rgba(6,10,22,0) 100%);
+  content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(900px circle at -8% 54%, rgba(99,91,255,.19) 0%, rgba(99,91,255,.085) 34%, rgba(71,64,184,.025) 58%, transparent 74%),
+    radial-gradient(680px circle at 104% 6%, rgba(71,64,184,.075), transparent 72%),
+    linear-gradient(90deg, rgba(17,22,48,.08), transparent 42%, rgba(2,5,13,.16));
 }
-/* ── the lattice, in the band's own mark ─────────────────────────
-   Everything that makes the ground and the light — the ambient pair, the
-   pool that follows the pointer, the parallax blob, the wash and the bed the
-   words sit on — is the closing call's, unchanged, and lives in .cta__sky /
-   .cta__spot / .cta::before / .cta::after further up this sheet. The one
-   thing this band says differently is what the pointer's circle is a lattice
-   of: the mark of the room it is inviting you into, in place of the dots.
-   Not one mark repeated, which is the thing that read as wallpaper however
-   far apart it was put: a monogram. Four marks — the WhatsApp mark, a
-   padlock, a key and a pair of people — each at its own size and its own
-   weight, on a staggered lattice, every other row shifted by half a step so
-   nothing lines up in a square. They are laid out so that no mark ever
-   touches itself along a diagonal and every column carries all four, over a
-   tile six rows deep so the repeat is far enough apart not to be read as
-   one. Anything that crosses a tile edge is drawn again on the far side, so
-   the repeat has no seam anywhere. */
-.wa .cta__spot{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='432' height='324' viewBox='0 0 432 324'%3E%3Cg transform='translate(27.5 18.5) scale(0.7083)'%3E%3Ccircle cx='9.2' cy='8.3' r='3.9' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M9.2 13.4c-4 0-6.9 2.2-6.9 5.1 0 .83.67 1.5 1.5 1.5h10.8c.83 0 1.5-.67 1.5-1.5 0-2.9-2.9-5.1-6.9-5.1z' fill='rgba(178,172,255,0.28)'/%3E%3Ccircle cx='17.3' cy='9.1' r='3' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M17.3 13.7c-.86 0-1.64.11-2.34.33 1.5 1.2 2.42 2.9 2.42 4.85 0 .05 0 .1-.01.15h3.86c.83 0 1.5-.67 1.5-1.5 0-2.28-2.4-3.83-5.43-3.83z' fill='rgba(178,172,255,0.28)'/%3E%3C/g%3E%3Cg transform='translate(130.5 13.5) scale(1.125)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z' fill='rgba(178,172,255,0.30)'/%3E%3C/g%3E%3Cg transform='translate(242 17) scale(0.8333)'%3E%3Cpath d='M6.2 10.6h11.6c.83 0 1.5.67 1.5 1.5v6.6c0 .83-.67 1.5-1.5 1.5H6.2c-.83 0-1.5-.67-1.5-1.5V12.1c0-.83.67-1.5 1.5-1.5z' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M8.1 10.6V8.2a3.9 3.9 0 017.8 0v2.4' fill='none' stroke='rgba(178,172,255,0.28)' stroke-width='2.1' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(349.5 16.5) scale(0.875)'%3E%3Ccircle cx='6.8' cy='12' r='3.9' fill='none' stroke='rgba(178,172,255,0.27)' stroke-width='2.5'/%3E%3Crect x='10.2' y='10.75' width='11.6' height='2.5' rx='1.25' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='16.6' y='13.25' width='2.4' height='3.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='19.6' y='13.25' width='2.4' height='2.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3C/g%3E%3Cg transform='translate(80 71) scale(0.8333)'%3E%3Cpath d='M6.2 10.6h11.6c.83 0 1.5.67 1.5 1.5v6.6c0 .83-.67 1.5-1.5 1.5H6.2c-.83 0-1.5-.67-1.5-1.5V12.1c0-.83.67-1.5 1.5-1.5z' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M8.1 10.6V8.2a3.9 3.9 0 017.8 0v2.4' fill='none' stroke='rgba(178,172,255,0.28)' stroke-width='2.1' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(187.5 70.5) scale(0.875)'%3E%3Ccircle cx='6.8' cy='12' r='3.9' fill='none' stroke='rgba(178,172,255,0.27)' stroke-width='2.5'/%3E%3Crect x='10.2' y='10.75' width='11.6' height='2.5' rx='1.25' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='16.6' y='13.25' width='2.4' height='3.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='19.6' y='13.25' width='2.4' height='2.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3C/g%3E%3Cg transform='translate(297.5 72.5) scale(0.7083)'%3E%3Ccircle cx='9.2' cy='8.3' r='3.9' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M9.2 13.4c-4 0-6.9 2.2-6.9 5.1 0 .83.67 1.5 1.5 1.5h10.8c.83 0 1.5-.67 1.5-1.5 0-2.9-2.9-5.1-6.9-5.1z' fill='rgba(178,172,255,0.28)'/%3E%3Ccircle cx='17.3' cy='9.1' r='3' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M17.3 13.7c-.86 0-1.64.11-2.34.33 1.5 1.2 2.42 2.9 2.42 4.85 0 .05 0 .1-.01.15h3.86c.83 0 1.5-.67 1.5-1.5 0-2.28-2.4-3.83-5.43-3.83z' fill='rgba(178,172,255,0.28)'/%3E%3C/g%3E%3Cg transform='translate(400.5 67.5) scale(1.125)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z' fill='rgba(178,172,255,0.30)'/%3E%3C/g%3E%3Cg transform='translate(27.5 126.5) scale(0.7083)'%3E%3Ccircle cx='9.2' cy='8.3' r='3.9' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M9.2 13.4c-4 0-6.9 2.2-6.9 5.1 0 .83.67 1.5 1.5 1.5h10.8c.83 0 1.5-.67 1.5-1.5 0-2.9-2.9-5.1-6.9-5.1z' fill='rgba(178,172,255,0.28)'/%3E%3Ccircle cx='17.3' cy='9.1' r='3' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M17.3 13.7c-.86 0-1.64.11-2.34.33 1.5 1.2 2.42 2.9 2.42 4.85 0 .05 0 .1-.01.15h3.86c.83 0 1.5-.67 1.5-1.5 0-2.28-2.4-3.83-5.43-3.83z' fill='rgba(178,172,255,0.28)'/%3E%3C/g%3E%3Cg transform='translate(130.5 121.5) scale(1.125)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z' fill='rgba(178,172,255,0.30)'/%3E%3C/g%3E%3Cg transform='translate(242 125) scale(0.8333)'%3E%3Cpath d='M6.2 10.6h11.6c.83 0 1.5.67 1.5 1.5v6.6c0 .83-.67 1.5-1.5 1.5H6.2c-.83 0-1.5-.67-1.5-1.5V12.1c0-.83.67-1.5 1.5-1.5z' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M8.1 10.6V8.2a3.9 3.9 0 017.8 0v2.4' fill='none' stroke='rgba(178,172,255,0.28)' stroke-width='2.1' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(349.5 124.5) scale(0.875)'%3E%3Ccircle cx='6.8' cy='12' r='3.9' fill='none' stroke='rgba(178,172,255,0.27)' stroke-width='2.5'/%3E%3Crect x='10.2' y='10.75' width='11.6' height='2.5' rx='1.25' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='16.6' y='13.25' width='2.4' height='3.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='19.6' y='13.25' width='2.4' height='2.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3C/g%3E%3Cg transform='translate(79.5 178.5) scale(0.875)'%3E%3Ccircle cx='6.8' cy='12' r='3.9' fill='none' stroke='rgba(178,172,255,0.27)' stroke-width='2.5'/%3E%3Crect x='10.2' y='10.75' width='11.6' height='2.5' rx='1.25' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='16.6' y='13.25' width='2.4' height='3.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='19.6' y='13.25' width='2.4' height='2.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3C/g%3E%3Cg transform='translate(189.5 180.5) scale(0.7083)'%3E%3Ccircle cx='9.2' cy='8.3' r='3.9' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M9.2 13.4c-4 0-6.9 2.2-6.9 5.1 0 .83.67 1.5 1.5 1.5h10.8c.83 0 1.5-.67 1.5-1.5 0-2.9-2.9-5.1-6.9-5.1z' fill='rgba(178,172,255,0.28)'/%3E%3Ccircle cx='17.3' cy='9.1' r='3' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M17.3 13.7c-.86 0-1.64.11-2.34.33 1.5 1.2 2.42 2.9 2.42 4.85 0 .05 0 .1-.01.15h3.86c.83 0 1.5-.67 1.5-1.5 0-2.28-2.4-3.83-5.43-3.83z' fill='rgba(178,172,255,0.28)'/%3E%3C/g%3E%3Cg transform='translate(292.5 175.5) scale(1.125)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z' fill='rgba(178,172,255,0.30)'/%3E%3C/g%3E%3Cg transform='translate(404 179) scale(0.8333)'%3E%3Cpath d='M6.2 10.6h11.6c.83 0 1.5.67 1.5 1.5v6.6c0 .83-.67 1.5-1.5 1.5H6.2c-.83 0-1.5-.67-1.5-1.5V12.1c0-.83.67-1.5 1.5-1.5z' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M8.1 10.6V8.2a3.9 3.9 0 017.8 0v2.4' fill='none' stroke='rgba(178,172,255,0.28)' stroke-width='2.1' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(22.5 229.5) scale(1.125)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z' fill='rgba(178,172,255,0.30)'/%3E%3C/g%3E%3Cg transform='translate(134 233) scale(0.8333)'%3E%3Cpath d='M6.2 10.6h11.6c.83 0 1.5.67 1.5 1.5v6.6c0 .83-.67 1.5-1.5 1.5H6.2c-.83 0-1.5-.67-1.5-1.5V12.1c0-.83.67-1.5 1.5-1.5z' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M8.1 10.6V8.2a3.9 3.9 0 017.8 0v2.4' fill='none' stroke='rgba(178,172,255,0.28)' stroke-width='2.1' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(241.5 232.5) scale(0.875)'%3E%3Ccircle cx='6.8' cy='12' r='3.9' fill='none' stroke='rgba(178,172,255,0.27)' stroke-width='2.5'/%3E%3Crect x='10.2' y='10.75' width='11.6' height='2.5' rx='1.25' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='16.6' y='13.25' width='2.4' height='3.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='19.6' y='13.25' width='2.4' height='2.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3C/g%3E%3Cg transform='translate(351.5 234.5) scale(0.7083)'%3E%3Ccircle cx='9.2' cy='8.3' r='3.9' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M9.2 13.4c-4 0-6.9 2.2-6.9 5.1 0 .83.67 1.5 1.5 1.5h10.8c.83 0 1.5-.67 1.5-1.5 0-2.9-2.9-5.1-6.9-5.1z' fill='rgba(178,172,255,0.28)'/%3E%3Ccircle cx='17.3' cy='9.1' r='3' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M17.3 13.7c-.86 0-1.64.11-2.34.33 1.5 1.2 2.42 2.9 2.42 4.85 0 .05 0 .1-.01.15h3.86c.83 0 1.5-.67 1.5-1.5 0-2.28-2.4-3.83-5.43-3.83z' fill='rgba(178,172,255,0.28)'/%3E%3C/g%3E%3Cg transform='translate(79.5 286.5) scale(0.875)'%3E%3Ccircle cx='6.8' cy='12' r='3.9' fill='none' stroke='rgba(178,172,255,0.27)' stroke-width='2.5'/%3E%3Crect x='10.2' y='10.75' width='11.6' height='2.5' rx='1.25' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='16.6' y='13.25' width='2.4' height='3.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3Crect x='19.6' y='13.25' width='2.4' height='2.4' rx='1.2' fill='rgba(178,172,255,0.27)'/%3E%3C/g%3E%3Cg transform='translate(189.5 288.5) scale(0.7083)'%3E%3Ccircle cx='9.2' cy='8.3' r='3.9' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M9.2 13.4c-4 0-6.9 2.2-6.9 5.1 0 .83.67 1.5 1.5 1.5h10.8c.83 0 1.5-.67 1.5-1.5 0-2.9-2.9-5.1-6.9-5.1z' fill='rgba(178,172,255,0.28)'/%3E%3Ccircle cx='17.3' cy='9.1' r='3' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M17.3 13.7c-.86 0-1.64.11-2.34.33 1.5 1.2 2.42 2.9 2.42 4.85 0 .05 0 .1-.01.15h3.86c.83 0 1.5-.67 1.5-1.5 0-2.28-2.4-3.83-5.43-3.83z' fill='rgba(178,172,255,0.28)'/%3E%3C/g%3E%3Cg transform='translate(292.5 283.5) scale(1.125)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z' fill='rgba(178,172,255,0.30)'/%3E%3C/g%3E%3Cg transform='translate(404 287) scale(0.8333)'%3E%3Cpath d='M6.2 10.6h11.6c.83 0 1.5.67 1.5 1.5v6.6c0 .83-.67 1.5-1.5 1.5H6.2c-.83 0-1.5-.67-1.5-1.5V12.1c0-.83.67-1.5 1.5-1.5z' fill='rgba(178,172,255,0.28)'/%3E%3Cpath d='M8.1 10.6V8.2a3.9 3.9 0 017.8 0v2.4' fill='none' stroke='rgba(178,172,255,0.28)' stroke-width='2.1' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
-  background-size:432px 324px;
+/* ── the pattern ──
+   Real marks, all of them: the WhatsApp silhouette the page uses
+   everywhere, a padlock, a key and a pair of people. Lit only where the
+   pointer is, a little brighter while the pointer is on the band at all,
+   and pulled back when it is over the words. */
+.wa__pattern{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.6;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='168' viewBox='0 0 240 168'%3E%3Cg fill='%233BE08A' opacity='.21'%3E%3Cg transform='translate(18 15) scale(.92)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z'/%3E%3C/g%3E%3Cg transform='translate(160 104) scale(.92)'%3E%3Cpath d='M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z'/%3E%3C/g%3E%3C/g%3E%3Cg fill='none' stroke='%233BE08A' stroke-width='1.2' opacity='.24'%3E%3Cpath d='M108 28v-5a7 7 0 0114 0v5'/%3E%3Crect x='104' y='28' width='22' height='17' rx='4'/%3E%3Ccircle cx='115' cy='36' r='1.4' fill='%233BE08A' stroke='none'/%3E%3Ccircle cx='207' cy='35' r='6'/%3E%3Cpath d='M213 35h17m-6 0v6m5-6v4M48 116c1-7 5-11 11-11s10 4 11 11m2-9c6 0 10 4 11 9'/%3E%3Ccircle cx='59' cy='99' r='5.5'/%3E%3Ccircle cx='74' cy='101' r='4.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:220px 154px;
+  -webkit-mask:radial-gradient(310px circle at var(--px) var(--py),#000 0%,rgba(0,0,0,.7) 40%,transparent 75%);
+  mask:radial-gradient(310px circle at var(--px) var(--py),#000 0%,rgba(0,0,0,.7) 40%,transparent 75%);
+  transition:opacity var(--dur-2) var(--ease);
 }
+.wa:hover .wa__pattern{opacity:.69}
+.wa.is-on-copy .wa__pattern{opacity:.34}
 
-/* the mark before the words, in both the eyebrow and the heading */
-.wa__eyebrow svg{width:13px;height:13px;flex:none;margin-right:var(--s-2)}
-.wa__eyebrow{display:inline-flex;align-items:center}
-.wa__say svg{width:1.14em;height:1.14em;vertical-align:-.22em;margin-right:.28em;color:var(--em)}
-.wa__lede{margin:var(--s-3) 0 0;max-width:58ch;color:var(--fg-body)}
-/* the three promises, as chips. Ruled text put three more bright things in a
-   row right above a footer that already has plenty; a chip is one quiet dark
-   object with one green mark on it, so the band carries a single accent
-   instead of a spread of them. The geometry is the page's own: the full
-   radius, the control's own padding, the body size. */
-.wa__feats{
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  gap:var(--s-2);margin:var(--s-6) 0 0;padding:0;list-style:none;
+/* the two columns, inside the page's own container width */
+.wa__in{
+  /* the page's own container, not a width of its own: --container is what
+     every other section is measured by, and the band already carries the
+     gutter as its side padding */
+  position:relative;z-index:1;width:100%;max-width:var(--container);margin-inline:auto;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,410px);
+  align-items:center;gap:clamp(44px,7vw,90px);
 }
+.wa__copy{position:relative;isolation:isolate;max-width:610px}
+/* the words' own quiet, and nothing that reads as a panel: a very soft dark
+   cloud well behind them, blurred past any edge it might have had */
+.wa__copy::before{
+  content:"";position:absolute;z-index:-1;inset:-52px -72px -62px;
+  background:rgba(8,12,24,.42);border-radius:48%;filter:blur(88px);pointer-events:none;
+}
+.wa__eyebrow{display:inline-flex;align-items:center;gap:var(--s-2);margin:0 0 var(--s-5);color:var(--em)}
+.wa__eyebrow svg{width:15px;height:15px;flex:none}
+.wa__say{
+  margin:0;color:var(--fg);
+  font-size:clamp(var(--fs-10), 4.5vw, var(--fs-12));
+  font-weight:var(--fw-bold);line-height:var(--lh-tight);letter-spacing:var(--tr-display);
+  text-wrap:balance;
+}
+.wa__lede{max-width:52ch;margin:var(--s-6) 0 0;color:var(--fg-body);text-shadow:0 2px 18px rgba(2,5,12,.9)}
+/* the three promises. The page's chip: full radius, its own height, its own
+   body size — but opaque, so the pattern behind cannot be read through it */
+.wa__feats{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:var(--s-7) 0 0;padding:0;list-style:none}
 .wa__feats li{
   display:inline-flex;align-items:center;gap:var(--s-2);
-  height:34px;padding:0 var(--s-4);border-radius:var(--r-full);
-  /* green on black: the tint and the edge are the same green as the mark, at
-     a tenth and a quarter of it, so three of them read as one family rather
-     than three colours */
-  background:rgba(59,224,138,.10);border:1px solid rgba(59,224,138,.26);
-  font-size:var(--fs-3);font-weight:var(--fw-medium);color:#CFEFE0;
-  white-space:nowrap;
-}
-.wa__feats svg{width:15px;height:15px;flex:none;color:var(--em)}
-/* they are not buttons and should not pretend to be: a step up in the tint
-   and the edge, a pixel of lift, and the mark brightens. Nothing that asks
-   to be pressed. */
-.wa__feats li{
+  min-height:36px;padding:0 var(--s-4);border-radius:var(--r-full);
+  background:rgba(10,34,27,.90);border:1px solid rgba(59,224,138,.34);
+  color:#E5F8EE;font-size:var(--fs-2);font-weight:var(--fw-medium);
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   transition:background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
              color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 .wa__feats li:hover{
-  background:rgba(59,224,138,.16);border-color:rgba(59,224,138,.42);
-  color:#E6FBF0;transform:translateY(-1px);
+  background:rgba(14,46,36,.94);border-color:rgba(59,224,138,.5);
+  color:#F1FCF6;transform:translateY(-1px);
 }
-.wa__feats li:hover svg{color:var(--em-soft, #8FF0BE)}
-@media (prefers-reduced-motion:reduce){.wa__feats li,.wa__feats li:hover{transition:none;transform:none}}
-/* the closing call's own button, in the band's own colour — and answering
-   the pointer the way every other button on this page does: one step darker,
-   one step further off the page. */
-.wa__go{background:var(--em);color:#05130F;box-shadow:0 10px 34px rgba(40,200,130,.40)}
-.wa__go:hover{background:var(--em-deep);box-shadow:0 14px 40px rgba(40,200,130,.52)}
-.wa .cta__note{color:var(--fg-body)}
-.wa .cta__note svg{color:var(--em)}
-@media (max-width:620px){ .wa__go{width:100%} }
+.wa__feats svg{width:15px;height:15px;flex:none;color:var(--em)}
+.wa__feats li:hover svg{color:var(--em-soft)}
+/* who is already in it */
+.wa__proof{display:flex;align-items:center;gap:var(--s-4);margin-top:var(--s-7)}
+.wa__faces{display:flex;flex:none}
+.wa__faces img{
+  width:39px;height:39px;margin-left:-10px;border-radius:var(--r-full);
+  border:2px solid var(--ink);object-fit:cover;background:var(--surface-sunken);
+}
+.wa__faces img:first-child{margin-left:0}
+.wa__proof p{margin:0;color:var(--fg-muted);font-size:var(--fs-2);line-height:var(--lh-snug)}
+.wa__proof b{display:block;color:var(--fg);font-size:var(--fs-3);font-weight:var(--fw-semibold)}
+/* the second line of the caption only — written .wa__proof span it also
+   caught the row of faces, which is a span too, and stacked them vertically */
+.wa__proof p span{display:block;margin-top:2px}
+.wa__act{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);margin-top:var(--s-7)}
+/* the page's own large button, in the band's green */
+.wa__go{background:var(--em);color:#05130F;box-shadow:0 10px 34px rgba(40,200,130,.31)}
+.wa__go:hover{background:var(--em-deep);transform:translateY(-2px);box-shadow:0 14px 40px rgba(40,200,130,.40)}
+.wa__go:focus-visible{outline:2px solid var(--em-soft);outline-offset:4px}
+.wa__go svg{width:19px;height:19px;flex:none}
+.wa__go .cta__go-arrow{width:17px;height:12px}
+.wa__note{display:inline-flex;align-items:center;gap:var(--s-2);margin:0;color:var(--fg-muted);font-size:var(--fs-1);line-height:var(--lh-snug)}
+.wa__note svg{width:15px;height:15px;flex:none;color:var(--em)}
+
+/* ── the phone ──
+   Narrow and upright, and only a phone: no notch, no camera island, no
+   side buttons. It grows by 2.5% under the pointer and the messages stop
+   while you are reading them. */
+.wa__phonewrap{position:relative;padding-inline:var(--s-3)}
+.wa__phonewrap::before{
+  content:"";position:absolute;inset:12% -10% -8%;z-index:-1;pointer-events:none;
+  border-radius:50%;background:rgba(37,193,115,.18);filter:blur(70px);
+}
+.wa__phone{
+  position:relative;overflow:hidden;width:100%;height:540px;
+  border:7px solid #111620;border-radius:38px;background:#09110E;
+  box-shadow:0 35px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.17), inset 0 1px 0 rgba(255,255,255,.08);
+  transform:rotate(.6deg) scale(1);
+  transition:transform var(--dur-3) cubic-bezier(.16,.72,.3,1), box-shadow var(--dur-3) var(--ease);
+}
+.wa__phonewrap:hover .wa__phone{
+  transform:rotate(.15deg) scale(1.025);
+  box-shadow:0 42px 100px rgba(0,0,0,.58), 0 0 0 1px rgba(255,255,255,.2), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.wa__head{
+  position:absolute;z-index:3;inset:0 0 auto;height:68px;
+  display:flex;align-items:center;gap:var(--s-3);padding:11px 14px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:rgba(12,23,19,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+}
+.wa__mark{display:grid;width:46px;height:46px;flex:none;place-items:center;border-radius:var(--r-full);
+  background:linear-gradient(145deg,var(--em),#139C62);color:#062517}
+.wa__mark svg{width:25px;height:25px}
+.wa__who{min-width:0;flex:1}
+.wa__who b{display:block;color:#fff;font-size:var(--fs-3);font-weight:var(--fw-semibold)}
+.wa__who span{display:block;margin-top:3px;color:#9BB0A4;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa__more{color:#A8BBB1;flex:none}.wa__more svg{width:20px;height:20px}
+.wa__paper{position:absolute;inset:0;background-color:#07110C;
+  background-image:linear-gradient(rgba(7,17,12,.72),rgba(7,17,12,.72)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%232a4b3a' stroke-width='1' opacity='.5'%3E%3Cpath d='M12 18c7-6 15 4 9 10s-15-4-9-10zM68 8l8 8-8 8-8-8zM35 63c8-10 18 4 9 11M76 65c5 0 9 4 9 9s-4 9-9 9-9-4-9-9'/%3E%3C/g%3E%3C/svg%3E")}
+.wa__view{position:absolute;inset:68px 0 44px;overflow:hidden;padding:14px 13px}
+.wa__msgs{display:flex;flex-direction:column;gap:11px;animation:waFlow 34s ease-in-out infinite alternate;will-change:transform}
+.wa__phone:hover .wa__msgs{animation-play-state:paused}
+.wa__day{align-self:center;padding:5px 10px;border-radius:7px;background:#17241E;color:#9EB2A7;font-size:10px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.wa__msg{position:relative;max-width:91%;padding:12px 13px 9px;border-radius:7px 12px 12px;
+  background:#1A2D24;color:#F0F5F2;font-size:var(--fs-2);line-height:var(--lh-snug);box-shadow:0 3px 12px rgba(0,0,0,.28)}
+.wa__msg--say{border-left:2px solid var(--em);background:#193126}
+.wa__tag{display:inline-flex;margin-bottom:6px;padding:3px 7px;border-radius:var(--r-full);
+  background:rgba(59,224,138,.13);color:var(--em-soft);font-size:10px;font-weight:var(--fw-bold);letter-spacing:.055em;text-transform:uppercase}
+.wa__shot{overflow:hidden;width:91%;padding:4px 4px 9px;border-radius:8px 13px 13px;background:#1A2D24;box-shadow:0 3px 12px rgba(0,0,0,.28)}
+.wa__shot img{display:block;width:100%;height:162px;border-radius:7px;object-fit:cover}
+.wa__shot span{display:block;padding:9px 9px 2px;color:#EEF5F1;font-size:12px;line-height:1.45}
+.wa__shot b{display:block;margin-bottom:2px;color:var(--em-soft);font-size:11px}
+.wa__msg--mine{align-self:flex-end;background:#0B4F35}
+.wa__from{display:block;margin-bottom:3px;color:#73E3AA;font-size:10px;font-weight:var(--fw-bold)}
+.wa__msg--mine .wa__from{color:#A2F1C8}
+.wa__at{float:right;margin:5px 0 0 12px;color:#8DA297;font-size:9px}
+.wa__ticks{color:#53BDEB}
+.wa__react{position:absolute;right:8px;bottom:-13px;padding:3px 6px;border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r-full);background:#26342E;font-size:11px;box-shadow:0 2px 7px rgba(0,0,0,.3)}
+.wa__bar{position:absolute;inset:auto 0 0;height:48px;display:flex;align-items:center;gap:var(--s-2);padding:6px 9px;background:#101B16}
+.wa__field{height:35px;display:flex;flex:1;align-items:center;gap:10px;padding:0 12px;border-radius:var(--r-full);background:#1B2923;color:#84978D;font-size:11px}
+.wa__send{display:grid;width:35px;height:35px;flex:none;place-items:center;border-radius:var(--r-full);background:var(--em);color:#07331F}
+.wa__send svg{width:17px;height:17px}
+/* the card that stands outside the phone, clear of its own chrome */
+.wa__live{
+  position:absolute;right:-28px;bottom:60px;display:flex;align-items:center;gap:var(--s-3);
+  min-width:238px;padding:12px 15px;border:1px solid rgba(59,224,138,.24);border-radius:var(--r-card);
+  background:rgba(13,25,30,.96);box-shadow:0 16px 38px rgba(0,0,0,.42), 0 0 28px rgba(37,193,115,.10);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  animation:waBob 5s ease-in-out infinite;
+}
+.wa__live-e{display:grid;width:35px;height:35px;flex:none;place-items:center;border-radius:9px;background:rgba(59,224,138,.12);font-size:19px}
+.wa__live-c{transition:opacity var(--dur-1) var(--ease)}
+.wa__live-c span{font-size:12px;color:var(--fg-muted)}
+.wa__live-c b{display:block;color:#fff;font-size:var(--fs-2);font-weight:var(--fw-semibold)}
+@keyframes waFlow{0%,14%{transform:translateY(0)}86%,100%{transform:translateY(-480px)}}
+@keyframes waBob{50%{transform:translateY(-7px)}}
+
+@media (max-width:900px){
+  .wa__in{grid-template-columns:minmax(0,1fr);gap:var(--s-9)}
+  .wa__copy{max-width:700px;margin-inline:auto;text-align:center}
+  .wa__lede{margin-inline:auto}
+  .wa__feats,.wa__proof,.wa__act{justify-content:center}
+  .wa__act{align-items:center}
+  .wa__phonewrap{width:min(410px,100%);margin-inline:auto}
+}
+@media (max-width:620px){
+  .wa__say{font-size:var(--fs-10)}
+  .wa__lede{font-size:var(--fs-5)}
+  .wa__feats{display:grid}
+  .wa__feats li{justify-content:center}
+  .wa__go{width:100%}
+  .wa__phone{height:510px;border-radius:34px;transform:none}
+  .wa__live{right:-2px;bottom:50px}
+  .wa__faces img{width:35px;height:35px}
+  .wa__pattern{opacity:.48;background-size:210px 147px}
+  .wa:hover .wa__pattern{opacity:.55}
+}
+@media (prefers-reduced-motion:reduce){
+  .wa__msgs,.wa__live{animation:none}
+  .wa__go,.wa__phone,.wa__feats li{transition:none}
+  .wa__phonewrap:hover .wa__phone{transform:rotate(.6deg)}
+  .wa__pattern{-webkit-mask:none;mask:none;opacity:.18}
+}
 
 /* ── the door, when it is locked ──────────────────────────────── */
 .auth{
@@ -5711,7 +5821,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         <p class="cta__rate"><span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span><b class="tnum">4,8</b><span class="cta__rate-n tnum">&#183; 15.000+ de&#287;erlendirme</span><span class="vh">5 &#252;zerinden 4,8, 15.000+ de&#287;erlendirmeye g&#246;re</span></p>
         <p class="cta__faces" aria-hidden="true"><span class="cta__ring"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"></span></p>
         <p class="eyebrow">10.000+ Profesyonel Fotoğrafçının Tercihi</p>
-        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket&#8217;i seçiyor.</h2>
+        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket ürünlerini kullanıyor.</h2>
         <a class="btn btn--primary btn--lg cta__go" href="#offer">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           Kendi paketini oluştur
@@ -5841,49 +5951,71 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
 </main>
 
-<!-- ══════════ 14 · THE WHATSAPP BAND ══════════
-     Between the last of the questions and the footer, and locked: the field
-     of padlocks under it turns to keys wherever the pointer goes, which is
-     the whole promise of the section drawn rather than written. The way in
-     is a door on our own site, not the group's address — the door checks the
-     session and forwards. Turkish, like the closing call above it. -->
+<!-- ══════════ 14 · THE WHATSAPP COMMUNITY ══════════
+     What the group is, on the left; what it looks like, on the right. The
+     door is the page's own: signed in it opens the group, signed out it
+     opens the way in first, and signing in from there lights the rest of
+     the page at the same moment. Turkish, like the closing call above it. -->
 <section class="section section--last" id="community" aria-labelledby="waTitle" lang="tr">
-  <div class="cta wa pbuy--dark" data-wa data-lit data-reveal>
-    <span class="cta__sky" aria-hidden="true"></span>
-    <span class="cta__spot" aria-hidden="true"></span>
-
-    <div class="wrap">
-      <div class="cta__in">
-
-        <p class="eyebrow wa__eyebrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.4 7V5.3a3.6 3.6 0 017.2 0V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="3" y="7" width="10" height="6.4" rx="1.6" stroke="currentColor" stroke-width="1.5"/></svg>Sadece fotoğrafçılara özel</p>
-
-        <h2 id="waTitle" class="cta__say wa__say"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg>Özel WhatsApp topluluğuna katıl</h2>
-
-        <p class="lede wa__lede">RetouchMarket&#8217;te olan bitenden herkesten önce haberdar ol.</p>
-
+  <div class="wa" data-wa data-reveal>
+    <span class="wa__pattern" aria-hidden="true"></span>
+    <div class="wa__in">
+      <div class="wa__copy" data-wa-copy>
+        <p class="eyebrow wa__eyebrow"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.5 8V5.9a4.5 4.5 0 019 0V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.8" y="8" width="12.4" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>Sadece fotoğrafçılara özel</p>
+        <h2 id="waTitle" class="wa__say">Özel WhatsApp<br>topluluğuna katıl.</h2>
+        <p class="lede wa__lede">Workshop duyurularını, yeni ürünleri ve yalnızca topluluğa özel fırsatları doğrudan WhatsApp&#8217;tan al.</p>
         <ul class="wa__feats">
-          <li><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 2L4.6 11.4h4.6L8.6 18l6.8-9.6h-4.6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Ücretsiz workshop duyuruları</li>
-          <li><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M9.6 2H3.9A1.9 1.9 0 002 3.9v5.7c0 .5.2.98.56 1.34l6.5 6.5a1.9 1.9 0 002.68 0l5.02-5.02a1.9 1.9 0 000-2.68l-6.5-6.5A1.9 1.9 0 009.6 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="6.5" cy="6.5" r="1.3" fill="currentColor"/></svg>Topluluğa özel indirimler</li>
-          <li><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L2.2 7.9l5.4-.8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Yeni ürünlere erken erişim</li>
+          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 2L4.6 11.4h4.6L8.6 18l6.8-9.6h-4.6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Ücretsiz workshop&#8217;lar</li>
+          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M9.6 2H3.9A1.9 1.9 0 002 3.9v5.7c0 .5.2.98.56 1.34l6.5 6.5a1.9 1.9 0 002.68 0l5.02-5.02a1.9 1.9 0 000-2.68l-6.5-6.5A1.9 1.9 0 009.6 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="6.5" r="1.3" fill="currentColor"/></svg>Özel İndirimler</li>
+          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L2.2 7.9l5.4-.8z" stroke="currentColor" stroke-width="1.5"/></svg>Yeni ürünler</li>
         </ul>
+        <div class="wa__proof">
+          <span class="wa__faces" aria-hidden="true">
+            <img src="images/whatsapp/avatar-dugunumuzvar.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-zariffilm.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-ugurdemir.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-ekrulila.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'">
+          </span>
+          <p><b>2100+ fotoğrafçı toplulukta</b><span>Ücretsiz &#183; Gereksiz mesaj yok</span></p>
+        </div>
+        <div class="wa__act">
+          <button class="btn btn--lg wa__go" type="button" data-join>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg>
+            Topluluğa katıl
+            <svg class="cta__go-arrow" viewBox="0 0 17 12" fill="none" aria-hidden="true"><path d="M1 6h14M10.6 1.2L15.4 6l-4.8 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="wa__note"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M6 9V6.7a4 4 0 018 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="4.2" y="9" width="11.6" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="13" r="1.1" fill="currentColor"/></svg>Bağlantı giriş yaptıktan sonra açılır.</p>
+        </div>
+      </div>
 
-        <button class="btn btn--primary btn--lg cta__go wa__go" type="button" data-join>
-          <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8" cy="7.1" r="2.9" stroke="currentColor" stroke-width="1.7"/><path d="M2.9 16.5c0-2.9 2.3-4.7 5.1-4.7 1.5 0 2.8.5 3.7 1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13.6 4.6a2.6 2.6 0 010 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.6 16.5v-4.4M13.4 14.3h4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-          Topluluğa katıl
-          <svg class="cta__go-arrow" width="17" height="12" viewBox="0 0 17 12" fill="none" aria-hidden="true"><path d="M1 6h14M10.6 1.2L15.4 6l-4.8 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-
-        <p class="cta__note">
-          <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="6.4" cy="10" r="3.4" stroke="currentColor" stroke-width="1.5"/><path d="M9.8 10H17M14.6 10v2.6M12 10v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Bağlantı, giriş yaptıktan sonra açılır.
-        </p>
-
+      <div class="wa__phonewrap" aria-hidden="true">
+        <div class="wa__phone">
+          <span class="wa__paper"></span>
+          <div class="wa__head">
+            <span class="wa__mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg></span>
+            <span class="wa__who"><b>RetouchMarket Topluluğu</b><span>2.418 katılımcı &#183; yalnızca fotoğrafçılar</span></span>
+            <span class="wa__more"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="1.3" fill="currentColor"/><circle cx="10" cy="4.5" r="1.3" fill="currentColor"/><circle cx="10" cy="15.5" r="1.3" fill="currentColor"/></svg></span>
+          </div>
+          <div class="wa__view">
+            <div class="wa__msgs">
+              <span class="wa__day">BUGÜN</span>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Workshop</span><br>Bu cuma 20.00&#8217;de ücretsiz &#8220;Doğal Cilt Tonları&#8221; workshop&#8217;unda buluşuyoruz. Kayıt bağlantısı toplulukta paylaşılacak 🎥<span class="wa__at">09:18</span><span class="wa__react">❤️ 28</span></div>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Bugüne özel</span><br>Sepette tüm ürünlerde <strong>%20 indirim</strong> başladı. Kampanya bu gece 23.59&#8217;da sona eriyor ⚡<span class="wa__at">10:02</span><span class="wa__react">🔥 41</span></div>
+              <div class="wa__shot"><img src="images/whatsapp/workshop-preview.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>Workshop önizlemesi</b>Doğal cilt tonları &#183; Cuma 20.00</span></div>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Yeni tutorial</span><br>&#8220;Photoshop&#8217;ta doğal ten rötuşu&#8221; tutorial&#8217;ı şimdi yayında. İzleme bağlantısı topluluk üyelerine açık 🎬<span class="wa__at">11:24</span></div>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Yeni preset</span><br>Yeni <strong>Natural Wedding Preset Pack</strong> çıktı. İlk örnekleri ve erken erişim bağlantısını hemen inceleyebilirsiniz.<span class="wa__at">12:10</span><span class="wa__react">✨ 19</span></div>
+              <div class="wa__shot"><img src="images/whatsapp/preset-preview.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>Natural Wedding Preset</b>Yeni paketten örnek sonuç ✨</span></div>
+              <div class="wa__msg wa__msg--mine"><span class="wa__from">Zeynep A.</span>Yeni preset&#8217;in renkleri çok doğal görünüyor, hemen deniyorum 🙌<span class="wa__at">12:13 <span class="wa__ticks">✓✓</span></span></div>
+            </div>
+          </div>
+          <div class="wa__bar"><span class="wa__field">☺ &nbsp; Mesaj yazın…</span><span class="wa__send"><svg viewBox="0 0 20 20" fill="none"><path d="M3 3.5l14 6.5-14 6.5 2-6.5zM5 10h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="wa__live"><span class="wa__live-e" data-live-icon>🎥</span><span class="wa__live-c" data-live-copy><b data-live-title>Workshop duyurusu</b><span data-live-text>Cuma &#183; 20.00 &#183; Ücretsiz</span></span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── giriş / kayıt ─────────────────────────────────────────────── -->
+<!-- the way in the community band opens when nobody is signed in. It lives
+     outside the section so the section can be lifted out without taking the
+     page's own door with it. -->
 <div class="auth" data-auth hidden role="dialog" aria-modal="true" aria-labelledby="authTitle" lang="tr">
   <div class="auth__card">
     <button class="auth__x" type="button" data-authx aria-label="Kapat">
@@ -5913,8 +6045,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   </div>
 </div>
 
-
-<!-- ══════════ 14 · FOOTER ══════════ -->
 <footer class="footer">
   <div class="footer__glow" aria-hidden="true"></div>
   <div class="wrap">
@@ -8942,41 +9072,25 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     btn.addEventListener('click', function(e){ e.stopPropagation(); });
   });
 
-  /* ---- and the comparison answers the pointer, as it does on the page ----
-     Explore Presets reveals as you move across the frame; the panel asks you
-     to drag its handle. One gesture for one idea, so the panel learns the
-     page's: on a mouse the reveal follows the pointer and lets go back to
-     the middle when you leave, exactly as the row above does. The handle
-     still drags, and a touch screen — which has no pointer to follow — is
-     left with the drag it always had.
+  /* The comparison answers the pointer the way Explore Presets does — but
+     that is the component's own doing now. Its handler was there all along;
+     it simply never matched, because the frame's class was written without
+     the prefix its selectors look for. With that put right, a second copy
+     here would be two handlers writing the same property on the same
+     element, so it is gone. What the page still says about the comparison is
+     how it LOOKS, further up the sheet.
 
-     --pos is the component's own property and the only thing written here;
-     nothing else about the frame is touched. Both spellings of the class
-     are matched, so this keeps working when the prefix is put right. */
+     One thing the component does not do and the page does: let go. On the
+     row above, the reveal returns to the middle when the pointer leaves the
+     frame, so a comparison is never left half-drawn behind you. That is the
+     only line kept here. */
   (function(){
-    var fine = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-    if(!fine) return;
-    var BA = '.frame.ba, .rmp-frame.rmp-ba';
-    function follow(e){
-      if(e.pointerType !== 'mouse') return;
-      var f = e.target.closest && e.target.closest(BA);
-      if(!f) return;
-      /* while it is zoomed in the frame is being panned, not compared */
-      if(f.classList.contains('rmp-is-zoomed')) return;
-      var r = f.getBoundingClientRect();
-      if(!r.width) return;
-      var pct = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
-      f.style.setProperty('--pos', pct.toFixed(2) + '%');
-    }
-    function centre(e){
-      var f = e.target.closest && e.target.closest(BA);
-      if(f) f.style.setProperty('--pos', '50%');
-    }
-    /* the panel builds its frames as you go, so listen where they live */
-    document.addEventListener('pointermove', follow, {passive:true});
+    if(!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches)) return;
     document.addEventListener('pointerout', function(e){
-      var f = e.target.closest && e.target.closest(BA);
-      if(f && !f.contains(e.relatedTarget)) centre(e);
+      var f = e.target.closest && e.target.closest('.rmp-frame.rmp-ba');
+      if(!f || f.contains(e.relatedTarget)) return;
+      if(f.classList.contains('rmp-is-zoomed')) return;   /* mid-pan, not mid-compare */
+      f.style.setProperty('--pos', '50%');
     }, {passive:true});
   })();
 
@@ -9072,7 +9186,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      is the thing to hold, and it is set from each rail's own width — a
      little different on each so the four never fall into step. Slow enough
      to be furniture rather than something that keeps catching the eye. */
-  var SPEED = [7.6, 6.4, 7.0, 5.9];        /* pixels a second */
+  var SPEED = [8.9, 7.5, 8.2, 6.9];        /* pixels a second — a fifth quicker */
   function pace(){
     [].forEach.call(band.querySelectorAll('[data-rail]'), function(rail, i){
       var one = rail.firstElementChild;
@@ -9172,84 +9286,116 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 </script>
 
 <script>
-/* ══════════ THE WHATSAPP BAND ══════════
+/* ══════════ THE WHATSAPP COMMUNITY ══════════
+   Three small jobs, and one of them matters: the door.
+
    The group's address is not on this page. The button goes to a door on our
-   own site; the door reads the session and forwards whoever is allowed. Here
-   that means: signed in, the door opens; signed out, the way in opens first,
-   and signing in from it lights the rail at the same moment — one session for
-   the page, not two ideas of who is here. */
+   own site; the door reads the session and forwards whoever is allowed. So:
+   signed in, the door opens; signed out, the way in opens first, and signing
+   in from it lights the rail at the same moment — one session for the page,
+   not two ideas of who is here. The reference file's demo onclick is not
+   here; this is the page's own control.
+   ══════════════════════════════════════════════ */
 (function(){
   var wa = document.querySelector('[data-wa]');
   var auth = document.querySelector('[data-auth]');
-  if(!wa || !auth) return;
+  if(!wa) return;
   var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
-  /* the door, not the group: it checks the session and redirects */
+  /* ---- the door ---- */
   var GATE = '/topluluk';
-  function here(){ return !!(window.RMSession && RMSession.here()); }
+  function here(){ return window.RMSession ? RMSession.here() : false; }
   function through(){ window.open(GATE, '_blank', 'noopener'); }
-
-  var last = null;
+  var lastFocus = null;
   function openAuth(on){
-    auth.hidden = !on;
-    if(on){ last = document.activeElement;
-      setTimeout(function(){ auth.querySelector('[data-mail]').focus(); }, 60); }
-    else if(last){ last.focus(); }
+    if(!auth) return through();
+    if(on){
+      lastFocus = document.activeElement;
+      auth.hidden = false;
+      var mail = auth.querySelector('[data-mail]');
+      if(mail) mail.focus();
+    } else {
+      auth.hidden = true;
+      if(lastFocus && lastFocus.focus) lastFocus.focus();
+    }
   }
-
-  wa.querySelector('[data-join]').addEventListener('click', function(){
+  var go = wa.querySelector('[data-join]');
+  if(go) go.addEventListener('click', function(){
     if(here()) return through();
     openAuth(true);
   });
-  auth.querySelector('[data-authx]').addEventListener('click', function(){ openAuth(false); });
-  auth.addEventListener('click', function(e){ if(e.target === auth) openAuth(false); });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && !auth.hidden) openAuth(false);
-  });
-  /* nothing behind it can be reached while it is up */
-  auth.addEventListener('keydown', function(e){
-    if(e.key !== 'Tab') return;
-    var can = auth.querySelectorAll('button, input, a[href]');
-    if(!can.length) return;
-    var first = can[0], lastOne = can[can.length - 1];
-    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); lastOne.focus(); }
-    else if(!e.shiftKey && document.activeElement === lastOne){ e.preventDefault(); first.focus(); }
-  });
-
-  var tabs = [].slice.call(auth.querySelectorAll('[data-tab]'));
-  var go = auth.querySelector('[data-authgo]');
-  var pass = auth.querySelector('[data-pass]');
-  tabs.forEach(function(t){
-    t.addEventListener('click', function(){
-      tabs.forEach(function(x){ x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
-      var up = t.getAttribute('data-tab') === 'up';
-      go.textContent = up ? 'Kayıt ol ve topluluğa katıl' : 'Giriş yap ve topluluğa katıl';
-      pass.setAttribute('autocomplete', up ? 'new-password' : 'current-password');
+  if(auth){
+    auth.addEventListener('click', function(e){
+      if(e.target === auth || e.target.closest('[data-authx]')) openAuth(false);
     });
-  });
-  go.addEventListener('click', function(){
-    var m = auth.querySelector('[data-mail]');
-    if(!m.value || m.value.indexOf('@') < 0){ m.focus(); return; }
-    if(window.RMSession) RMSession.set(true);   /* the rail lights with it */
-    openAuth(false);
-    through();
-  });
+    var send = auth.querySelector('[data-authgo]');
+    if(send) send.addEventListener('click', function(){
+      if(window.RMSession) RMSession.set(true);
+      openAuth(false);
+      through();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && !auth.hidden) openAuth(false);
+    });
+  }
 
-  /* the same light the closing call carries: the pools follow the pointer and
-     the blob lags behind them — and here they also decide which locks are
-     keys, since both read the same two numbers */
-  if(!still) wa.addEventListener('pointermove', function(e){
-    var r = wa.getBoundingClientRect();
-    var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-    wa.style.setProperty('--px', (x * 100).toFixed(1) + '%');
-    wa.style.setProperty('--py', (y * 100).toFixed(1) + '%');
-    wa.style.setProperty('--gx', ((x - .5) * 44).toFixed(1) + 'px');
-    wa.style.setProperty('--gy', ((y - .5) * 30).toFixed(1) + 'px');
-  }, {passive:true});
-  /* pointer gone, the field locks itself again */
-  wa.addEventListener('pointerleave', function(){
-    wa.style.setProperty('--px', '50%'); wa.style.setProperty('--py', '-40%');
-  }, {passive:true});
+  /* ---- the light follows the pointer ----
+     The green pool and the circle the pattern is lit in read the same two
+     numbers, so one write moves both. Away from the band the light waits at
+     53% 25%, which is where the section is drawn to rest, and it goes back
+     there when the pointer leaves. Over the words the pattern steps back,
+     because the sentence is the thing to read there. */
+  if(!still){
+    var copy = wa.querySelector('[data-wa-copy]');
+    wa.addEventListener('pointermove', function(e){
+      var r = wa.getBoundingClientRect();
+      wa.style.setProperty('--px', (e.clientX - r.left) + 'px');
+      wa.style.setProperty('--py', (e.clientY - r.top) + 'px');
+      if(copy){
+        var c = copy.getBoundingClientRect();
+        wa.classList.toggle('is-on-copy',
+          e.clientX >= c.left && e.clientX <= c.right && e.clientY >= c.top && e.clientY <= c.bottom);
+      }
+    }, {passive:true});
+    wa.addEventListener('pointerleave', function(){
+      wa.style.setProperty('--px', '53%');
+      wa.style.setProperty('--py', '25%');
+      wa.classList.remove('is-on-copy');
+    }, {passive:true});
+  }
+
+  /* ---- the card outside the phone ----
+     Four things the group actually sends, one at a time, on a short calm
+     fade. It only runs while the band is on screen: a timer ticking behind a
+     section nobody is looking at is work for nothing. */
+  var NOTICES = [
+    ['🎥', 'Workshop duyurusu',        'Cuma · 20.00 · Ücretsiz'],
+    ['⚡', 'Bugüne özel %20 indirim',  'Sepette otomatik uygulanır'],
+    ['🎬', 'Yeni tutorial yayında',    'Doğal ten rötuşu'],
+    ['✨', 'Yeni preset çıktı',        'Natural Wedding Pack']
+  ];
+  var icon = wa.querySelector('[data-live-icon]'),
+      copyBox = wa.querySelector('[data-live-copy]'),
+      title = wa.querySelector('[data-live-title]'),
+      text  = wa.querySelector('[data-live-text]');
+  if(!still && icon && copyBox && window.IntersectionObserver){
+    var at = 0, tick = null, fade = null;
+    function turn(){
+      copyBox.style.opacity = '0';
+      clearTimeout(fade);
+      fade = setTimeout(function(){
+        at = (at + 1) % NOTICES.length;
+        icon.textContent  = NOTICES[at][0];
+        title.textContent = NOTICES[at][1];
+        text.textContent  = NOTICES[at][2];
+        copyBox.style.opacity = '1';
+      }, 180);
+    }
+    new IntersectionObserver(function(rows){
+      if(rows[0].isIntersecting){ if(!tick) tick = setInterval(turn, 3600); }
+      else { clearInterval(tick); tick = null; clearTimeout(fade); }
+    }, {threshold:0}).observe(wa);
+  }
 })();
 </script>
 </body>
