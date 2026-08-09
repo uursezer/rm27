@@ -22,6 +22,23 @@
 (function(){
 'use strict';
 
+/* Sahne çiplerinin ikonları — emoji değil, sistemin kendi çizgi ikonları:
+   hepsi 24'lük ızgarada, currentColor konturlu, aynı kalınlıkta. */
+function _ci(d){ return '<svg class="rmp-chip__ic" viewBox="0 0 24 24" aria-hidden="true">'+d+'</svg>'; }
+var IK = {
+  /* fotoğraf */
+  foto: _ci('<rect x="3" y="5" width="18" height="14" rx="2.5"/>'+
+            '<circle cx="8.6" cy="10.2" r="1.35"/><path d="M20.6 15.6 16 11l-5.6 5.6"/>'),
+  /* yukarı-aşağı */
+  dikey:_ci('<path d="M12 4v16"/><path d="M8.4 7.6 12 4l3.6 3.6"/><path d="M8.4 16.4 12 20l3.6-3.6"/>'),
+  /* sağa-sola */
+  yatay:_ci('<path d="M4 12h16"/><path d="M7.6 8.4 4 12l3.6 3.6"/><path d="M16.4 8.4 20 12l-3.6 3.6"/>'),
+  /* fare */
+  fare: _ci('<rect x="7.5" y="3" width="9" height="18" rx="4.5"/><path d="M12 7v3.2"/>'),
+  /* paket kutusu */
+  kutu: _ci('<path d="M21 7.6 12 3 3 7.6l9 4.6 9-4.6Z"/><path d="M3 7.6v8.8L12 21l9-4.6V7.6"/><path d="M12 12.2V21"/>')
+};
+
 /* Lightbox işaretlemesi buradan kurulur: host'a HTML yapıştırtmıyoruz. */
 var _kok = document.createElement('div');
 _kok.innerHTML = '<div class="rmp-pdp" id="rmp-pdp" role="dialog" aria-modal="true" aria-label="Ürün detayı">'+
@@ -31,14 +48,18 @@ _kok.innerHTML = '<div class="rmp-pdp" id="rmp-pdp" role="dialog" aria-modal="tr
 '  <div class="rmp-railwrap" id="rmp-railwrap">'+
 '    <div class="rmp-rail" id="rmp-rail" role="group" aria-label="Görseller"></div>'+
 '  </div>'+
-'    <div class="rmp-cap rmp-cap--count" id="rmp-count"></div>'+
 '  </div>'+
 '  <div class="rmp-col">'+
-'    <div class="rmp-stage"><div class="rmp-track" id="rmp-track"></div></div>'+
-'    <div class="rmp-cap">'+
-'      <span class="rmp-k">↑↓</span> Fotoğrafı değiştir <span class="rmp-sep"></span>'+
-'      <span class="rmp-k">←→</span> Paketi değiştir <span class="rmp-sep"></span>'+
-'      <span class="rmp-k">⤢</span> Tıkla yakınlaş'+
+'    <div class="rmp-stage"><div class="rmp-track" id="rmp-track"></div>'+
+/* Sahnenin altındaki üç çip: solda kaçıncı görselde olduğun, ortada ve
+   sağda ne yapabileceğin. Alt bilgi şeridi kalktı; bu üçü artık içeriğin
+   ÜSTÜNDE durur ve panel o şeridin yerini alarak büyür. Tıklamayı
+   yutmazlar — fotoğrafa basıp yakınlaşmak hâlâ mümkün. */
+'      <div class="rmp-hud" aria-hidden="true">'+
+'        <span class="rmp-chip rmp-chip--count">'+IK.foto+'<b id="rmp-count"></b></span>'+
+'        <span class="rmp-chip">'+IK.dikey+'<span>Fotoğrafı değiştir</span>'+IK.fare+'</span>'+
+'        <span class="rmp-chip">'+IK.yatay+'<span>Paketi değiştir</span>'+IK.kutu+'</span>'+
+'      </div>'+
 '    </div>'+
 '  </div>'+
 '  <div class="rmp-infocol">'+
@@ -46,11 +67,6 @@ _kok.innerHTML = '<div class="rmp-pdp" id="rmp-pdp" role="dialog" aria-modal="tr
 '      <div class="rmp-info__scroll" id="rmp-info"></div>'+
 '      <div class="rmp-buy" id="rmp-buy"></div>'+
 '    </aside>'+
-'    <button class="rmp-cap rmp-cap--link" type="button" id="rmp-bundle">'+
-'      Get 5, pay 3 bundle'+
-'      <svg class="rmp-kic rmp-kic--go" viewBox="0 0 24 24" aria-hidden="true">'+
-'        <path d="M8 16 16 8"/><path d="M9.5 8H16v6.5"/></svg>'+
-'    </button>'+
 '  </div>'+
 '  </div>'+
 '<button class="rmp-nav rmp-prev" id="rmp-prev"><span class="rmp-nav__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19"/></svg></span><span class="rmp-lbl">'+
