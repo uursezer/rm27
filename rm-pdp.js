@@ -551,11 +551,13 @@ function baPct(f,x){ var r=f.getBoundingClientRect(); return (x-r.left)/r.width*
 
 track.addEventListener('pointermove',function(e){
   if(coarse||e.buttons!==0) return;
-  /* `&&false` disabled this guard, so a zoomed frame kept following the
-     pointer — and the percentage is worked out from the frame's rectangle,
-     which the zoom has scaled and panned. The divider jumped every time you
-     zoomed in or out. Zoomed in, the gesture is panning, not comparing. */
-  var f=e.target.closest('.rmp-frame.rmp-ba'); if(!f||f.classList.contains('rmp-is-zoomed')) return;
+  /* Follows the pointer whether or not the frame is zoomed. The percentage
+     is taken from the frame's rectangle AFTER the transform, and the divider
+     is inside the same transform — so the two scale together and the sum
+     comes out right at any zoom. Stopping it while zoomed only froze the
+     comparison. What must not move it is a drag, and the line above already
+     returns while a button is down. */
+  var f=e.target.closest('.rmp-frame.rmp-ba'); if(!f) return;
   setBA(f,baPct(f,e.clientX));
 });
 track.addEventListener('pointerdown',function(e){

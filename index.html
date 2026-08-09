@@ -821,7 +821,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    the base is the room's ambient light and drifts slowly,
    ::before is the pool that follows the pointer,
    ::after is one blurred blob that leans against it, for parallax. */
-.topband__glow,.footer__glow{
+.topband__glow{
   position:absolute;inset:-20% -10%;z-index:-1;pointer-events:none;
   background:
     radial-gradient(46% 52% at 10% 84%, rgba(140,88,255,.26) 0%, rgba(140,88,255,0) 70%),
@@ -2168,8 +2168,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 .rmp-pdp .rmp-ba__knob::before{left:10px;transform:translateY(-50%) rotate(-135deg)}
 .rmp-pdp .rmp-ba__knob::after{right:10px;transform:translateY(-50%) rotate(45deg)}
-/* on a mouse there is nothing to grab: the reveal follows the pointer */
-.rmp-pdp .frame.ba,.rmp-pdp .rmp-frame.rmp-ba{cursor:ew-resize}
+/* On a mouse there is nothing to grab: the reveal follows the pointer. But
+   only while the picture is at rest — zoomed in, the press is a grab and the
+   drag is a pan, and the pointer has to say which. Written at this weight
+   because the rule above it is, and the component's own grab/grabbing rules
+   would otherwise lose to it and the cursor would never change. */
+.rmp-pdp .frame.ba:not(.rmp-is-zoomed),
+.rmp-pdp .rmp-frame.rmp-ba:not(.rmp-is-zoomed){cursor:ew-resize}
+.rmp-pdp .rmp-frame.rmp-is-zoomed{cursor:grab}
+.rmp-pdp .rmp-frame.rmp-is-zoomed.rmp-is-panning{cursor:grabbing}
 
 /* The words that ride the cursor over a pack's picture. They belonged to the
    gallery that used to open there and they outlived it: the product panel
@@ -2279,15 +2286,31 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .pchip__buy:hover,.pchip__buy:focus-visible{
   background:var(--accent);color:var(--fg-on-accent);transform:scale(1.06);
 }
-/* the one being looked at: the body carries it, the way the plugin tabs do */
-.pchip:has([aria-selected="true"]){background:var(--accent-bg);border-color:var(--accent)}
-.pchip:has([aria-selected="true"]) .pchip__pick{
-  color:var(--accent-700);font-weight:var(--fw-semibold);
+/* The one being looked at — v2: the accent solid rather than a tint of it.
+   v1 was the tint (--accent-bg with an accent edge and accent-700 ink); it
+   is one line away if this reads as too loud.
+   The disc has to change with it: on a solid accent body a disc that was
+   also accent would disappear, so it takes a wash of white and the accent
+   back as its own ink — the same two facts the tinted version carried, in
+   the other order. */
+.pchip:has([aria-selected="true"]){
+  background:var(--accent);border-color:var(--accent);box-shadow:var(--sh-1);
 }
-.pchip:has([aria-selected="true"]) .pchip__buy{background:var(--surface);color:var(--accent-700)}
+.pchip:has([aria-selected="true"]) .pchip__pick{
+  color:var(--fg-on-accent);font-weight:var(--fw-semibold);
+}
+.pchip:has([aria-selected="true"]):hover{border-color:var(--accent-700);background:var(--accent-700)}
+.pchip:has([aria-selected="true"]) .pchip__buy{
+  background:rgba(255,255,255,.92);color:var(--accent-700);
+}
 .pchip:has([aria-selected="true"]) .pchip__buy:hover,
 .pchip:has([aria-selected="true"]) .pchip__buy:focus-visible{
-  background:var(--accent);color:var(--fg-on-accent);
+  background:#fff;color:var(--accent-700);
+}
+/* and the ring has to be visible against the accent it now sits on */
+.pchip:has([aria-selected="true"]) .pchip__pick:focus-visible,
+.pchip:has([aria-selected="true"]) .pchip__buy:focus-visible{
+  outline-color:#fff;
 }
 /* keyboard: two controls, so two rings */
 .pchip__pick:focus-visible,.pchip__buy:focus-visible{
@@ -2646,13 +2669,18 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   padding:var(--s-10) var(--s-5) var(--s-5);
   background:linear-gradient(to top,rgba(4,10,20,.94) 0%,rgba(4,10,20,.76) 40%,rgba(4,10,20,0) 100%);
 }
+/* one step up the family. At --fs-4 and --fs-3 these were the page's
+   smallest UI sizes sitting on a picture the width of the column, which read
+   as a caption rather than as the name of what you are watching. --fs-6 and
+   --fs-5 are the lede sizes: bigger than the interface, smaller than a
+   heading, so it does not take the section's own title's job. */
 .player__cap{
-  font-size:var(--fs-4);font-weight:var(--fw-semibold);color:#fff;
+  font-size:var(--fs-6);font-weight:var(--fw-semibold);color:#fff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .player__desc{
   margin:0;max-width:70ch;
-  font-size:var(--fs-3);line-height:var(--lh-normal);color:rgba(255,255,255,.88);
+  font-size:var(--fs-5);line-height:var(--lh-normal);color:rgba(255,255,255,.88);
   text-wrap:pretty;
 }
 /* it opens rather than appears: the pane you land on gives you the name at
@@ -3740,7 +3768,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* ════════════════════════════════════════════════════════════════
    10 · FOOTER
    ════════════════════════════════════════════════════════════════ */
-.footer{border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
+/* one flat colour, and nothing over it. The footer used to carry the head
+   band's ambient pair — a soft purple lift in two corners — which is why it
+   read as a gradient rather than as a ground. Both the layer and the rule
+   that drew it are gone; this is the whole background now. */
+.footer{background:#080A15;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
 /* the solid a menu opens onto here: the footer's own ground, one step up so
    the menu still reads as standing on it rather than cut out of it */
 .footer,.offer2{--pop:#161B33}
@@ -5821,7 +5853,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         <p class="cta__rate"><span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span><b class="tnum">4,8</b><span class="cta__rate-n tnum">&#183; 15.000+ de&#287;erlendirme</span><span class="vh">5 &#252;zerinden 4,8, 15.000+ de&#287;erlendirmeye g&#246;re</span></p>
         <p class="cta__faces" aria-hidden="true"><span class="cta__ring"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"></span></p>
         <p class="eyebrow">10.000+ Profesyonel Fotoğrafçının Tercihi</p>
-        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket ürünlerini kullanıyor.</h2>
+        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket&#8217;i kullanıyor.</h2>
         <a class="btn btn--primary btn--lg cta__go" href="#offer">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           Kendi paketini oluştur
@@ -6046,7 +6078,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 </div>
 
 <footer class="footer">
-  <div class="footer__glow" aria-hidden="true"></div>
   <div class="wrap">
     <div class="footer__top">
       <div class="footer__intro">
@@ -7103,6 +7134,53 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      dot click all land in the same place, and the row still works with JS
      off. This layer only keeps the dots in sync and runs the countdown. */
   var DECK_MS = 6000;
+  /* ---- the neighbours say which way they go ----
+     A pane either side of the one playing is the control for stepping one
+     video left or right — it has said so with a pointer for a while, but a
+     pointer only says "this does something", not which. The words that ride
+     the cursor over a before/after already answer exactly that question, so
+     this is the same object saying a different sentence: Back on the pane
+     before, Next on the pane after, with the arrows the rest of the page
+     draws its steppers with. Mouse only; a finger has the swipe. */
+  (function(){
+    var decks = document.querySelectorAll('[data-deck], [data-badeck]');
+    if(!decks.length) return;
+    if(!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches)) return;
+    var BACK = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3.5L6 9l5.5 5.5"/></svg>';
+    var NEXT = '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5L12 9l-5.5 5.5"/></svg>';
+    var hint = document.createElement('span');
+    hint.className = 'ziphint';
+    hint.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(hint);
+    function off(){ hint.classList.remove('is-on'); }
+    [].forEach.call(decks, function(deck){
+      var track = deck.querySelector('[data-deck-track], [data-badeck-track]');
+      if(!track) return;
+      deck.addEventListener('pointermove', function(e){
+        if(e.pointerType !== 'mouse') return off();
+        var pane = e.target.closest('.deck__pane');
+        if(!pane || pane.parentNode !== track || pane.classList.contains('is-on')) return off();
+        var panes = [].slice.call(track.children);
+        var on = panes.indexOf(track.querySelector('.deck__pane.is-on'));
+        var me = panes.indexOf(pane);
+        /* before the one playing is Back, after it is Next — and with none
+           of them marked as playing there is nothing to be either side of */
+        if(on < 0 || me < 0) return off();
+        var back = me < on;
+        hint.innerHTML = back ? BACK + 'Back' : 'Next' + NEXT;
+        var w = hint.offsetWidth, h = hint.offsetHeight;
+        var flip = e.clientX + 18 + w > window.innerWidth - 8;
+        hint.style.left = e.clientX + 'px';
+        hint.style.top = e.clientY + 'px';
+        hint.style.setProperty('--hx', (flip ? -(w + 18) : 18) + 'px');
+        hint.style.setProperty('--hy', (e.clientY + 20 + h > window.innerHeight ? -(h + 14) : 16) + 'px');
+        hint.classList.add('is-on');
+      }, {passive:true});
+      deck.addEventListener('pointerleave', off);
+    });
+    window.addEventListener('scroll', off, {passive:true});
+  })();
+
   var decks = [].slice.call(document.querySelectorAll('[data-deck]')).map(function(deck){
     var track  = deck.querySelector('[data-deck-track]'),
         panes  = [].slice.call(track.children),
@@ -9089,7 +9167,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     document.addEventListener('pointerout', function(e){
       var f = e.target.closest && e.target.closest('.rmp-frame.rmp-ba');
       if(!f || f.contains(e.relatedTarget)) return;
-      if(f.classList.contains('rmp-is-zoomed')) return;   /* mid-pan, not mid-compare */
+      /* zoomed in you are looking closely at one place; snapping the
+         comparison back to the middle underneath you is not a rest, it is a
+         jump */
+      if(f.classList.contains('rmp-is-zoomed')) return;
       f.style.setProperty('--pos', '50%');
     }, {passive:true});
   })();
