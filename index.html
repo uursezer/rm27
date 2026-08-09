@@ -658,8 +658,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   transform:translate(-50%,-50%) rotate(-7deg);
   pointer-events:none;
 }
-/* the room: turned down, and the colour taken out of it */
-.wall--dark{opacity:.56;filter:brightness(.8) saturate(.78)}
+/* The room: turned down, and the colour taken out of it. Further down than
+   it was — the pictures were legible enough to read instead of the sentence
+   in front of them, which is the wrong way round for a wall. Quiet enough to
+   be texture, and the one the pointer lifts still jumps out of it, because
+   that copy is untouched. */
+.wall--dark{opacity:.40;filter:brightness(.60) saturate(.55)}
 /* the same wall again, in its own window, with nothing showing yet */
 .wall__lit{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
 .wall__lit .wall{position:absolute;z-index:auto;opacity:1;filter:none}
@@ -688,40 +692,50 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 /* in the lit wall the pictures are their own colour again — and every one
    of them is invisible until the pointer is on it */
+/* Nothing is put on top of the picture that comes up: no tint, no coloured
+   ring, no glow around it. The photograph is what is being shown, so what
+   you see is the file — the only things left are a hairline to hold its
+   edge and a shadow to lift it off the wall, both neutral. */
 .wall__lit .wall__shot{
   opacity:0;transform:scale(1);
-  border-color:rgba(255,255,255,.30);
-  box-shadow:0 0 0 1px rgba(167,162,255,.18), 0 0 24px rgba(99,91,255,.18), 0 16px 40px rgba(0,0,0,.38);
-  transition:opacity .28s var(--ease), transform .24s ease-out;
+  border-color:rgba(255,255,255,.34);
+  box-shadow:0 22px 52px rgba(0,0,0,.52);
+  transition:opacity .28s var(--ease), transform .26s ease-out;
 }
+.wall__lit .wall__shot::after{content:none}
 .wall__lit .wall__shot img{filter:none;transform:scale(1.02)}
 /* --light and --zoom are written by the script: full under the pointer,
    easing to nothing as the picture reaches the words */
-.wall__lit .wall__shot.is-lit{opacity:var(--light,1);transform:scale(var(--zoom,1.025))}
+.wall__lit .wall__shot.is-lit{opacity:var(--light,1);transform:scale(var(--zoom,1.06))}
 @keyframes wallLeft{to{transform:translateX(-50%)}}
 @keyframes wallRight{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 /* the band's own dark middle, kept: the words are read off this and not off
    a panel drawn behind them */
 .cta--wall::after{
   background:
-    radial-gradient(ellipse 45% 78% at 50% 49%,
-      rgba(5,8,18,.96) 0%, rgba(5,8,18,.84) 42%, rgba(5,8,18,.28) 72%, transparent 100%),
+    /* narrower and gentler than it was: the core is pulled in so more of the
+       wall stays visible either side of the column, and the fall is spread
+       over five stops instead of three so there is no edge to the dark */
+    radial-gradient(ellipse 38% 72% at 50% 49%,
+      rgba(5,8,18,.94) 0%, rgba(5,8,18,.86) 26%, rgba(5,8,18,.62) 46%,
+      rgba(5,8,18,.30) 66%, rgba(5,8,18,.10) 84%, transparent 100%),
     linear-gradient(90deg, rgba(8,12,24,.15), transparent 23%, transparent 77%, rgba(8,12,24,.15));
 }
 @media (max-width:900px){
   .wall{width:230vw;min-width:1480px}
-  .wall--dark{opacity:.46}
+  .wall--dark{opacity:.34}
   .wall__shot{width:146px}
 }
 @media (max-width:620px){
   /* narrower frames and a steeper slant, so the wall still reads as a wall
      on a phone rather than as one column of pictures */
   .wall{width:390vw;min-width:1320px;transform:translate(-50%,-50%) rotate(-9deg)}
-  .wall--dark{opacity:.42}
+  .wall--dark{opacity:.30}
   .wall__shot{width:132px}
   .cta--wall::after{
-    background:radial-gradient(ellipse 74% 72% at 50% 50%,
-      rgba(5,8,18,.97), rgba(5,8,18,.84) 52%, rgba(5,8,18,.24) 82%, transparent);
+    background:radial-gradient(ellipse 66% 68% at 50% 50%,
+      rgba(5,8,18,.95), rgba(5,8,18,.86) 30%, rgba(5,8,18,.60) 52%,
+      rgba(5,8,18,.26) 74%, rgba(5,8,18,.08) 88%, transparent);
   }
 }
 @media (prefers-reduced-motion:reduce){
@@ -2146,7 +2160,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 .rmp-pdp .rmp-ba__knob::before,.rmp-pdp .rmp-ba__knob::after{
   content:"";position:absolute;top:50%;width:5px;height:5px;
-  border:0;border-top:2px solid var(--n-700);border-right:2px solid var(--n-700);
+  /* the page's own ink, written out rather than taken from a token: inside
+     the panel the neutral scale is the dark one, and --n-700 there is a pale
+     grey — the chevrons came out almost invisible on the white disc */
+  border:0;border-top:2px solid #425466;border-right:2px solid #425466;
   border-radius:1px;background:none;
 }
 .rmp-pdp .rmp-ba__knob::before{left:10px;transform:translateY(-50%) rotate(-135deg)}
@@ -8973,26 +8990,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     win.insertAdjacentHTML('beforeend', '<span class="card__full" aria-hidden="true">' + FS + '</span>');
   });
 
-  var hint = document.createElement('span');
-  hint.className = 'ziphint';
-  hint.setAttribute('aria-hidden', 'true');
-  hint.innerHTML = FS + 'Full screen';   /* the corner's own mark, so the two say one thing */
-  document.getElementById('presets').appendChild(hint);
-  function hintOff(){ hint.classList.remove('is-on'); }
-  grid.addEventListener('pointermove', function(e){
-    if(e.pointerType !== 'mouse') return hintOff();
-    if(window.RMPdp && RMPdp.isOpen()) return hintOff();
-    if(!e.target.closest('.card__img')) return hintOff();
-    var w = hint.offsetWidth, h = hint.offsetHeight;
-    var flip = e.clientX + 18 + w > window.innerWidth - 8;
-    hint.style.left = e.clientX + 'px';
-    hint.style.top = e.clientY + 'px';
-    hint.style.setProperty('--hx', (flip ? -(w + 18) : 18) + 'px');
-    hint.style.setProperty('--hy', (e.clientY + 20 + h > window.innerHeight ? -(h + 14) : 16) + 'px');
-    hint.classList.add('is-on');
-  }, {passive:true});
-  grid.addEventListener('pointerleave', hintOff);
-  window.addEventListener('scroll', hintOff, {passive:true});
+  /* The words that used to ride the cursor here are gone: the whole card
+     opens the panel now, so a label following the pointer over one part of
+     it was promising something narrower than what actually happens. The
+     mark in the corner stays — it says the picture opens bigger, which is
+     still true, and it says it without talking. */
 })();
 </script>
 
@@ -9018,7 +9020,25 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     for(var w = 0; w < WHO.length; w++)
       SHOTS.push('images/testimonials/' + WHO[w] + '/' + n + '.webp');
 
-  var PER = 12;                       /* pictures in one run of a rail */
+  /* How many pictures one run has to hold.
+     A rail travels exactly half its own width, so the loop is seamless only
+     while ONE run is already wider than the wall it has to cover. Twelve was
+     a number, not a measurement: on a wide window the run ran out before the
+     wall's right edge and the corner stood empty. So it is measured — the
+     wall's own width, plus the furthest a rail is nudged left, plus one
+     picture of slack, divided by what one picture and its gap take up. */
+  var PER = 12;
+  function unit(){
+    var s = band.querySelector('.wall__shot');
+    if(!s) return 164;
+    var gap = parseFloat(getComputedStyle(s.parentNode).gap) || 10;
+    return s.getBoundingClientRect().width / Math.cos(7 * Math.PI / 180) + gap;
+  }
+  function needed(){
+    var wall = band.querySelector('.wall');
+    var u = unit();
+    return Math.ceil((wall.offsetWidth + 260 + u) / u) + 1;
+  }
   function run(from){
     var el = document.createElement('div');
     el.className = 'wall__run';
@@ -9037,16 +9057,55 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   /* the same run twice in every rail: the animation travels exactly half the
      rail's width, so the second copy is standing where the first began and
      the loop has no seam and no gap at either end */
-  [].forEach.call(band.querySelectorAll('[data-rail]'), function(rail, i){
-    var from = (i % 4) * 7;
-    rail.appendChild(run(from));
-    rail.appendChild(run(from));
-  });
+  function build(){
+    [].forEach.call(band.querySelectorAll('[data-rail]'), function(rail, i){
+      var from = (i % 4) * 7;
+      rail.textContent = '';
+      rail.appendChild(run(from));
+      rail.appendChild(run(from));
+    });
+  }
+  /* ---- how fast it drifts ----
+     The rails were given a time each, and a time is not a speed: a rail
+     travels half its own width in it, so the moment a run had to grow to
+     cover a wider window, the same 78 seconds became a faster crawl. Speed
+     is the thing to hold, and it is set from each rail's own width — a
+     little different on each so the four never fall into step. Slow enough
+     to be furniture rather than something that keeps catching the eye. */
+  var SPEED = [7.6, 6.4, 7.0, 5.9];        /* pixels a second */
+  function pace(){
+    [].forEach.call(band.querySelectorAll('[data-rail]'), function(rail, i){
+      var one = rail.firstElementChild;
+      if(!one) return;
+      var travel = one.getBoundingClientRect().width / Math.cos(7 * Math.PI / 180);
+      rail.style.animationDuration = Math.round(travel / SPEED[i % SPEED.length]) + 's';
+    });
+  }
+  build();                       /* once, to have something to measure */
+  var want = needed();
+  if(want > PER){ PER = want; build(); }
+  pace();
+  /* a window that grows needs a longer run; one that shrinks already has
+     more than enough, and rebuilding it would only throw pictures away */
+  var again = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(again);
+    again = setTimeout(function(){
+      var w = needed();
+      if(w > PER){ PER = w; build(); relight(); }
+      pace();                    /* the frames change size at the breakpoints */
+    }, 200);
+  }, {passive:true});
 
-  var dark = [].slice.call(band.querySelectorAll('.wall--dark .wall__shot'));
-  var lit  = [].slice.call(band.querySelectorAll('.wall__lit .wall__shot'));
+  var dark = [], lit = [];
+  function relight(){
+    on = -1;
+    dark = [].slice.call(band.querySelectorAll('.wall--dark .wall__shot'));
+    lit  = [].slice.call(band.querySelectorAll('.wall__lit .wall__shot'));
+  }
   var title = document.getElementById('startTitle');
   var on = -1;
+  relight();
 
   function light(i){
     if(i === on) return;
@@ -9097,7 +9156,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
          dark well before it is behind anything anyone is reading */
       var l = Math.max(0, 1 - Math.min(1, over) * 2.35);
       lit[on].style.setProperty('--light', l.toFixed(3));
-      lit[on].style.setProperty('--zoom', (1 + l * .025).toFixed(3));
+      lit[on].style.setProperty('--zoom', (1 + l * .06).toFixed(3));
     }
     if(on >= 0) tick = requestAnimationFrame(keepClear);
   }
