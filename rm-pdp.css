@@ -35,11 +35,13 @@
      Rol çalmaz — okunan şeyin önünde parlayan bir bant değil, altına
      çekilen bir gölge. */
   --veil:linear-gradient(to top,
-    rgba(17,16,40,.96), rgba(17,16,40,.46) 46%,
-    rgba(var(--accent-rgb),.06) 76%, transparent);
+    rgba(10,10,26,.98), rgba(11,11,29,.64) 44%,
+    rgba(var(--accent-rgb),.05) 78%, transparent);
+  /* iki perde de aynı: aynı renk, aynı yükseklik */
+  --veilH:72px;
   --accent-bg:var(--accent-50); --accent-border:var(--accent-200);
   --star:#E8A33D;                       /* yalnızca puan — asla vurgu */
-  --danger:#C0392E;
+  --danger:#C0392E; --danger-fg:#FF9A9A;
   --ok:#1A7F4B; --ok-bg:#E9F4EE; --ok-edge:#B9DCC9;  /* yalnızca "tamamlandı" */
 
   /* tip */
@@ -278,7 +280,7 @@ body.rmp-locked{overflow:hidden}
    perdesi konur — devamı olduğunu söyler, okunan şeyden rol çalmaz.
    Sona gelince ikisi birden kalkar. */
 .rmp-railwrap::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;height:76px;
+  content:"";position:absolute;left:0;right:0;bottom:0;height:var(--veilH);
   z-index:2;pointer-events:none;
   background:var(--veil);
   transition:opacity var(--dur-2) var(--ease);
@@ -603,7 +605,7 @@ body.rmp-locked{overflow:hidden}
 .rmp-info__scroll::after{
   /* Kutunun DİBİNE kadar iner. Eskiden --s-5 yukarıda bitiyordu ve altında
      panelin alt dolgusu çıplak kalıyordu: perde havada duruyor gibiydi. */
-  content:"";position:absolute;left:0;right:0;bottom:0;height:64px;
+  content:"";position:absolute;left:0;right:0;bottom:0;height:var(--veilH);
   z-index:2;pointer-events:none;
   background:var(--veil);
   transition:opacity var(--dur-2) var(--ease);
@@ -659,7 +661,12 @@ body.rmp-locked{overflow:hidden}
    kafa karıştırıcı hem de ikinci dokunuşta kazara silme riski. */
 .rmp-btn .rmp-lb--out,.rmp-btn .rmp-tik--out{display:none}
 @media (hover:hover) and (pointer:fine){
-  .rmp-btn.rmp-done:hover,.rmp-btn.rmp-done:focus-visible{background:var(--danger)}
+  /* Kaldırma hâli kaynak sitenin koyu zemindeki İKİNCİL kırmızısıyla
+     yazılır: dolu bir tuğla değil, kendi zemininde duran kırmızı bir yazı
+     ve onu çerçeveleyen kırmızı bir saç teli. */
+  .rmp-btn.rmp-done:hover,.rmp-btn.rmp-done:focus-visible{
+    background:var(--bg);color:var(--danger-fg);
+    box-shadow:inset 0 0 0 1px var(--danger-fg)}
   .rmp-btn.rmp-done:hover .rmp-tik--in,.rmp-btn.rmp-done:focus-visible .rmp-tik--in{display:none}
   .rmp-btn.rmp-done:hover .rmp-tik--out,.rmp-btn.rmp-done:focus-visible .rmp-tik--out{display:block}
   .rmp-btn.rmp-done:hover .rmp-lb--in,.rmp-btn.rmp-done:focus-visible .rmp-lb--in{display:none}

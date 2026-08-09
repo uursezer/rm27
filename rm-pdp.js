@@ -371,7 +371,12 @@ function yerlestir(){
      kare yerine oturur. Böylece hareket serbest, iniş kararlı olur. */
   var bas = hamleBas===null ? track.scrollTop : hamleBas;
   var basI = Math.round(bas/h), d = track.scrollTop - bas;
-  var i = Math.abs(d) > h*0.2
+  /* EŞİK. Bir fare çentiği bir karenin ancak sekizde biri kadar yol alır;
+     beşte birlik eşik onu geri yaylandırıyor ve "birkaç kere çevirmek"
+     gerekiyordu. Eşik %8'e indi: tek bir çentik bile karar sayılır, ama
+     parmakla yapılan kazara bir dokunuş (genelde bundan da kısa) yerinde
+     kalır. Uzun bir hamle kaç kare yol aldıysa o kadar gider. */
+  var i = Math.abs(d) > h*0.08
         ? basI + (d>0?1:-1) * Math.max(1, Math.round(Math.abs(d)/h))
         : Math.round(track.scrollTop/h);
   hamleBas=null;
