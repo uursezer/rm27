@@ -172,7 +172,52 @@ function railShadow(){
   var over=rail.scrollHeight>rail.clientHeight+1;
   var atEnd = rail.scrollTop >= rail.scrollHeight-rail.clientHeight-2;
   rail.classList.toggle('rmp-at-end', !over || atEnd);
+  /* sürüklenecek bir şey varsa imleç öyle desin */
+  rail.classList.toggle('rmp-can-drag', over);
 }
+
+/* ── ŞERİDİ TUTUP SÜRÜKLEME ──────────────────────────────────────
+   Tekerlek ve şerit çubuğu vardı; fareyle basılı tutup dikeyde çekmek
+   yoktu. Yalnızca FARE için: dokunmatikte şerit zaten kendi kendine
+   kayıyor, oraya karışmak onu bozardı. Üç kural:
+   1) 3px'ten kısa hareket sürükleme sayılmaz — tek tıklama tıklamadır,
+   2) sürükledikten sonraki tıklama yutulur, yoksa parmağını kaldırdığın
+      karenin üstüne atlıyordu,
+   3) sürüklerken otomatik ortalama susar (railEl). */
+(function(){
+  var sur=null, yut=false;
+  rail.addEventListener('pointerdown',function(e){
+    if(e.pointerType!=='mouse' || e.button!==0) return;
+    if(rail.scrollHeight<=rail.clientHeight+1) return;
+    sur={y:e.clientY, top:rail.scrollTop, id:e.pointerId, tasindi:false};
+  });
+  rail.addEventListener('pointermove',function(e){
+    if(!sur || e.pointerId!==sur.id) return;
+    var d=e.clientY-sur.y;
+    if(!sur.tasindi){
+      if(Math.abs(d)<=3) return;
+      sur.tasindi=true;
+      rail.classList.add('rmp-is-dragging');
+      try{ rail.setPointerCapture(e.pointerId); }catch(_){}
+    }
+    rail.scrollTop=sur.top-d;
+    railEl=Date.now();
+    railShadow();
+    e.preventDefault();
+  });
+  function birak(e){
+    if(!sur || (e && e.pointerId!==sur.id)) return;
+    var t=sur.tasindi; sur=null;
+    rail.classList.remove('rmp-is-dragging');
+    if(t) yut=true;
+  }
+  rail.addEventListener('pointerup',birak);
+  rail.addEventListener('pointercancel',birak);
+  rail.addEventListener('click',function(e){
+    if(!yut) return;
+    yut=false; e.stopPropagation(); e.preventDefault();
+  },true);
+})();
 /* Mobilde sabit satın alma çubuğunun gerçek yüksekliğini yayınla:
    oklar ve sayfa dolgusu buna göre yerleşsin. */
 function syncBuyH(){
@@ -532,11 +577,28 @@ info.addEventListener('keydown',function(e){
   else if(e.key==='Home'){ e.preventDefault(); ogeler[0].focus(); }
   else if(e.key==='End'){ e.preventDefault(); ogeler[ogeler.length-1].focus(); }
 });
-/* boşluğa tıklayınca menü kapanır — lightbox kapanmaz */
+/* MENÜ AÇIKKEN DIŞARIYA TIKLAMAK YALNIZCA MENÜYÜ KAPATIR.
+   Kapanıyordu, ama tıklama altındaki şeye de gidiyordu: fotoğrafa basınca
+   menü kapanıp aynı anda yakınlaşıyor, karartmaya basınca lightbox'ın
+   tamamı kapanıyordu. Menü açıkken ilk tıklama bir KAPATMA hamlesidir ve
+   başka hiçbir şeye dokunmaz — ikinci tıklama normal işini görür.
+   Yakalama (capture) evresinde dinlenir: hedefin kendi dinleyicileri daha
+   çalışmadan durdurulur. Fotoğrafın yakınlaşması pointerup'a bağlı olduğu
+   için işaretçi olayları da aynı şekilde yutulur. */
+function disariMi(t){ var p=pickEl(); return pickAcikMi() && p && !p.contains(t); }
+var pickYut=false;                     /* bu hamlenin tamamı yutulacak mı */
+document.addEventListener('pointerdown',function(e){
+  pickYut = disariMi(e.target);
+  if(!pickYut) return;
+  pickAc(false);
+  e.stopPropagation();
+},true);
+document.addEventListener('pointerup',function(e){ if(pickYut) e.stopPropagation(); },true);
+document.addEventListener('pointercancel',function(){ pickYut=false; },true);
 document.addEventListener('click',function(e){
-  var p=pickEl();
-  if(pickAcikMi() && p && !p.contains(e.target)) pickAc(false);
-});
+  if(!pickYut) return;
+  pickYut=false; e.stopPropagation(); e.preventDefault();
+},true);
 
 /* Sepetteki paketler — ürün adına göre; oturum boyunca korunur. */
 var SEPET={};

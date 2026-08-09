@@ -263,6 +263,12 @@ body.rmp-locked{overflow:hidden}
   -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-10)),transparent 100%);
           mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-10)),transparent 100%);
 }
+/* tutup sürüklenebiliyorsa imleç öyle desin — ve tutulduğunda kapansın */
+.rmp-rail.rmp-can-drag{cursor:grab}
+.rmp-rail.rmp-is-dragging{cursor:grabbing}
+/* sürüklerken karelerin içindeki resim seçilmesin */
+.rmp-rail.rmp-is-dragging *{pointer-events:none;user-select:none}
+
 .rmp-rail.rmp-at-end{-webkit-mask-image:none;mask-image:none}
 .rmp-rail::-webkit-scrollbar{display:none}
 /* Dış halka (box-shadow 0 0 0 2.5px) komşularla çakışıyor ve sert
@@ -434,22 +440,31 @@ body.rmp-locked{overflow:hidden}
 /* Başlık ve künye SABİT; uzun metinde kaybolmazlar. */
 .rmp-info__top{flex:0 0 auto}
 /* ── başlık bloğu: rozet · paket adı · satıcı ── */
-.rmp-head{margin-bottom:var(--s-5)}
+.rmp-head{margin-bottom:var(--s-2)}
 /* ── başlığın üstü: üst satır · ad · kim yaptığı ──
    1) ÜST SATIR. Solda TÜR — tek kelime, ana renkte. Sağda rozetler, satırın
       öbür ucuna yaslı. İkisi aynı orta çizgide durur. */
+/* Üç parça, iki boşluk: kaş adın ETİKETİ olduğu için ona yakın durur,
+   üretici satırı ise ayrı bir bilgi olduğu için daha uzakta. Eşit iki
+   boşluk üçünü birbirinden kopuk üç blok gibi gösteriyordu.
+   Ölçüler kaynak sitenin kendi sisteminden: .eyebrow 12px/600/.075em ve
+   altında --s-3; .chip 11px/700/.05em; .card__by 24px avatar + --fs-2. */
 .rmp-kindrow{
   display:flex;align-items:center;justify-content:space-between;
-  gap:var(--s-4);flex-wrap:wrap;margin-bottom:var(--s-5);
+  gap:var(--s-4);flex-wrap:wrap;
+  /* Satırın yüksekliğini rozet belirliyor: kaşın mürekkebi o 25px'in
+     ortasında durur ve altında zaten pay bırakır. Buraya ayrıca boşluk
+     koymak kaşı addan koparıyordu — boşluk ölçülerek sıfırlandı. */
+  margin-bottom:0;
 }
 .rmp-kind{
   margin:0;min-width:0;
-  font-size:13px;font-weight:var(--fw-bold);letter-spacing:.12em;
-  text-transform:uppercase;color:var(--accent-fg);
+  font-size:var(--fs-1);font-weight:var(--fw-semibold);line-height:1.4;
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--accent-fg);
 }
 /* 2) AD, kendi satırında ve tam boyunda */
 .rmp-pick{min-width:0}
-/* rozet = kaynak sitedeki .chip: kalın, VERSAL, hap yarıçapı */
+/* rozet = kaynak sitedeki .chip'in ta kendisi: 11px, kalın, VERSAL, hap */
 .rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-left:auto}
 /* emoji: Apple'ın renkli seti öncelikli; rozetin harf aralığından ve
    VERSAL dönüşümünden etkilenmemeli */
@@ -457,8 +472,8 @@ body.rmp-locked{overflow:hidden}
   letter-spacing:0;text-transform:none;font-size:13px;
   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .rmp-badge{display:inline-flex;align-items:center;gap:6px;
-  font-size:12px;font-weight:var(--fw-bold);letter-spacing:.05em;text-transform:uppercase;
-  padding:6px 12px;border-radius:var(--r-full);
+  font-size:11px;font-weight:var(--fw-bold);letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 10px 4px 8px;border-radius:var(--r-full);
   background:var(--accent-bg);color:var(--accent-fg);
   box-shadow:inset 0 0 0 1px var(--accent-border)}
 /* Varyant yok: kaynak sitede de etiketten bağımsız TEK çip stili var.
@@ -466,13 +481,13 @@ body.rmp-locked{overflow:hidden}
 .rmp-info h1{margin:0;overflow-wrap:anywhere;
   /* kutu kalkınca genişlik açıldı: başlık ölçekte bir kademe yukarı.
      Dar panelde --fs-8'e iner — kırılmaz, taşmaz. */
-  font-size:clamp(var(--fs-9),13cqw,var(--fs-10));
+  font-size:clamp(var(--fs-9),11cqw,var(--fs-10));
   font-weight:var(--fw-bold);letter-spacing:var(--tr-display);
-  line-height:var(--lh-tight);color:var(--fg);text-wrap:balance}
-.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-3);margin-top:var(--s-5);
-  font-size:var(--fs-4);color:var(--fg-muted)}
-.rmp-info .rmp-av{width:34px;height:34px;border-radius:var(--r-full);background:var(--surface-sunken);
-  border:1px solid var(--border);font-size:11px;font-weight:var(--fw-bold);letter-spacing:.02em;
+  line-height:var(--lh-display);color:var(--fg);text-wrap:balance}
+.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-2);
+  font-size:var(--fs-3);font-weight:var(--fw-medium);color:var(--fg-muted)}
+.rmp-info .rmp-av{width:28px;height:28px;border-radius:var(--r-full);background:var(--surface-sunken);
+  border:1px solid var(--border);font-size:10px;font-weight:var(--fw-semibold);letter-spacing:.02em;
   display:grid;place-items:center;color:var(--fg-muted);flex:none}
 .rmp-rate{display:inline-flex;align-items:baseline;gap:5px;
   font-size:var(--fs-3);font-weight:var(--fw-semibold);color:var(--fg);
