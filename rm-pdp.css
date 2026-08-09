@@ -31,14 +31,6 @@
   --accent:var(--accent-500);   --accent-fg:var(--accent-600);
   /* aynı ana renk, kanal olarak: saydam perdeler için */
   --accent-rgb:99,91,255;
-  /* "devamı var" perdesi: koyu bir indigo, içinde ana renkten bir iz.
-     Rol çalmaz — okunan şeyin önünde parlayan bir bant değil, altına
-     çekilen bir gölge. */
-  --veil:linear-gradient(to top,
-    rgba(10,10,26,.98), rgba(11,11,29,.64) 44%,
-    rgba(var(--accent-rgb),.05) 78%, transparent);
-  /* iki perde de aynı: aynı renk, aynı yükseklik */
-  --veilH:72px;
   --accent-bg:var(--accent-50); --accent-border:var(--accent-200);
   --star:#E8A33D;                       /* yalnızca puan — asla vurgu */
   --danger:#C0392E; --danger-fg:#FF9A9A;
@@ -274,18 +266,7 @@ body.rmp-locked{overflow:hidden}
   box-shadow:inset 0 0 0 1px var(--border);
   display:flex;flex-direction:column;overflow:hidden;
 }
-/* ── "devamı var" solmaları ────────────────────────────────────────
-   Maske içeriği yok ederken geriye kutunun siyahı kalıyordu: sinyal
-   doğruydu ama rengi yoktu. Maskenin bittiği yere ana rengin ince bir
-   perdesi konur — devamı olduğunu söyler, okunan şeyden rol çalmaz.
-   Sona gelince ikisi birden kalkar. */
-.rmp-railwrap::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;height:var(--veilH);
-  z-index:2;pointer-events:none;
-  background:var(--veil);
-  transition:opacity var(--dur-2) var(--ease);
-}
-.rmp-railwrap:has(.rmp-rail.rmp-at-end)::after{opacity:0}
+
 
 /* ── kaydırma alanı: altta yumuşak solma maskesi ── */
 .rmp-rail{
@@ -295,8 +276,8 @@ body.rmp-locked{overflow:hidden}
   gap:var(--thumbGap);
   padding:var(--railPad) var(--railPadX);
   /* maskede #000 bir RENK değil, "tam görünür" anlamına gelen parlaklık */
-  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-10)),transparent 100%);
-          mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-10)),transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 72px),transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 calc(100% - 72px),transparent 100%);
 }
 /* tutup sürüklenebiliyorsa imleç öyle desin — ve tutulduğunda kapansın */
 .rmp-rail.rmp-can-drag{cursor:grab}
@@ -595,23 +576,14 @@ body.rmp-locked{overflow:hidden}
   flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
   margin:var(--s-5) 0 0;font-size:var(--fs-4);line-height:var(--lh-relaxed);
   color:var(--fg-body);
-  /* devamı olduğunu gösteren alt solma — sona gelince kalkar */
-  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-8)),transparent 100%);
-          mask-image:linear-gradient(to bottom,#000 calc(100% - var(--s-8)),transparent 100%);
+  /* Devamı olduğunu gösteren alt solma — sona gelince kalkar. Tek yol bu:
+     içerik ERİR. Üstüne serilen yarı saydam bir perde yazıyı okunur
+     bırakıyordu; maskenin arkasında kalan zaten kutunun kendi koyusu
+     (--boxBg), yani siyah değil bizim rengimiz. */
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 72px),transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 calc(100% - 72px),transparent 100%);
 }
 .rmp-about.rmp-at-end,.rmp-about.rmp-no-scroll{-webkit-mask-image:none;mask-image:none}
-/* aynı perde, yazının bittiği yerde. Maske .rmp-about'un KENDİSİNE
-   uygulandığı için perde bir üst kutuya çizilir — yoksa o da silinirdi. */
-.rmp-info__scroll::after{
-  /* Kutunun DİBİNE kadar iner. Eskiden --s-5 yukarıda bitiyordu ve altında
-     panelin alt dolgusu çıplak kalıyordu: perde havada duruyor gibiydi. */
-  content:"";position:absolute;left:0;right:0;bottom:0;height:var(--veilH);
-  z-index:2;pointer-events:none;
-  background:var(--veil);
-  transition:opacity var(--dur-2) var(--ease);
-}
-.rmp-info__scroll:has(.rmp-about.rmp-at-end)::after,
-.rmp-info__scroll:has(.rmp-about.rmp-no-scroll)::after{opacity:0}
 .rmp-about::-webkit-scrollbar{width:8px}
 .rmp-about::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:var(--r-full)}
 .rmp-about p{margin:0 0 var(--s-3)}
