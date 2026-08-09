@@ -82,7 +82,7 @@ function paketTuru(p){
   if(p.kind) return p.kind;
   var m=String(p.name||'').match(/(LUTs?|Presets?)\s*$/i);
   if(!m) return '';
-  return /lut/i.test(m[1]) ? 'LUTs' : 'PRESETS';
+  return /lut/i.test(m[1]) ? 'LUT PACK' : 'PRESET PACK';
 }
 function paketAdi(p){
   if(p.short) return p.short;
@@ -303,12 +303,22 @@ function buildRail(p){
   markRail();
 }
 /* ══════════ MEDYAYA GİT — tek giriş noktası ══════════
-   Şerit tıklaması, klavye ve oklar hep buradan geçer. Üç kural:
+   Şerit tıklaması, klavye ve oklar hep buradan geçer. İki kural:
    1) hedef ANINDA aktif olur (sayaç ve şerit animasyonu beklemez),
-   2) kaydırma boyunca snap kapalıdır (aradaki karelerde takılmaz),
-   3) casus (updateActive) susar — yoksa animasyonun ortasındaki ara
-      kareyi aktif sanıp şeridi ileri geri oynatıyordu.               */
-var navBusy=false, navTok=0, navTimer=null;
+   2) casus (updateActive) susar — yoksa animasyonun ortasındaki ara
+      kareyi aktif sanıp şeridi ileri geri oynatıyordu.
+
+   SNAP YOK. Tarayıcının `scroll-snap-type:mandatory`'si her karede
+   frene basıyordu: bir birim tekerlek bile bir kareyi zorla yerine
+   çekiyor, kaydırma "ittirmeli" hissettiriyordu. İçerik sütunu artık
+   bir sayfa gibi serbest kayar; parmağını çektiğinde en yakın kareye
+   kendi eğrimizle yumuşakça oturur (yerlestir). */
+var navBusy=false, navTok=0;
+/* Elle yapılan her hareket programatik olanı devirir: kullanıcı hep kazanır. */
+function navIptal(){
+  navTok++; navBusy=false;
+  if(track.__rmpRAF){ cancelAnimationFrame(track.__rmpRAF); track.__rmpRAF=0; }
+}
 function goToMedia(i,ani){
   var son=PRODUCTS[pi].media.length-1;
   i=Math.max(0,Math.min(son,i));
@@ -320,7 +330,6 @@ function goToMedia(i,ani){
   if(i!==mi){ mi=i; sonrasi(); }
   if(Math.abs(track.scrollTop-hedef)<1) return;
   var tok=++navTok; navBusy=true;
-  track.classList.add('rmp-no-snap');
   /* 3 kareden uzak hedefte önce hedefin bir kare berisine ışınlanıp
      oradan akıcı kayarız: 20 kare boyu animasyon beklenmez ama geçiş
      yine sürekli hissedilir (iOS'un uzun listelerde yaptığı numara). */
@@ -328,34 +337,68 @@ function goToMedia(i,ani){
   if(ani!==false && Math.abs(hedef-track.scrollTop)/h > 3)
     track.scrollTop = hedef + (hedef>track.scrollTop ? -h : h);
   /* KENDİ ANİMASYONUMUZ. behavior:'smooth' tarayıcının seçtiği süreyi
-     kullanıyor — burada yarım saniyeye yakın, ve bir kare ilerlemek için
+     kullanıyor — burada yarım saniyeye yakın, bir kare ilerlemek için
      beklenmeyecek kadar uzun. Süreyi kendimiz veriyoruz: 190ms, sondan
-     yumuşayan bir eğriyle. Kaydırma bittiği an biliniyor, yoklamaya da
-     emniyet zamanlayıcısına da gerek kalmıyor. */
-  clearTimeout(navTimer);
+     yumuşayan bir eğriyle. */
   kaydir(hedef, ani===false?0:190, function(){ bitir(tok); }, function(){ return tok===navTok; });
 }
-var animRAF=null;
-function kaydir(hedef, sure, bitince, gecerliMi){
-  if(animRAF) cancelAnimationFrame(animRAF);
-  var bas=track.scrollTop, fark=hedef-bas, t0=null;
-  if(!sure || Math.abs(fark)<1){ track.scrollTop=hedef; bitince(); return; }
-  animRAF=requestAnimationFrame(function adim(t){
-    if(!gecerliMi()){ animRAF=null; return; }     /* yeni hedef devraldı */
+/* ── OTURMA ─────────────────────────────────────────────────────
+   Serbest kaydırmanın bedeli yarım kalmış bir karedir. Elin durunca
+   (140ms sessizlik) en yakın kareye 260ms'lik yumuşak bir eğriyle
+   oturur. Zorlamaz: hareket ederken hiçbir şeye karışmaz, sadece
+   sonunda toparlar. */
+var settleT=null, hamleBas=null;
+function yerlestir(){
+  if(!isOpen || zoom>1 || navBusy) return;
+  var h=track.clientHeight; if(!h) return;
+  /* NİYETE GÖRE OTURMA. Sadece "en yakına" gitmek, kare bir sahne boyu
+     olduğu için küçük hareketleri geri yaylandırıyordu: bir tık çeviriyor,
+     içerik kıpırdıyor, sonra geldiği yere dönüyor — lastik gibi. Karar
+     HAMLENİN TAMAMINA bakılarak verilir: bir karenin beşte birinden fazla
+     yol aldıysan gittiğin yöndeki kareye geçersin, altındaysa bulunduğun
+     kare yerine oturur. Böylece hareket serbest, iniş kararlı olur. */
+  var bas = hamleBas===null ? track.scrollTop : hamleBas;
+  var basI = Math.round(bas/h), d = track.scrollTop - bas;
+  var i = Math.abs(d) > h*0.2
+        ? basI + (d>0?1:-1) * Math.max(1, Math.round(Math.abs(d)/h))
+        : Math.round(track.scrollTop/h);
+  hamleBas=null;
+  i=Math.max(0,Math.min(PRODUCTS[pi].media.length-1,i));
+  var c=track.querySelector('.rmp-cell[data-i="'+i+'"]'); if(!c) return;
+  var hedef=track.scrollTop+(c.getBoundingClientRect().top-track.getBoundingClientRect().top);
+  if(Math.abs(hedef-track.scrollTop)<0.5) return;
+  var tok=++navTok; navBusy=true;
+  if(i!==mi){ mi=i; sonrasi(); }
+  kaydir(hedef, 260, function(){ bitir(tok); }, function(){ return tok===navTok; });
+}
+/* ── TEK KAYDIRMA MOTORU ────────────────────────────────────────
+   behavior:'smooth' süreyi tarayıcıya bırakıyor — burada yarım saniyeye
+   yakın ve her yerde farklı. Süre ve eğri bizde: sondan yumuşayan bir
+   kübik. Hem içerik sütunu hem küçük resim şeridi aynı motoru kullanır,
+   böylece panelin her yeri aynı hızda hareket eder. Her öğe kendi
+   karesini taşır: ikisi birbirini iptal etmez. */
+function akit(el, alan, hedef, sure, bitince, gecerliMi){
+  if(el.__rmpRAF){ cancelAnimationFrame(el.__rmpRAF); el.__rmpRAF=0; }
+  var bas=el[alan], fark=hedef-bas, t0=null;
+  if(!sure || Math.abs(fark)<1){ el[alan]=hedef; if(bitince) bitince(); return; }
+  el.__rmpRAF=requestAnimationFrame(function adim(t){
+    if(gecerliMi && !gecerliMi()){ el.__rmpRAF=0; return; }   /* yeni hedef devraldı */
     if(t0===null) t0=t;
     var k=Math.min(1,(t-t0)/sure);
-    track.scrollTop = bas + fark * (1-Math.pow(1-k,3));
-    if(k<1) animRAF=requestAnimationFrame(adim); else { animRAF=null; bitince(); }
+    el[alan] = bas + fark * (1-Math.pow(1-k,3));
+    if(k<1) el.__rmpRAF=requestAnimationFrame(adim);
+    else { el.__rmpRAF=0; if(bitince) bitince(); }
   });
+}
+function kaydir(hedef, sure, bitince, gecerliMi){
+  akit(track,'scrollTop',hedef,sure,bitince,gecerliMi);
 }
 function bitir(tok){
   if(tok!==navTok) return;
-  clearTimeout(navTimer); navTimer=null;
   /* artığı ölçerek sıfırla: hedef ile gerçek konum arasında kalan
      kesir, snap geri açıldığında tarayıcıyı yeniden oynatıyordu */
   var c=track.querySelector('.rmp-cell[data-i="'+mi+'"]');
   if(c) track.scrollTop+=c.getBoundingClientRect().top-track.getBoundingClientRect().top;
-  track.classList.remove('rmp-no-snap');
   navBusy=false;
 }
 function sonrasi(){ setCount(); markRail(); unmountAway(); }
@@ -363,7 +406,11 @@ function sonrasi(){ setCount(); markRail(); unmountAway(); }
 /* Kullanıcı şeridi elle gezerken otomatik ortalama devreye girmemeli. */
 var railEl=0;
 ['wheel','pointerdown','touchstart'].forEach(function(ev){
-  rail.addEventListener(ev,function(){ railEl=Date.now(); },{passive:true});
+  rail.addEventListener(ev,function(){
+    railEl=Date.now();
+    /* şerit kendi kendine kayıyorsa elin altında durur */
+    if(rail.__rmpRAF){ cancelAnimationFrame(rail.__rmpRAF); rail.__rmpRAF=0; }
+  },{passive:true});
 });
 function markRail(){
   Array.prototype.forEach.call(rail.children,function(b,i){b.setAttribute('aria-current',i===mi);});
@@ -396,8 +443,7 @@ function markRail(){
 function railTo(v,yatay){
   var max=yatay?rail.scrollWidth-rail.clientWidth:rail.scrollHeight-rail.clientHeight;
   v=Math.max(0,Math.min(max,v));
-  var o={behavior:'smooth'}; o[yatay?'left':'top']=v;
-  rail.scrollTo(o);
+  akit(rail, yatay?'scrollLeft':'scrollTop', v, 260);
 }
 rail.addEventListener('click',function(e){
   var b=e.target.closest('button'); if(!b) return;
@@ -435,7 +481,16 @@ function restorePoster(f){
   f.insertAdjacentHTML('beforeend','<button class="rmp-vid__poster" aria-label="Videoyu oynat"><span class="rmp-vid__play"></span></button>');
   wireYT(f,it);
 }
-function onScroll(){ if(!spyRAF) spyRAF=requestAnimationFrame(updateActive); }
+function onScroll(){
+  if(!spyRAF) spyRAF=requestAnimationFrame(updateActive);
+  clearTimeout(settleT);
+  if(navBusy){ hamleBas=null; return; }  /* kendi animasyonumuz hedefte bitecek */
+  settleT=setTimeout(yerlestir,140);
+}
+/* Hamlenin başladığı yer, kaydırma OLMADAN önce işaretlenir: tekerlek ve
+   dokunuş olayları kaydırmadan önce gelir, `scroll` ise sonra. */
+function hamleBasla(){ if(hamleBas===null && !navBusy) hamleBas=track.scrollTop; }
+track.addEventListener('touchstart',hamleBasla,{passive:true});
 
 /* ── sağ panel ── */
 function buildInfo(p){
@@ -705,7 +760,7 @@ track.addEventListener('pointerup',endPtr,{passive:true});
 track.addEventListener('pointercancel',function(e){pts.delete(e.pointerId);
   if(start&&start.f) start.f.classList.remove('rmp-is-panning'); drag=null;start=null;},{passive:true});
 track.addEventListener('wheel',function(e){
-  if(zoom<=1) return;                     /* normal: dikey kaydırma + snap */
+  if(zoom<=1){ navIptal(); hamleBasla(); return; }   /* serbest: tarayıcı kaydırır */
   e.preventDefault();
   if(e.ctrlKey){ setZoom(zoom*(e.deltaY<0?1.12:.89),e.clientX,e.clientY); return; }
   panX-=e.deltaX; panY-=e.deltaY; clampPan(); applyZoom();
@@ -751,7 +806,6 @@ pdp.addEventListener('wheel',tekerlek,{passive:false});
    3) hâlâ kaydıracak yeri kalan bir panel (uzun açıklama) önce kendini
       kaydırır; sonuna geldiğinde tekerlek yine içeriği değiştirir.
    Yakınlaşmışken hiçbir şey değişmez: o zaman tekerlek gezinmektir. */
-var wAcc=0, wLast=0, wStep=0;
 function kaydirabilir(el,dy){
   while(el && el!==pdp && el.nodeType===1){
     var oy=getComputedStyle(el).overflowY;
@@ -771,19 +825,11 @@ function tekerlek(e){
   if(!dy) return;
   if(kok && kaydirabilir(kok,dy)) return;
   e.preventDefault();
-  var now=Date.now();
-  /* BIR HAMLE BIR KARE. Tekerlek 140ms sussa yeni bir hamle sayilir; aksi
-     halde tek bir fiskenin sonundaki ataletli onlarca olay kareyi ucar
-     yedi geciyordu. Ayni hamle icinde parmagini durdurmadan cevirmeye
-     devam edene 300ms'de bir kare daha verilir: gezinmek isteyen gezinir,
-     tek fiske atan bir kare gider. */
-  if(now-wLast>120){ wAcc=0; wStep=0; }
-  wLast=now;
-  if(now-wStep<300){ wAcc=0; return; }
-  wAcc+=dy;
-  if(Math.abs(wAcc)<24) return;
-  var yon=wAcc>0?1:-1; wAcc=0; wStep=now;
-  goToMedia(mi+yon);
+  /* BİRE BİR. Bir sayfayı nasıl kaydırıyorsan içeriği de öyle: tekerleğin
+     verdiği kadar, ne eksik ne fazla. Tek birimlik bir hareket bile geçer.
+     Kademe yok, bekleme yok, kilit yok — durduğunda `yerlestir` toparlar. */
+  navIptal(); hamleBasla();
+  track.scrollTop += dy;
 }
 function bgNodes(){
   return Array.prototype.filter.call(document.body.children,function(n){

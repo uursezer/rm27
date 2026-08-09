@@ -255,7 +255,7 @@ body.rmp-locked{overflow:hidden}
 /* ── kaydırma alanı: altta yumuşak solma maskesi ── */
 .rmp-rail{
   flex:1 1 auto;min-height:0;width:100%;
-  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+  overflow-y:auto;overscroll-behavior:contain;scroll-behavior:auto;scrollbar-width:none;
   display:flex;flex-direction:column;align-items:center;
   gap:var(--thumbGap);
   padding:var(--railPad) var(--railPadX);
@@ -306,8 +306,10 @@ body.rmp-locked{overflow:hidden}
 .rmp-rail button .rmp-bdg{opacity:1}
 
 /* ── orta: 4:5 medya sahnesi ──
-   Her öğe sahnenin tam yüksekliği kadar; scroll-snap sayesinde
-   içerik asla yarım kalmaz.                                      */
+   Her öğe sahnenin tam yüksekliği kadar. SNAP YOK: tarayıcının
+   `mandatory` snap'i her karede frene basıyor, tek birimlik bir
+   tekerlek hareketini bile bir sonraki kareye zorluyordu. Sütun
+   serbest kayar; el durunca en yakın kareye betik oturtur. */
 /* Galerinin kendi zemini yok: sitenin arka plani gorunur.
    Boylece 16:9 video gibi tam oturmayan icerikler siyah kutu
    icinde degil, sayfanin kendi zemininde durur. */
@@ -316,17 +318,15 @@ body.rmp-locked{overflow:hidden}
 }
 .rmp-track{
   position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
-  scroll-snap-type:y mandatory; overscroll-behavior:contain;
+  overscroll-behavior:contain;
+  /* kaydırmayı biz canlandırıyoruz; sayfanın smooth'u üstüne binmesin */
+  scroll-behavior:auto;
   scrollbar-width:none;
 }
-/* scroll-snap-stop:always, akıcı bir programatik kaydırmayı ARADAKİ her
-   snap noktasında durduruyor ("takılma" hissi). Kaydırma sürerken snap
-   kapatılır, hedefe varınca geri açılır. */
-.rmp-track.rmp-no-snap{scroll-snap-type:none}
 .rmp-track::-webkit-scrollbar{display:none}
 .rmp-track.rmp-locked{overflow:hidden}
 .rmp-cell{
-  height:100%; scroll-snap-align:start; scroll-snap-stop:always;
+  height:100%;
   display:grid; place-items:center; position:relative;
 }
 .rmp-frame{
@@ -440,7 +440,7 @@ body.rmp-locked{overflow:hidden}
 /* Başlık ve künye SABİT; uzun metinde kaybolmazlar. */
 .rmp-info__top{flex:0 0 auto}
 /* ── başlık bloğu: rozet · paket adı · satıcı ── */
-.rmp-head{margin-bottom:var(--s-2)}
+.rmp-head{margin-bottom:var(--s-4)}
 /* ── başlığın üstü: üst satır · ad · kim yaptığı ──
    1) ÜST SATIR. Solda TÜR — tek kelime, ana renkte. Sağda rozetler, satırın
       öbür ucuna yaslı. İkisi aynı orta çizgide durur. */
@@ -459,7 +459,7 @@ body.rmp-locked{overflow:hidden}
 }
 .rmp-kind{
   margin:0;min-width:0;
-  font-size:var(--fs-1);font-weight:var(--fw-semibold);line-height:1.4;
+  font-size:var(--fs-2);font-weight:var(--fw-semibold);line-height:1.4;
   letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--accent-fg);
 }
 /* 2) AD, kendi satırında ve tam boyunda */
@@ -468,12 +468,12 @@ body.rmp-locked{overflow:hidden}
 .rmp-badges{display:flex;flex-wrap:wrap;gap:var(--s-2);margin-left:auto}
 /* emoji: Apple'ın renkli seti öncelikli; rozetin harf aralığından ve
    VERSAL dönüşümünden etkilenmemeli */
-.rmp-badge .rmp-bi{flex:0 0 auto;font-style:normal;font-size:12px;line-height:1;
-  letter-spacing:0;text-transform:none;font-size:13px;
+.rmp-badge .rmp-bi{flex:0 0 auto;font-style:normal;line-height:1;
+  letter-spacing:0;text-transform:none;font-size:14px;
   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
-.rmp-badge{display:inline-flex;align-items:center;gap:6px;
-  font-size:11px;font-weight:var(--fw-bold);letter-spacing:.05em;text-transform:uppercase;
-  padding:4px 10px 4px 8px;border-radius:var(--r-full);
+.rmp-badge{display:inline-flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:var(--fw-bold);letter-spacing:.05em;text-transform:uppercase;
+  padding:6px 13px 6px 11px;border-radius:var(--r-full);
   background:var(--accent-bg);color:var(--accent-fg);
   box-shadow:inset 0 0 0 1px var(--accent-border)}
 /* Varyant yok: kaynak sitede de etiketten bağımsız TEK çip stili var.
@@ -484,10 +484,10 @@ body.rmp-locked{overflow:hidden}
   font-size:clamp(var(--fs-9),11cqw,var(--fs-10));
   font-weight:var(--fw-bold);letter-spacing:var(--tr-display);
   line-height:var(--lh-display);color:var(--fg);text-wrap:balance}
-.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-2);margin-top:var(--s-2);
-  font-size:var(--fs-3);font-weight:var(--fw-medium);color:var(--fg-muted)}
-.rmp-info .rmp-av{width:28px;height:28px;border-radius:var(--r-full);background:var(--surface-sunken);
-  border:1px solid var(--border);font-size:10px;font-weight:var(--fw-semibold);letter-spacing:.02em;
+.rmp-info .rmp-by{display:flex;align-items:center;gap:var(--s-3);margin-top:var(--s-2);
+  font-size:var(--fs-4);font-weight:var(--fw-medium);color:var(--fg-muted)}
+.rmp-info .rmp-av{width:32px;height:32px;border-radius:var(--r-full);background:var(--surface-sunken);
+  border:1px solid var(--border);font-size:11px;font-weight:var(--fw-semibold);letter-spacing:.02em;
   display:grid;place-items:center;color:var(--fg-muted);flex:none}
 .rmp-rate{display:inline-flex;align-items:baseline;gap:5px;
   font-size:var(--fs-3);font-weight:var(--fw-semibold);color:var(--fg);
@@ -502,7 +502,7 @@ body.rmp-locked{overflow:hidden}
    dış çerçeve kutuyu bir bütün olarak tutuyor.
    Zemin marka tonunun bir tutamı; koyu panelde canlı ama sessiz durur. */
 .rmp-facts{
-  list-style:none;margin:var(--s-5) 0 0;padding:0;
+  list-style:none;margin:var(--s-6) 0 0;padding:0;
   display:grid;grid-template-columns:1fr 1fr;
   border:1px solid var(--border);border-radius:var(--r-card);
   overflow:hidden;background:var(--accent-bg);
