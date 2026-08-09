@@ -1073,7 +1073,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 /* the disc is a cap height taller than the first line, so it rides that line
    rather than the middle of a two-line block */
-.ptabs button .ptab__no{align-self:flex-start;margin-top:1px}
+.ptabs button .ptab__no{align-self:flex-start;margin-top:1.7px}
 /* a disc and two badges want more room than a word does — written with the
    track's own class so it outranks .os button further down the sheet */
 .os.ptabs button{
@@ -1103,6 +1103,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* the count in front of the name: three plugins, and this is the first */
 .ptab__no{
   flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:var(--r-full);
+  padding-top:2.9px;                       /* the digit's own descender room */
   background:var(--surface-sunken);color:var(--fg-muted);
   font-size:11px;font-weight:var(--fw-bold);line-height:1;
   transition:background var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
@@ -1120,7 +1121,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* the row centres these on its line box, and a line box carries descender
    room the capitals beside them never use — so they land about a pixel low.
    Measured off the rendered pixels, not guessed, and put back. */
-.ptab__apps .ptab__app,.ptab__no{position:relative;top:-0.8px}
+.ptab__apps .ptab__app,.ptabs .ptab__no{position:relative;top:-0.8px}
 /* the eyebrow can carry the apps it runs in: the same three marks the plugin
    tabs wear, so the badge for "this works in Photoshop" is one thing on this
    page and not two. They keep their own case against the eyebrow's caps —
@@ -1135,17 +1136,19 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    the page below it shifts when the slide changes */
 #hero .eyebrow{min-height:22px;display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-3)}
 .ptab__app{
-  display:grid;place-items:center;width:24px;height:22px;padding:0;
-  border-radius:5px;border:1px solid var(--border-strong);color:var(--fg-muted);
+  display:grid;place-items:center;width:24px;height:22px;padding:4px 0 0;
+  /* filled, not outlined — the same pair the number disc beside them wears,
+     so the row reads as one set of marks rather than two kinds of box */
+  border-radius:5px;border:1px solid transparent;
+  background:var(--surface-sunken);color:var(--fg-muted);
   font-size:10px;font-weight:var(--fw-bold);line-height:1;
   transition:background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
              color var(--dur-2) var(--ease);
 }
-/* the live tab fills its number and its marks, but in the page's ink: the
-   white pill it sits on is already saying which tab is live, and the accent
-   is spent on the things you can press elsewhere on this page */
+/* on the live tab they fill in the accent's palest tint, so they stay marks
+   rather than becoming three solid purple blocks beside a solid purple disc */
 .ptabs button[aria-selected="true"] .ptab__app{
-  background:none;border-color:var(--accent-border);color:var(--accent-fg);
+  background:var(--accent-bg);border-color:transparent;color:var(--accent-fg);
 }
 /* below the breakpoint the names would be shoulder to shoulder — let the row
    scroll and give each button back its own width */
@@ -2373,9 +2376,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* On the chip you are looking at, the green disc sits on solid accent — two
    saturated colours meeting with nothing between them, which reads as a
    muddle rather than as a disc on a pill. A hairline of white gives it its
-   own edge. Only there: on a white chip the disc already has one. */
+   own edge. Only there: on a white chip the disc already has one.
+   White was too loud a hairline — it read as a cut-out. The system's pale
+   green edge belongs to the disc instead of fighting it, and still separates
+   cleanly from the purple. */
 .pchip:has([aria-selected="true"]) .pchip__buy.is-in{
-  box-shadow:0 0 0 1px #FFFFFF, 0 1px 3px rgba(12,74,45,.35);
+  box-shadow:0 0 0 1px var(--ok-edge), 0 1px 3px rgba(12,74,45,.35);
 }
 /* pressing it again takes it out, so under the pointer it becomes the red the
    rest of the page removes things in — the pale one, because this is an
@@ -2745,14 +2751,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   text-wrap:pretty;
 }
 /* ── a line that runs long ────────────────────────────────────────
-   Three lines is what this strip can carry before it starts covering the
+   Two lines is what this strip can carry before it starts covering the
    picture it is describing. Past that it is folded, and a button says so.
    The fold is line-based rather than height-based, so it lands on a line
    and never mid-word, and it is only applied once the script has measured
    that there is something to fold — a clamp on a short line would still
    cost it a layout mode it does not need. */
 .player__desc.is-fold{
-  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
   overflow:hidden;
 }
 /* `unset` on -webkit-line-clamp is not reliably a reset — `none` is. */
@@ -4567,9 +4573,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     </div>
     </div>
     <div class="os ptabs" role="tablist" aria-label="Plugins" id="pluginTabs">
-      <button type="button" role="tab" aria-selected="true" aria-controls="pp-0" id="pt-0"><span class="ptab__no" aria-hidden="true">1</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">RetouchX Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span><span class="ptab__app"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="14" height="9.2" rx="1.6" stroke="currentColor" stroke-width="1.4"/><path d="M8 11.4v3M5.4 14.4h5.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span></span></span><span class="ptab__d">Otomatik ve toplu rötuş app&#8217;i.</span></span><span class="vh"> — for Photoshop and desktop</span></button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="pp-1" id="pt-1" tabindex="-1"><span class="ptab__no" aria-hidden="true">2</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">Lightroom Ai Color Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">LrC</span></span></span><span class="ptab__d">LrC profesyonel renk efekti plugin&#8217;i</span></span><span class="vh"> — for Lightroom Classic</span></button>
-      <button type="button" role="tab" aria-selected="false" aria-controls="pp-2" id="pt-2" tabindex="-1"><span class="ptab__no" aria-hidden="true">3</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">US Photoshop Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span></span></span><span class="ptab__d">PS hızlı ve kolay rötuş plugin&#8217;i</span></span><span class="vh"> — for Photoshop</span></button>
+      <button type="button" role="tab" aria-selected="true" aria-controls="pp-0" id="pt-0"><span class="ptab__no" aria-hidden="true">1</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">RetouchX Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span><span class="ptab__app"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="2.2" width="14" height="9.2" rx="1.6" stroke="currentColor" stroke-width="1.4"/><path d="M8 11.4v3M5.4 14.4h5.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span></span></span><span class="ptab__d">Otomatik ve toplu rötuş app</span></span><span class="vh"> — for Photoshop and desktop</span></button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="pp-1" id="pt-1" tabindex="-1"><span class="ptab__no" aria-hidden="true">2</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">Lightroom Ai Color Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">LrC</span></span></span><span class="ptab__d">Profesyonel renk efekti plugin</span></span><span class="vh"> — for Lightroom Classic</span></button>
+      <button type="button" role="tab" aria-selected="false" aria-controls="pp-2" id="pt-2" tabindex="-1"><span class="ptab__no" aria-hidden="true">3</span><span class="ptab__c"><span class="ptab__l"><span class="ptab__nm">US Photoshop Plugin</span><span class="ptab__apps" aria-hidden="true"><span class="ptab__app">Ps</span></span></span><span class="ptab__d">Hızlı ve kolay rötuş plugin</span></span><span class="vh"> — for Photoshop</span></button>
     </div>
       <div class="panel is-on" id="pp-0" role="tabpanel" aria-labelledby="pt-0">
         <div class="deck" data-deck role="group" aria-roledescription="carousel" aria-label="RetouchX Plugin walkthroughs">

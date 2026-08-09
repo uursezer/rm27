@@ -641,6 +641,49 @@ prevB.onclick=function(){goProduct(-1);}; nextB.onclick=function(){goProduct(1);
 
 /* ═══ lightbox aç / kapat ═══ */
 var pdp=document.getElementById('rmp-pdp'), lastTrigger=null, scrollY=0, isOpen=false;
+pdp.addEventListener('wheel',tekerlek,{passive:false});
+/* ═══ tekerlek: şeridin dışında da içerik değiştirir ═══
+   Fare imleci nerede olursa olsun (küçük resim sütunu hariç) tekerlek
+   içerikte ileri/geri gider. Üç istisna var, üçü de kullanıcıyı korur:
+   1) küçük resim sütunu kendi listesini kaydırır,
+   2) içerik alanı zaten kendi snap kaydırmasıyla gider,
+   3) hâlâ kaydıracak yeri kalan bir panel (uzun açıklama) önce kendini
+      kaydırır; sonuna geldiğinde tekerlek yine içeriği değiştirir.
+   Yakınlaşmışken hiçbir şey değişmez: o zaman tekerlek gezinmektir. */
+var wAcc=0, wLast=0, wStep=0;
+function kaydirabilir(el,dy){
+  while(el && el!==pdp && el.nodeType===1){
+    var oy=getComputedStyle(el).overflowY;
+    if((oy==='auto'||oy==='scroll') && el.scrollHeight>el.clientHeight+1){
+      if(dy<0 ? el.scrollTop>1 : el.scrollTop < el.scrollHeight-el.clientHeight-1) return true;
+    }
+    el=el.parentNode;
+  }
+  return false;
+}
+function tekerlek(e){
+  if(!isOpen || zoom>1) return;
+  var t=e.target, kok=t&&t.closest?t:null;
+  if(kok && (kok.closest('.rmp-railcol') || kok.closest('.rmp-track'))) return;
+  var dy=e.deltaY;
+  if(e.deltaMode===1) dy*=16; else if(e.deltaMode===2) dy*=(track.clientHeight||600);
+  if(!dy) return;
+  if(kok && kaydirabilir(kok,dy)) return;
+  e.preventDefault();
+  var now=Date.now();
+  /* BIR HAMLE BIR KARE. Tekerlek 140ms sussa yeni bir hamle sayilir; aksi
+     halde tek bir fiskenin sonundaki ataletli onlarca olay kareyi ucar
+     yedi geciyordu. Ayni hamle icinde parmagini durdurmadan cevirmeye
+     devam edene 600ms'de bir kare daha verilir: gezinmek isteyen gezinir,
+     tek fiske atan bir kare gider. */
+  if(now-wLast>140){ wAcc=0; wStep=0; }
+  wLast=now;
+  if(now-wStep<600){ wAcc=0; return; }
+  wAcc+=dy;
+  if(Math.abs(wAcc)<24) return;
+  var yon=wAcc>0?1:-1; wAcc=0; wStep=now;
+  goToMedia(mi+yon);
+}
 function bgNodes(){
   return Array.prototype.filter.call(document.body.children,function(n){
     return n!==pdp && n.tagName!=='SCRIPT' && n.tagName!=='STYLE';});

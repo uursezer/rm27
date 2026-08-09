@@ -74,7 +74,7 @@
   --n-200:#232C48; --n-300:#33405F; --n-400:#6B7793; --n-500:#9AA6BF;
   --n-600:#B7C0D4; --n-700:#D3DAE8; --n-800:#E9EDF5; --n-900:#FFFFFF;
   /* tek zemin rengi — satın alma bloğu da aynı tonu kullanır */
-  --bg:#0A0B0D;   --bg-subtle:#0A0B0D;
+  --bg:#050708;   --bg-subtle:#050708;
   --surface:rgba(255,255,255,.06);
   --surface-sunken:rgba(255,255,255,.08);
   --border:rgba(255,255,255,.10);
@@ -116,7 +116,7 @@
      zemin (--bg) üstünde durur. Lightbox'ta böyle bir zemin olmadığı için
      saydam panellerden arkadaki bulanık sayfa sızıyordu. Her kutu, yüzey
      tonunu kendi opak zemininin üstünde taşır. */
-  --boxBg:#12151F;
+  --boxBg:#0B0C12;
   --boxR:var(--r-panel);
 
   position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
