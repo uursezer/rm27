@@ -2332,6 +2332,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .pchip .pchip__buy.is-in{
   background:var(--ok);color:#FFFFFF;box-shadow:0 1px 3px rgba(12,74,45,.35);
 }
+/* On the chip you are looking at, the green disc sits on solid accent — two
+   saturated colours meeting with nothing between them, which reads as a
+   muddle rather than as a disc on a pill. A hairline of white gives it its
+   own edge. Only there: on a white chip the disc already has one. */
+.pchip:has([aria-selected="true"]) .pchip__buy.is-in{
+  box-shadow:0 0 0 1px #FFFFFF, 0 1px 3px rgba(12,74,45,.35);
+}
 /* pressing it again takes it out, so under the pointer it becomes the red the
    rest of the page removes things in — the pale one, because this is an
    offer, not a warning — and the tick becomes the cross it would leave */
