@@ -437,11 +437,11 @@ body.rmp-locked{overflow:hidden}
    imlece cevap vermez. Yazıların üstüne değil, ALTINA çizilir. */
 .rmp-info::before{
   content:"";position:absolute;right:0;top:0;z-index:0;pointer-events:none;
-  width:min(440px,92%);height:min(340px,68%);
+  width:min(594px,124%);height:min(459px,92%);
   transform:translate(30%,-36%);border-radius:50%;
   background:radial-gradient(closest-side,
     rgba(58,92,255,.44), rgba(58,92,255,.17) 46%, rgba(58,92,255,0) 80%);
-  filter:blur(66px);
+  filter:blur(89px);
 }
 .rmp-info > *{position:relative;z-index:1}
 .rmp-info__scroll{flex:1 1 auto;min-height:0;overflow:hidden;
