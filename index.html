@@ -7581,15 +7581,30 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   sToggle.addEventListener('click', function(){ searchOpen(!sBar.classList.contains('is-on')); });
   document.getElementById('searchClose').addEventListener('click', function(){ searchOpen(false); });
 
-  /* ---- language dropdown ---- */
+  /* ---- language dropdown ----
+     Until now this only swapped the flag and the code: nothing on the page
+     read it, and it forgot the choice the moment you reloaded. It now
+     publishes what was chosen on the root as data-lang, remembers it, and
+     announces it — so anything on the page that CAN speak both knows which
+     to speak.
+
+     It deliberately does not touch the root's lang attribute. That one says
+     what the words on the page actually ARE, and they have not changed: this
+     page is written in English with two sections deliberately in Turkish.
+     Saying lang="tr" over English text would only mislead a screen reader.
+     data-lang is the preference; lang is the fact. */
   var LANGS = {tr:'Türkçe', en:'English'};
+  var LANG_KEY = 'rm-lang', deL = document.documentElement;
   function langCloseAll(){
     document.querySelectorAll('.langpick__btn').forEach(function(b){
       b.setAttribute('aria-expanded','false');
       document.getElementById(b.getAttribute('aria-controls')).setAttribute('hidden','');
     });
   }
-  function langSet(code){
+  function langSet(code, quiet){
+    if(!LANGS[code]) code = 'en';
+    deL.setAttribute('data-lang', code);
+    if(!quiet){ try { localStorage.setItem(LANG_KEY, code); } catch(e){} }
     document.querySelectorAll('.langpick').forEach(function(pick){
       pick.querySelectorAll('.langpick__menu button').forEach(function(opt){
         var on = opt.getAttribute('data-lang') === code;
@@ -7601,7 +7616,24 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         }
       });
     });
+    document.dispatchEvent(new CustomEvent('rm:lang', {detail:{lang:code}}));
   }
+  /* one place to ask, one place to be told — the gallery and anything else
+     that has words of its own read this rather than the markup */
+  window.RMLang = {
+    get: function(){ return deL.getAttribute('data-lang') || 'en'; },
+    set: function(code){ langSet(code); },
+    on: function(fn){ document.addEventListener('rm:lang', fn); },
+    has: function(code){ return !!LANGS[code]; }
+  };
+  (function(){
+    var saved = null;
+    try { saved = localStorage.getItem(LANG_KEY); } catch(e){}
+    /* the choice on the way back in; otherwise whatever the markup already
+       marks as current, so the flag and the attribute cannot disagree */
+    var mark = document.querySelector('.langpick__menu button[aria-current="true"]');
+    langSet(saved || (mark && mark.getAttribute('data-lang')) || 'en', !saved);
+  })();
   document.querySelectorAll('.langpick').forEach(function(pick){
     var btn = pick.querySelector('.langpick__btn'),
         menu = pick.querySelector('.langpick__menu');
