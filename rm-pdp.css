@@ -574,7 +574,8 @@ body.rmp-locked{overflow:hidden}
    başlık ve künye yerinde kalır, satın alma bloğu altta sabittir. */
 .rmp-about{
   flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
-  margin:var(--s-5) 0 0;font-size:var(--fs-4);line-height:var(--lh-relaxed);
+  /* künye kutusundan sonra nefes: --s-5 iki bloğu birbirine yapıştırıyordu */
+  margin:var(--s-7) 0 0;font-size:var(--fs-4);line-height:var(--lh-relaxed);
   color:var(--fg-body);
   /* Devamı olduğunu gösteren alt solma — sona gelince kalkar. Tek yol bu:
      içerik ERİR. Üstüne serilen yarı saydam bir perde yazıyı okunur
@@ -664,8 +665,11 @@ body.rmp-locked{overflow:hidden}
   display:flex;align-items:center;
   transition:background var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease);
 }
-.rmp-nav:hover{background:var(--boxBg);
+/* Açılmış hâli kendi rengini taşır: zemin bir kademe morlaşır ve kaşın
+   mürekkebi ana renge iner. Kapalıyken kutunun kendi koyusunda kalır. */
+.rmp-nav:hover,.rmp-nav:focus-visible{background:#191A3A;
   box-shadow:var(--sh-3), inset 0 0 0 1px var(--accent-border)}
+.rmp-nav:hover .rmp-t em,.rmp-nav:focus-visible .rmp-t em{color:#625CF6}
 .rmp-nav:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 /* devre dışıyken açılmasın: sallanan boş bir hap kalıyordu */
 .rmp-nav[disabled]{opacity:.28;cursor:default;pointer-events:none}

@@ -2153,12 +2153,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    biçimsiz kalıyordu. Tek mekanizma seçildi: webkit sözde öğeleri. */
 .rmp-pdp #rmp-about::-webkit-scrollbar-thumb{background:#121226;border-radius:999px}
 .rmp-pdp #rmp-about::-webkit-scrollbar-thumb:hover{background:var(--accent-fg)}
-/* The thumb is the share of the text that fits, and with most of a
-   description on screen that share is nearly all of it — a bar almost as tall
-   as the column. Shortening the TRACK shortens the thumb with it and keeps
-   the proportion honest: it now runs between the first and last lines rather
-   than edge to edge. */
-.rmp-pdp #rmp-about::-webkit-scrollbar-track{background:transparent;margin-block:34px}
+/* The track runs the full height of the text. It was inset 34px top and
+   bottom to make the thumb read shorter, but that put the bar's start a
+   third of the way down the column while the text starts at the top — it
+   looked broken, and it was. The bar the earlier note was about was the
+   browser's own 15px default; that is fixed at its source. */
+.rmp-pdp #rmp-about::-webkit-scrollbar-track{background:transparent}
 
 /* The way out, in the page's own colour for "this closes" — the quiet one.
    On a dark ground the page never fills with --danger; it draws the pale red
