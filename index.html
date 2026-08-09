@@ -1341,7 +1341,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .panel{display:none}
 .panel.is-on{display:block}
 .deck{
-  --deck-gap:var(--s-4);
+  /* one step up from --s-4: at sixteen the neighbouring panel was almost
+     touching the one you are reading and the row felt packed */
+  --deck-gap:var(--s-6);
   /* the column's own left edge, with a floor so the neighbours stay wide
      enough to aim at on smaller screens. Declared here so any deck can stand
      on its own, and again on .pstage for the tab row that sits over one. */
@@ -2146,9 +2148,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .rmp-pdp #rmp-about::-webkit-scrollbar{width:6px}
 /* the thumb is the system's secondary purple rather than a grey — it is the
    only moving part of the panel and it may as well belong to it */
-.rmp-pdp #rmp-about{scrollbar-color:var(--accent-fg) transparent}
-.rmp-pdp #rmp-about::-webkit-scrollbar-thumb{background:var(--accent-fg);border-radius:999px}
-.rmp-pdp #rmp-about::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.rmp-pdp #rmp-about{scrollbar-color:#121226 transparent}
+.rmp-pdp #rmp-about::-webkit-scrollbar-thumb{background:#121226;border-radius:999px}
+.rmp-pdp #rmp-about::-webkit-scrollbar-thumb:hover{background:var(--accent-fg)}
 .rmp-pdp #rmp-about::-webkit-scrollbar-track{background:transparent}
 
 /* The way out, in the page's own colour for "this closes" — the quiet one.
@@ -2179,7 +2181,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   font-size:0;                      /* the component's own word steps aside */
   font-weight:var(--fw-semibold);text-transform:uppercase;
   color:#fff;padding:5px 11px;border-radius:6px;
-  background:rgba(8,20,36,.62);box-shadow:none;
+  /* the same hairline the stage chips wear, so every pill over a picture
+     is edged the same way */
+  background:rgba(8,20,36,.62);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
 }
 /* …and the page's own words take its place, in the page's own language */
@@ -4410,7 +4414,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   :root{--gutter:var(--s-5);--section-y:var(--s-8)}
   .hero{padding:var(--s-9) 0 var(--s-10)}
   .cards,.cards.is-cols-2,.cards.is-cols-3,.cards.is-cols-4{--cols:1}
-  .deck{--deck-gap:var(--s-3)}
+  .deck{--deck-gap:var(--s-4)}
   .progress{width:120px}
   /* four columns on a 390px screen: the label drops to 11px and the padding
      to 4px so "Photographers" still fits on one line */

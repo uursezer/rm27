@@ -33,10 +33,6 @@ var IK = {
   dikey:_ci('<path d="M12 4v16"/><path d="M8.4 7.6 12 4l3.6 3.6"/><path d="M8.4 16.4 12 20l3.6-3.6"/>'),
   /* sağa-sola */
   yatay:_ci('<path d="M4 12h16"/><path d="M7.6 8.4 4 12l3.6 3.6"/><path d="M16.4 8.4 20 12l-3.6 3.6"/>'),
-  /* fare */
-  fare: _ci('<rect x="7.5" y="3" width="9" height="18" rx="4.5"/><path d="M12 7v3.2"/>'),
-  /* paket kutusu */
-  kutu: _ci('<path d="M21 7.6 12 3 3 7.6l9 4.6 9-4.6Z"/><path d="M3 7.6v8.8L12 21l9-4.6V7.6"/><path d="M12 12.2V21"/>')
 };
 
 /* Lightbox işaretlemesi buradan kurulur: host'a HTML yapıştırtmıyoruz. */
@@ -57,8 +53,8 @@ _kok.innerHTML = '<div class="rmp-pdp" id="rmp-pdp" role="dialog" aria-modal="tr
    yutmazlar — fotoğrafa basıp yakınlaşmak hâlâ mümkün. */
 '      <div class="rmp-hud" aria-hidden="true">'+
 '        <span class="rmp-chip rmp-chip--count">'+IK.foto+'<b id="rmp-count"></b></span>'+
-'        <span class="rmp-chip">'+IK.dikey+'<span>Fotoğrafı değiştir</span>'+IK.fare+'</span>'+
-'        <span class="rmp-chip">'+IK.yatay+'<span>Paketi değiştir</span>'+IK.kutu+'</span>'+
+'        <span class="rmp-chip">'+IK.dikey+'<span>Fotoğrafı değiştir</span></span>'+
+'        <span class="rmp-chip">'+IK.yatay+'<span>Paketi değiştir</span></span>'+
 '      </div>'+
 '    </div>'+
 '  </div>'+
@@ -776,7 +772,10 @@ track.addEventListener('pointerup',endPtr,{passive:true});
 track.addEventListener('pointercancel',function(e){pts.delete(e.pointerId);
   if(start&&start.f) start.f.classList.remove('rmp-is-panning'); drag=null;start=null;},{passive:true});
 track.addEventListener('wheel',function(e){
-  if(zoom<=1){ navIptal(); hamleBasla(); return; }   /* serbest: tarayıcı kaydırır */
+  if(zoom<=1){
+    if(tekerlekTik(e, tekerlekNorm(e))) return;      /* fare: bir tık bir kare */
+    navIptal(); hamleBasla(); return;                /* parmak: tarayıcı kaydırır */
+  }
   e.preventDefault();
   if(e.ctrlKey){ setZoom(zoom*(e.deltaY<0?1.12:.89),e.clientX,e.clientY); return; }
   panX-=e.deltaX; panY-=e.deltaY; clampPan(); applyZoom();
@@ -832,18 +831,49 @@ function kaydirabilir(el,dy){
   }
   return false;
 }
+/* ── FARE ÇENTİĞİ Mİ, PARMAK MI? ────────────────────────────────
+   İkisi aynı olayla gelir ama aynı şeyi istemez. Touchpad yüzlerce
+   küçük değeri saniyeler içinde yollar: orada istenen serbest kayma.
+   Farenin tekerleği ise seyrek, büyük ve hep aynı boyda tıklar atar:
+   orada istenen BİR TIK, BİR KARE — birkaç kere çevirmek zorunda
+   kalmak eziyet. Ayırt etmenin iki işareti var:
+     · deltaMode satır ise (0 değilse) o kesin faredir,
+     · yoğun bir akışın içindeysek (arka arkaya <50ms) parmaktır,
+       değilse ve adım büyükse (≥60) faredir. */
+var wSon=0, wAkis=0, wTik=0;
+function tekerlekFare(e){
+  var now=Date.now(), ara=now-wSon; wSon=now;
+  if(ara<50) wAkis++; else wAkis=0;
+  if(e.deltaMode!==0) return true;
+  if(wAkis>=3) return false;                 /* akış sürüyor: parmak */
+  return Math.abs(e.deltaY)>=60;
+}
+function tekerlekNorm(e){
+  var dy=e.deltaY;
+  if(e.deltaMode===1) dy*=16; else if(e.deltaMode===2) dy*=(track.clientHeight||600);
+  return dy;
+}
+/* Fare çentiği: tek tık, tek kare. true dönerse olay tüketilmiştir. */
+function tekerlekTik(e, dy){
+  if(!tekerlekFare(e)) return false;
+  e.preventDefault();
+  var now=Date.now();
+  if(now-wTik<110) return true;              /* aynı çentiğin ikizi */
+  wTik=now; navIptal();
+  goToMedia(mi + (dy>0?1:-1));
+  return true;
+}
 function tekerlek(e){
   if(!isOpen || zoom>1) return;
   var t=e.target, kok=t&&t.closest?t:null;
   if(kok && (kok.closest('.rmp-railcol') || kok.closest('.rmp-track'))) return;
-  var dy=e.deltaY;
-  if(e.deltaMode===1) dy*=16; else if(e.deltaMode===2) dy*=(track.clientHeight||600);
+  var dy=tekerlekNorm(e);
   if(!dy) return;
   if(kok && kaydirabilir(kok,dy)) return;
   e.preventDefault();
-  /* BİRE BİR. Bir sayfayı nasıl kaydırıyorsan içeriği de öyle: tekerleğin
-     verdiği kadar, ne eksik ne fazla. Tek birimlik bir hareket bile geçer.
-     Kademe yok, bekleme yok, kilit yok — durduğunda `yerlestir` toparlar. */
+  if(tekerlekTik(e,dy)) return;
+  /* BİRE BİR. Bir sayfayı nasıl kaydırıyorsan içeriği de öyle: parmağın
+     verdiği kadar, ne eksik ne fazla. Durduğunda `yerlestir` toparlar. */
   navIptal(); hamleBasla();
   track.scrollTop += dy;
 }
