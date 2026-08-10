@@ -3823,7 +3823,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .baband{
   background:var(--n-0);
   border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  transition:background var(--dur-2) var(--ease);
 }
+/* open, it is no longer an invitation but the head of what is below it, so it
+   steps back onto the page's secondary ground */
+.baband:has(+ .bafold.is-open){background:var(--bg-subtle)}
 .baband__in{
   display:flex;align-items:center;justify-content:space-between;
   gap:var(--s-6);padding-block:var(--s-7);flex-wrap:wrap;
@@ -5832,6 +5836,51 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
 
 
+<!-- ══════════ 12 · THE LAST WORD ══════════
+     The page has shown the work, the tools and the people. This is the one
+     thing left to say, on the ground the two offers use, with the same light
+     under the pointer — so the last panel reads as the same voice that made
+     the offers rather than a new one arriving at the end.
+     ════════════════════════════════════════════════════════════════ -->
+<section class="section section--last" id="start" aria-labelledby="startTitle" lang="tr">
+  <div class="cta cta--wall pbuy--dark" data-lit data-reveal>
+    <!-- The wall of photographs, built twice.
+         The one underneath is the room: dark, desaturated, drifting. The one
+         on top is exactly the same wall in full colour, with every frame
+         invisible — and the single frame the pointer is on is turned up.
+         Lighting a photograph is therefore not a filter being animated on
+         it, which is expensive and shows; it is one copy fading in over
+         another that was there all along. -->
+    <div class="wall wall--dark" aria-hidden="true" data-wall>
+      <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+      <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+    </div>
+    <div class="wall__lit" aria-hidden="true">
+      <div class="wall" data-wall>
+        <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+        <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="cta__in">
+        <p class="cta__rate"><span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span><b class="tnum">4,8</b><span class="cta__rate-n tnum">&#183; 15.000+ de&#287;erlendirme</span><span class="vh">5 &#252;zerinden 4,8, 15.000+ de&#287;erlendirmeye g&#246;re</span></p>
+        <p class="cta__faces" aria-hidden="true"><span class="cta__ring"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"></span></p>
+        <p class="eyebrow">10.000+ Profesyonel Fotoğrafçının Tercihi</p>
+        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket&#8217;i kullanıyor.</h2>
+        <a class="btn btn--primary btn--lg cta__go" href="#offer">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Kendi paketini oluştur
+          <svg class="cta__go-arrow" width="17" height="12" viewBox="0 0 17 12" fill="none" aria-hidden="true"><path d="M1 6h14M10.6 1.2L15.4 6l-4.8 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <p class="cta__note">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M8.6 1.7H3.4a1.7 1.7 0 00-1.7 1.7v5.2c0 .45.18.88.5 1.2l6 6a1.7 1.7 0 002.4 0l4.6-4.6a1.7 1.7 0 000-2.4l-6-6a1.7 1.7 0 00-1.2-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.9" cy="5.9" r="1.15" fill="currentColor"/></svg>
+          5 ürün seç, yalnızca 3 ürün öde.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════ 11 · TESTIMONIALS ══════════
      The photographs, names and handles come from the client's archive.
      PLACEHOLDER: five of the six quotes are written here rather than supplied,
@@ -5981,46 +6030,63 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   </div>
 </section>
 
-<!-- ══════════ 12 · THE LAST WORD ══════════
-     The page has shown the work, the tools and the people. This is the one
-     thing left to say, on the ground the two offers use, with the same light
-     under the pointer — so the last panel reads as the same voice that made
-     the offers rather than a new one arriving at the end.
-     ════════════════════════════════════════════════════════════════ -->
-<section class="section section--last" id="start" aria-labelledby="startTitle" lang="tr">
-  <div class="cta cta--wall pbuy--dark" data-lit data-reveal>
-    <!-- The wall of photographs, built twice.
-         The one underneath is the room: dark, desaturated, drifting. The one
-         on top is exactly the same wall in full colour, with every frame
-         invisible — and the single frame the pointer is on is turned up.
-         Lighting a photograph is therefore not a filter being animated on
-         it, which is expensive and shows; it is one copy fading in over
-         another that was there all along. -->
-    <div class="wall wall--dark" aria-hidden="true" data-wall>
-      <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
-      <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
-    </div>
-    <div class="wall__lit" aria-hidden="true">
-      <div class="wall" data-wall>
-        <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
-        <div class="wall__rail" data-rail></div><div class="wall__rail" data-rail></div>
+<!-- ══════════ 14 · THE WHATSAPP COMMUNITY ══════════
+     What the group is, on the left; what it looks like, on the right. The
+     door is the page's own: signed in it opens the group, signed out it
+     opens the way in first, and signing in from there lights the rest of
+     the page at the same moment. Turkish, like the closing call above it. -->
+<section class="section section--last" id="community" aria-labelledby="waTitle" lang="tr">
+  <div class="wa" data-wa data-reveal>
+    <span class="wa__pattern" aria-hidden="true"></span>
+    <div class="wa__in">
+      <div class="wa__copy" data-wa-copy>
+        <p class="eyebrow wa__eyebrow"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.5 8V5.9a4.5 4.5 0 019 0V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.8" y="8" width="12.4" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>Sadece fotoğrafçılara özel</p>
+        <h2 id="waTitle" class="wa__say">Özel WhatsApp<br>topluluğuna katıl.</h2>
+        <p class="lede wa__lede">Workshop duyurularını, yeni ürünleri ve yalnızca topluluğa özel fırsatları doğrudan WhatsApp&#8217;tan al.</p>
+        <ul class="wa__feats">
+          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 2L4.6 11.4h4.6L8.6 18l6.8-9.6h-4.6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Ücretsiz workshop&#8217;lar</li>
+          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M9.6 2H3.9A1.9 1.9 0 002 3.9v5.7c0 .5.2.98.56 1.34l6.5 6.5a1.9 1.9 0 002.68 0l5.02-5.02a1.9 1.9 0 000-2.68l-6.5-6.5A1.9 1.9 0 009.6 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="6.5" r="1.3" fill="currentColor"/></svg>Özel İndirimler</li>
+          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L2.2 7.9l5.4-.8z" stroke="currentColor" stroke-width="1.5"/></svg>Yeni ürünler</li>
+        </ul>
+        <div class="wa__proof">
+          <span class="wa__faces" aria-hidden="true">
+            <img src="images/whatsapp/avatar-dugunumuzvar.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-zariffilm.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-ugurdemir.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-ekrulila.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'">
+          </span>
+          <p><b>2100+ fotoğrafçı toplulukta</b><span>Ücretsiz &#183; Gereksiz mesaj yok</span></p>
+        </div>
+        <div class="wa__act">
+          <button class="btn btn--lg wa__go" type="button" data-join>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg>
+            Topluluğa katıl
+            <svg class="cta__go-arrow" viewBox="0 0 17 12" fill="none" aria-hidden="true"><path d="M1 6h14M10.6 1.2L15.4 6l-4.8 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="wa__note"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M6 9V6.7a4 4 0 018 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="4.2" y="9" width="11.6" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="13" r="1.1" fill="currentColor"/></svg>Bağlantı giriş yaptıktan sonra açılır.</p>
+        </div>
       </div>
-    </div>
-    <div class="wrap">
-      <div class="cta__in">
-        <p class="cta__rate"><span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span><b class="tnum">4,8</b><span class="cta__rate-n tnum">&#183; 15.000+ de&#287;erlendirme</span><span class="vh">5 &#252;zerinden 4,8, 15.000+ de&#287;erlendirmeye g&#246;re</span></p>
-        <p class="cta__faces" aria-hidden="true"><span class="cta__ring"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"></span></p>
-        <p class="eyebrow">10.000+ Profesyonel Fotoğrafçının Tercihi</p>
-        <h2 id="startTitle" class="cta__say">Türkiye&#8217;nin önde gelen fotoğrafçıları, <br>doğal renkler ve hızlı retouch için <br>RetouchMarket&#8217;i kullanıyor.</h2>
-        <a class="btn btn--primary btn--lg cta__go" href="#offer">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Kendi paketini oluştur
-          <svg class="cta__go-arrow" width="17" height="12" viewBox="0 0 17 12" fill="none" aria-hidden="true"><path d="M1 6h14M10.6 1.2L15.4 6l-4.8 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <p class="cta__note">
-          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M8.6 1.7H3.4a1.7 1.7 0 00-1.7 1.7v5.2c0 .45.18.88.5 1.2l6 6a1.7 1.7 0 002.4 0l4.6-4.6a1.7 1.7 0 000-2.4l-6-6a1.7 1.7 0 00-1.2-.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5.9" cy="5.9" r="1.15" fill="currentColor"/></svg>
-          5 ürün seç, yalnızca 3 ürün öde.
-        </p>
+
+      <div class="wa__phonewrap" aria-hidden="true">
+        <div class="wa__phone">
+          <span class="wa__paper"></span>
+          <div class="wa__head">
+            <span class="wa__mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg></span>
+            <span class="wa__who"><b>RetouchMarket Topluluğu</b><span>2.418 katılımcı &#183; yalnızca fotoğrafçılar</span></span>
+            <span class="wa__more"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="1.3" fill="currentColor"/><circle cx="10" cy="4.5" r="1.3" fill="currentColor"/><circle cx="10" cy="15.5" r="1.3" fill="currentColor"/></svg></span>
+          </div>
+          <div class="wa__view">
+            <div class="wa__msgs">
+              <span class="wa__day">BUGÜN</span>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Workshop</span><br>Bu cuma 20.00&#8217;de ücretsiz &#8220;Doğal Cilt Tonları&#8221; workshop&#8217;unda buluşuyoruz. Kayıt bağlantısı toplulukta paylaşılacak 🎥<span class="wa__at">09:18</span><span class="wa__react">❤️ 28</span></div>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Bugüne özel</span><br>Sepette tüm ürünlerde <strong>%20 indirim</strong> başladı. Kampanya bu gece 23.59&#8217;da sona eriyor ⚡<span class="wa__at">10:02</span><span class="wa__react">🔥 41</span></div>
+              <div class="wa__shot"><img src="images/whatsapp/workshop-preview.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>Workshop önizlemesi</b>Doğal cilt tonları &#183; Cuma 20.00</span></div>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Yeni tutorial</span><br>&#8220;Photoshop&#8217;ta doğal ten rötuşu&#8221; tutorial&#8217;ı şimdi yayında. İzleme bağlantısı topluluk üyelerine açık 🎬<span class="wa__at">11:24</span></div>
+              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Yeni preset</span><br>Yeni <strong>Natural Wedding Preset Pack</strong> çıktı. İlk örnekleri ve erken erişim bağlantısını hemen inceleyebilirsiniz.<span class="wa__at">12:10</span><span class="wa__react">✨ 19</span></div>
+              <div class="wa__shot"><img src="images/whatsapp/preset-preview.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>Natural Wedding Preset</b>Yeni paketten örnek sonuç ✨</span></div>
+              <div class="wa__msg wa__msg--mine"><span class="wa__from">Zeynep A.</span>Yeni preset&#8217;in renkleri çok doğal görünüyor, hemen deniyorum 🙌<span class="wa__at">12:13 <span class="wa__ticks">✓✓</span></span></div>
+            </div>
+          </div>
+          <div class="wa__bar"><span class="wa__field">☺ &nbsp; Mesaj yazın…</span><span class="wa__send"><svg viewBox="0 0 20 20" fill="none"><path d="M3 3.5l14 6.5-14 6.5 2-6.5zM5 10h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="wa__live"><span class="wa__live-e" data-live-icon>🎓</span><span class="wa__live-c" data-live-copy><b data-live-title>Workshop duyurusu</b><span data-live-text>Cuma &#183; 20.00 &#183; Ücretsiz</span></span></div>
       </div>
     </div>
   </div>
@@ -6140,68 +6206,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 </section>
 
 </main>
-
-<!-- ══════════ 14 · THE WHATSAPP COMMUNITY ══════════
-     What the group is, on the left; what it looks like, on the right. The
-     door is the page's own: signed in it opens the group, signed out it
-     opens the way in first, and signing in from there lights the rest of
-     the page at the same moment. Turkish, like the closing call above it. -->
-<section class="section section--last" id="community" aria-labelledby="waTitle" lang="tr">
-  <div class="wa" data-wa data-reveal>
-    <span class="wa__pattern" aria-hidden="true"></span>
-    <div class="wa__in">
-      <div class="wa__copy" data-wa-copy>
-        <p class="eyebrow wa__eyebrow"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.5 8V5.9a4.5 4.5 0 019 0V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.8" y="8" width="12.4" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>Sadece fotoğrafçılara özel</p>
-        <h2 id="waTitle" class="wa__say">Özel WhatsApp<br>topluluğuna katıl.</h2>
-        <p class="lede wa__lede">Workshop duyurularını, yeni ürünleri ve yalnızca topluluğa özel fırsatları doğrudan WhatsApp&#8217;tan al.</p>
-        <ul class="wa__feats">
-          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 2L4.6 11.4h4.6L8.6 18l6.8-9.6h-4.6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Ücretsiz workshop&#8217;lar</li>
-          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M9.6 2H3.9A1.9 1.9 0 002 3.9v5.7c0 .5.2.98.56 1.34l6.5 6.5a1.9 1.9 0 002.68 0l5.02-5.02a1.9 1.9 0 000-2.68l-6.5-6.5A1.9 1.9 0 009.6 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="6.5" cy="6.5" r="1.3" fill="currentColor"/></svg>Özel İndirimler</li>
-          <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L2.2 7.9l5.4-.8z" stroke="currentColor" stroke-width="1.5"/></svg>Yeni ürünler</li>
-        </ul>
-        <div class="wa__proof">
-          <span class="wa__faces" aria-hidden="true">
-            <img src="images/whatsapp/avatar-dugunumuzvar.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-zariffilm.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-ugurdemir.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'"><img src="images/whatsapp/avatar-ekrulila.webp" alt="" width="39" height="39" loading="lazy" onerror="this.style.display='none'">
-          </span>
-          <p><b>2100+ fotoğrafçı toplulukta</b><span>Ücretsiz &#183; Gereksiz mesaj yok</span></p>
-        </div>
-        <div class="wa__act">
-          <button class="btn btn--lg wa__go" type="button" data-join>
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg>
-            Topluluğa katıl
-            <svg class="cta__go-arrow" viewBox="0 0 17 12" fill="none" aria-hidden="true"><path d="M1 6h14M10.6 1.2L15.4 6l-4.8 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <p class="wa__note"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M6 9V6.7a4 4 0 018 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="4.2" y="9" width="11.6" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="13" r="1.1" fill="currentColor"/></svg>Bağlantı giriş yaptıktan sonra açılır.</p>
-        </div>
-      </div>
-
-      <div class="wa__phonewrap" aria-hidden="true">
-        <div class="wa__phone">
-          <span class="wa__paper"></span>
-          <div class="wa__head">
-            <span class="wa__mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2.5A9.44 9.44 0 002.6 11.94c0 1.66.44 3.28 1.26 4.71L2.5 21.5l4.98-1.3a9.4 9.4 0 004.56 1.16h.01a9.44 9.44 0 000-18.86zm5.46 14.32c-.25.7-1.44 1.33-2.02 1.42-.52.08-1.17.11-1.89-.12-.43-.13-.99-.32-1.71-.63-3.02-1.3-4.99-4.34-5.14-4.54-.15-.2-1.23-1.62-1.23-3.1s.77-2.2 1.05-2.5c.27-.31.6-.38.8-.38h.57c.18.01.43-.7.67.51.25.6.84 2.06.92 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.39-.45.53-.15.15-.3.31-.13.61.17.3.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.3.15.48.13.65-.07.17-.2.74-.87.94-1.17.2-.3.4-.25.67-.15.27.1 1.74.82 2.04.97.3.15.5.22.57.35.08.12.08.72-.17 1.42z"/></svg></span>
-            <span class="wa__who"><b>RetouchMarket Topluluğu</b><span>2.418 katılımcı &#183; yalnızca fotoğrafçılar</span></span>
-            <span class="wa__more"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="1.3" fill="currentColor"/><circle cx="10" cy="4.5" r="1.3" fill="currentColor"/><circle cx="10" cy="15.5" r="1.3" fill="currentColor"/></svg></span>
-          </div>
-          <div class="wa__view">
-            <div class="wa__msgs">
-              <span class="wa__day">BUGÜN</span>
-              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Workshop</span><br>Bu cuma 20.00&#8217;de ücretsiz &#8220;Doğal Cilt Tonları&#8221; workshop&#8217;unda buluşuyoruz. Kayıt bağlantısı toplulukta paylaşılacak 🎥<span class="wa__at">09:18</span><span class="wa__react">❤️ 28</span></div>
-              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Bugüne özel</span><br>Sepette tüm ürünlerde <strong>%20 indirim</strong> başladı. Kampanya bu gece 23.59&#8217;da sona eriyor ⚡<span class="wa__at">10:02</span><span class="wa__react">🔥 41</span></div>
-              <div class="wa__shot"><img src="images/whatsapp/workshop-preview.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>Workshop önizlemesi</b>Doğal cilt tonları &#183; Cuma 20.00</span></div>
-              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Yeni tutorial</span><br>&#8220;Photoshop&#8217;ta doğal ten rötuşu&#8221; tutorial&#8217;ı şimdi yayında. İzleme bağlantısı topluluk üyelerine açık 🎬<span class="wa__at">11:24</span></div>
-              <div class="wa__msg wa__msg--say"><span class="wa__from">RetouchMarket</span><span class="wa__tag">Yeni preset</span><br>Yeni <strong>Natural Wedding Preset Pack</strong> çıktı. İlk örnekleri ve erken erişim bağlantısını hemen inceleyebilirsiniz.<span class="wa__at">12:10</span><span class="wa__react">✨ 19</span></div>
-              <div class="wa__shot"><img src="images/whatsapp/preset-preview.webp" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>Natural Wedding Preset</b>Yeni paketten örnek sonuç ✨</span></div>
-              <div class="wa__msg wa__msg--mine"><span class="wa__from">Zeynep A.</span>Yeni preset&#8217;in renkleri çok doğal görünüyor, hemen deniyorum 🙌<span class="wa__at">12:13 <span class="wa__ticks">✓✓</span></span></div>
-            </div>
-          </div>
-          <div class="wa__bar"><span class="wa__field">☺ &nbsp; Mesaj yazın…</span><span class="wa__send"><svg viewBox="0 0 20 20" fill="none"><path d="M3 3.5l14 6.5-14 6.5 2-6.5zM5 10h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-        </div>
-        <div class="wa__live"><span class="wa__live-e" data-live-icon>🎓</span><span class="wa__live-c" data-live-copy><b data-live-title>Workshop duyurusu</b><span data-live-text>Cuma &#183; 20.00 &#183; Ücretsiz</span></span></div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- the way in the community band opens when nobody is signed in. It lives
      outside the section so the section can be lifted out without taking the
@@ -8016,10 +8020,20 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     baFold.inert = true;
     baBtn.addEventListener('click', function(){
       var open = baOpen();
+      var band = document.querySelector('.baband');
+      if(open && band){
+        /* the fold grows downward, so what you asked to see is below the
+           band — put the band under the bar and the gallery fills the rest */
+        requestAnimationFrame(function(){
+          var nav = document.getElementById('nav');
+          window.scrollTo({top: window.scrollY + band.getBoundingClientRect().top -
+                                ((nav ? nav.offsetHeight : 0) + 1),
+                           behavior: still ? 'auto' : 'smooth'});
+        });
+      }
       if(!open){
         /* closing from below the fold would drop the page onto whatever came
            after it — put the band back under the pointer instead */
-        var band = document.querySelector('.baband');
         if(band && band.getBoundingClientRect().top < 0){
           var nav = document.getElementById('nav');
           window.scrollTo({top: window.scrollY + band.getBoundingClientRect().top -
@@ -8045,8 +8059,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       bar.style.transition = keep;
     }
     var nav = document.getElementById('nav');
-    var gap = (nav ? nav.offsetHeight : 0) + 28;
-    window.scrollTo({top: window.scrollY + bar.getBoundingClientRect().top - gap,
+    /* the ROW, not the block that holds it: the block carries 40px of its own
+       clearance inside the fold, and aiming at that left the chips sitting a
+       third of the way down the window instead of under the bar */
+    var hedef = bar.querySelector('.pchips') || bar;
+    var gap = (nav ? nav.offsetHeight : 0) + 16;
+    window.scrollTo({top: window.scrollY + hedef.getBoundingClientRect().top - gap,
                      behavior: still ? 'auto' : 'smooth'});
   }
 
@@ -8091,7 +8109,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
     chips.forEach(function(c){
       c.tabIndex = -1;
-      c.addEventListener('click', function(){ pick(chips.indexOf(c)); });
+      c.addEventListener('click', function(){
+        pick(chips.indexOf(c));
+        /* the gallery you just asked for should be the thing you are looking
+           at: the row goes to the top of the window and its pictures fill
+           what is under it */
+        toChips(c);
+      });
       c.addEventListener('keydown', function(e){
         var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
         if(!d) return;
