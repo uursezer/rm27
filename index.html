@@ -2365,19 +2365,19 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    separate offer and must not look pressed because the pill was grazed */
 .pchip:hover{border-color:var(--n-400)}
 /* The one being looked at — v2: the accent solid rather than a tint of it.
-   v1 was the tint (--accent-bg with an accent edge and accent-700 ink); it
-   is one line away if this reads as too loud.
-   The disc has to change with it: on a solid accent body a disc that was
-   also accent would disappear, so it takes a wash of white and the accent
-   back as its own ink — the same two facts the tinted version carried, in
-   the other order. */
+   Back to the tint — the accent's SECONDARY face rather than its solid: the
+   palest step of the ramp as the ground, the accent's border tone as the
+   edge, and the deep step as the ink. It still reads as the one chosen
+   (nothing else on the row carries any accent at all) without a row of white
+   words on twelve pills of solid purple. The solid version is one line away
+   if this reads as too quiet. */
 .pchip:has([aria-selected="true"]){
-  background:var(--accent);border-color:var(--accent);box-shadow:var(--sh-1);
+  background:var(--accent-bg);border-color:var(--accent-border);box-shadow:none;
 }
 .pchip:has([aria-selected="true"]) .pchip__pick{
-  color:var(--fg-on-accent);font-weight:var(--fw-semibold);
+  color:var(--accent-700);font-weight:var(--fw-semibold);
 }
-.pchip:has([aria-selected="true"]):hover{border-color:var(--accent-700);background:var(--accent-700)}
+.pchip:has([aria-selected="true"]):hover{border-color:var(--accent);background:var(--accent-bg)}
 
 /* What pressing it would do, said before you press it. It cannot be drawn by
    the chip: the row of chips scrolls sideways, and a scroller clips whatever
@@ -5148,72 +5148,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   </div>
 </section>
 
-<!-- ══════════ 6 · BESTSELLER BUNDLE ══════════
-     PLACEHOLDER DATA: the plugin pack's price is set in the build script — the
-     page states it nowhere; so is the 10,000+ figure. Everything else is read
-     off the preset grid above. The boxes and the picker are drawn from one
-     state in script, so the two cannot disagree; this markup is the frame. -->
-<section class="section offer2" id="offer" aria-labelledby="offerTitle" data-lit>
-  <div class="offer2__glow" aria-hidden="true"></div>
-  <div class="offer2__grid" aria-hidden="true"></div>
-  <div class="wrap">
-    <div class="shell" data-offer data-reveal>
-      <div class="shell__head">
-        <div>
-          <p class="eyebrow">Bestseller bundle</p>
-          <h2 id="offerTitle">The Easiest Way to Choose.</h2>
-          <p class="lede">Not sure where to start? We put our bestselling tools together and made
-            the decision for you — keep our picks, or swap in the ones you want.</p>
-        </div>
-        <div class="tiers" role="radiogroup" aria-label="Bundle size">
-          <span class="tiers__thumb" aria-hidden="true"></span>
-          <button type="button" role="radio" data-deal="3" aria-checked="false">Get 3, Pay 2</button>
-          <button type="button" role="radio" data-deal="5" aria-checked="true" aria-label="Get 5, Pay 3 — best deal">Get 5, Pay 3</button>
-          <span class="osbest" aria-hidden="true"><svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><path d="M7 .8l1.9 3.9 4.3.6-3.1 3 .7 4.3L7 10.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/></svg>Best deal</span>
-        </div>
-      </div>
-
-      <div class="prods" id="bundleRow" data-picks></div>
-      <p class="vh" data-status role="status"></p>
-
-      <div class="custom" id="bundlePicker" data-custom hidden>
-        <h3 class="vh">Customize your selection</h3>
-        <div class="prog" data-prog>
-          <p class="prog__line">
-            <b class="prog__t">Your bundle: <span class="tnum" data-prog-n>0 / 5</span></b>
-            <span class="custom__hint" data-hint aria-live="polite"></span>
-            <span class="prog__pct tnum" data-prog-p>0%</span>
-          </p>
-          <span class="prog__track" aria-hidden="true"><i class="prog__fill" data-prog-fill></i></span>
-          <button class="btn btn--secondary custom__done" type="button" data-done>Done</button>
-        </div>
-        <div class="choices" data-choices></div>
-      </div>
-
-      <div class="ofoot">
-        <p class="oproof">
-          <span class="oproof__faces"><a class="oface" href="#voices" data-at="@ekrulila" data-tip="@ekrulila" data-tip-below aria-label="Ekrulila on Instagram, @ekrulila — read what they said"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@mucahitguney" data-tip="@mucahitguney" data-tip-below aria-label="Mücahit Güney on Instagram, @mucahitguney — read what they said"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@celalcanik" data-tip="@celalcanik" data-tip-below aria-label="Celal Canık on Instagram, @celalcanik — read what they said"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@zariffilm" data-tip="@zariffilm" data-tip-below aria-label="Zarif Film on Instagram, @zariffilm — read what they said"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@ugurdemir" data-tip="@ugurdemir" data-tip-below aria-label="Uğur Demir on Instagram, @ugurdemir — read what they said"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@dugunumuzvar" data-tip="@dugunumuzvar" data-tip-below aria-label="Düğünümüz Var on Instagram, @dugunumuzvar — read what they said"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a></span>
-          <span class="oproof__rate">
-            <span class="oproof__score">
-            <span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span>
-            <b class="tnum">4.8</b>
-            </span>
-            <span class="oproof__n tnum">15,000+ reviews</span>
-            <span class="vh">, rated 4.8 out of 5 from more than 15,000 reviews</span>
-          </span>
-        </p>
-        <div class="oact">
-          <span class="oact__row">
-            <button class="btn btn--secondary btn--lg" type="button" data-customize aria-expanded="false" aria-controls="bundlePicker">Customize bundle</button>
-            <button class="btn btn--primary btn--lg obuy" type="button" data-go disabled></button>
-          </span>
-          <p class="osave" data-save hidden></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ══════════ 7 · BEFORE / AFTER ══════════
      PLACEHOLDER DATA: the pack names are real, but which photograph belongs to
      which pack is a stand-in and every frame is drawn from the page's pool. -->
@@ -5716,6 +5650,74 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    </div>
   </div>
 </section>
+
+<!-- ══════════ 6 · BESTSELLER BUNDLE ══════════
+     PLACEHOLDER DATA: the plugin pack's price is set in the build script — the
+     page states it nowhere; so is the 10,000+ figure. Everything else is read
+     off the preset grid above. The boxes and the picker are drawn from one
+     state in script, so the two cannot disagree; this markup is the frame. -->
+<section class="section offer2" id="offer" aria-labelledby="offerTitle" data-lit>
+  <div class="offer2__glow" aria-hidden="true"></div>
+  <div class="offer2__grid" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="shell" data-offer data-reveal>
+      <div class="shell__head">
+        <div>
+          <p class="eyebrow">Bestseller bundle</p>
+          <h2 id="offerTitle">The Easiest Way to Choose.</h2>
+          <p class="lede">Not sure where to start? We put our bestselling tools together and made
+            the decision for you — keep our picks, or swap in the ones you want.</p>
+        </div>
+        <div class="tiers" role="radiogroup" aria-label="Bundle size">
+          <span class="tiers__thumb" aria-hidden="true"></span>
+          <button type="button" role="radio" data-deal="3" aria-checked="false">Get 3, Pay 2</button>
+          <button type="button" role="radio" data-deal="5" aria-checked="true" aria-label="Get 5, Pay 3 — best deal">Get 5, Pay 3</button>
+          <span class="osbest" aria-hidden="true"><svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><path d="M7 .8l1.9 3.9 4.3.6-3.1 3 .7 4.3L7 10.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z"/></svg>Best deal</span>
+        </div>
+      </div>
+
+      <div class="prods" id="bundleRow" data-picks></div>
+      <p class="vh" data-status role="status"></p>
+
+      <div class="custom" id="bundlePicker" data-custom hidden>
+        <h3 class="vh">Customize your selection</h3>
+        <div class="prog" data-prog>
+          <p class="prog__line">
+            <b class="prog__t">Your bundle: <span class="tnum" data-prog-n>0 / 5</span></b>
+            <span class="custom__hint" data-hint aria-live="polite"></span>
+            <span class="prog__pct tnum" data-prog-p>0%</span>
+          </p>
+          <span class="prog__track" aria-hidden="true"><i class="prog__fill" data-prog-fill></i></span>
+          <button class="btn btn--secondary custom__done" type="button" data-done>Done</button>
+        </div>
+        <div class="choices" data-choices></div>
+      </div>
+
+      <div class="ofoot">
+        <p class="oproof">
+          <span class="oproof__faces"><a class="oface" href="#voices" data-at="@ekrulila" data-tip="@ekrulila" data-tip-below aria-label="Ekrulila on Instagram, @ekrulila — read what they said"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@mucahitguney" data-tip="@mucahitguney" data-tip-below aria-label="Mücahit Güney on Instagram, @mucahitguney — read what they said"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@celalcanik" data-tip="@celalcanik" data-tip-below aria-label="Celal Canık on Instagram, @celalcanik — read what they said"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@zariffilm" data-tip="@zariffilm" data-tip-below aria-label="Zarif Film on Instagram, @zariffilm — read what they said"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@ugurdemir" data-tip="@ugurdemir" data-tip-below aria-label="Uğur Demir on Instagram, @ugurdemir — read what they said"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a><a class="oface" href="#voices" data-at="@dugunumuzvar" data-tip="@dugunumuzvar" data-tip-below aria-label="Düğünümüz Var on Instagram, @dugunumuzvar — read what they said"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="44" height="44" onerror="this.closest('.oface').style.display='none'"></a></span>
+          <span class="oproof__rate">
+            <span class="oproof__score">
+            <span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span>
+            <b class="tnum">4.8</b>
+            </span>
+            <span class="oproof__n tnum">15,000+ reviews</span>
+            <span class="vh">, rated 4.8 out of 5 from more than 15,000 reviews</span>
+          </span>
+        </p>
+        <div class="oact">
+          <span class="oact__row">
+            <button class="btn btn--secondary btn--lg" type="button" data-customize aria-expanded="false" aria-controls="bundlePicker">Customize bundle</button>
+            <button class="btn btn--primary btn--lg obuy" type="button" data-go disabled></button>
+          </span>
+          <p class="osave" data-save hidden></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 
 
 
