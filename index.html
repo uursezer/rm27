@@ -1398,7 +1398,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .deck__pane .player__foot,.deck__pane .player__dur{transition:opacity var(--dur-2) var(--ease)}
 
 .deck__bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-top:var(--s-5)}
-.deck__ctrl{display:flex;align-items:center;justify-content:center;gap:var(--s-3)}
+/* the pill is the middle column itself now that nothing stands beside it, so
+   the two 1fr edges centre it in the bar rather than centring a group */
+.deck__bar > .deck__dots{justify-self:center}
 .deck__arrows{display:flex;gap:var(--s-2);justify-content:flex-end}
 .deck__dots{
   display:flex;align-items:center;gap:var(--s-2);
@@ -1420,15 +1422,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    for the whole set. It is one dot, one colour, stretched when it is the
    one you are on. */
 .deck__dot[aria-current="true"]{width:26px;background:var(--accent)}
-.deck__play{
-  width:38px;height:38px;border-radius:var(--r-full);display:grid;place-items:center;flex:none;
-  border:1px solid var(--border);background:var(--surface);color:var(--fg-body);box-shadow:var(--sh-1);
-  transition:border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
-}
-.deck__play:hover{border-color:var(--border-strong);color:var(--fg)}
-.deck__play .i-pause{display:none}
-.deck__play.is-playing .i-play{display:none}
-.deck__play.is-playing .i-pause{display:block}
 
 /* ── horizontal shelf: used by the tutorials rail ──────────────── */
 .strip{margin-top:var(--s-6)}
@@ -4710,17 +4703,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           </div>
           <div class="deck__bar wrap">
             <span aria-hidden="true"></span>
-            <div class="deck__ctrl">
-              <div class="deck__dots">
-                <button class="deck__dot" type="button" aria-current="true" aria-label="Go to video 1 of 7: RetouchX Plugin — 40 portraits, one pass"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 2 of 7: Setting up a batch queue"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 3 of 7: Keeping skin texture"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 4 of 7: Eyes, teeth and lips"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 5 of 7: Reviewing before export"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 6 of 7: Masking hair edges"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 7 of 7: Saving your own recipe"></button>
-              </div>
-              <button class="deck__play" type="button" data-deck-toggle aria-label="Play the RetouchX Plugin carousel"><svg class="i-play" width="11" height="13" viewBox="0 0 11 13" fill="currentColor" aria-hidden="true"><path d="M10.2 5.6a1 1 0 010 1.8l-8.7 5A1 1 0 010 11.5v-10A1 1 0 011.5.6l8.7 5z"/></svg><svg class="i-pause" width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="3.4" height="12" rx="1.1"/><rect x="6.6" y="0" width="3.4" height="12" rx="1.1"/></svg></button>
+            <div class="deck__dots">
+              <button class="deck__dot" type="button" aria-current="true" aria-label="Go to video 1 of 7: RetouchX Plugin — 40 portraits, one pass"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 2 of 7: Setting up a batch queue"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 3 of 7: Keeping skin texture"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 4 of 7: Eyes, teeth and lips"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 5 of 7: Reviewing before export"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 6 of 7: Masking hair edges"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 7 of 7: Saving your own recipe"></button>
             </div>
             <div class="deck__arrows">
               <button class="arrow" type="button" data-deck-step="-1" aria-label="Previous video"><svg width="7" height="11" viewBox="0 0 7 11" fill="none" aria-hidden="true"><path d="M5.5 1L1.5 5.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -4804,17 +4794,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           </div>
           <div class="deck__bar wrap">
             <span aria-hidden="true"></span>
-            <div class="deck__ctrl">
-              <div class="deck__dots">
-                <button class="deck__dot" type="button" aria-current="true" aria-label="Go to video 1 of 7: Lightroom Ai Color Plugin — grade a gallery in taps"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 2 of 7: Matching a reference frame"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 3 of 7: Building your own look"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 4 of 7: Syncing across a shoot"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 5 of 7: Protecting skin tones"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 6 of 7: Split toning shadows"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 7 of 7: Exporting a preset pack"></button>
-              </div>
-              <button class="deck__play" type="button" data-deck-toggle aria-label="Play the Lightroom Ai Color Plugin carousel"><svg class="i-play" width="11" height="13" viewBox="0 0 11 13" fill="currentColor" aria-hidden="true"><path d="M10.2 5.6a1 1 0 010 1.8l-8.7 5A1 1 0 010 11.5v-10A1 1 0 011.5.6l8.7 5z"/></svg><svg class="i-pause" width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="3.4" height="12" rx="1.1"/><rect x="6.6" y="0" width="3.4" height="12" rx="1.1"/></svg></button>
+            <div class="deck__dots">
+              <button class="deck__dot" type="button" aria-current="true" aria-label="Go to video 1 of 7: Lightroom Ai Color Plugin — grade a gallery in taps"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 2 of 7: Matching a reference frame"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 3 of 7: Building your own look"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 4 of 7: Syncing across a shoot"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 5 of 7: Protecting skin tones"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 6 of 7: Split toning shadows"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 7 of 7: Exporting a preset pack"></button>
             </div>
             <div class="deck__arrows">
               <button class="arrow" type="button" data-deck-step="-1" aria-label="Previous video"><svg width="7" height="11" viewBox="0 0 7 11" fill="none" aria-hidden="true"><path d="M5.5 1L1.5 5.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -4898,17 +4885,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           </div>
           <div class="deck__bar wrap">
             <span aria-hidden="true"></span>
-            <div class="deck__ctrl">
-              <div class="deck__dots">
-                <button class="deck__dot" type="button" aria-current="true" aria-label="Go to video 1 of 7: US Photoshop Plugin — the panel tour"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 2 of 7: Frequency separation"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 3 of 7: Dodge and burn layers"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 4 of 7: Saved liquify shapes"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 5 of 7: Export sizes for Instagram"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 6 of 7: Cleaning up backgrounds"></button>
-                <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 7 of 7: Sharpening for print"></button>
-              </div>
-              <button class="deck__play" type="button" data-deck-toggle aria-label="Play the US Photoshop Plugin carousel"><svg class="i-play" width="11" height="13" viewBox="0 0 11 13" fill="currentColor" aria-hidden="true"><path d="M10.2 5.6a1 1 0 010 1.8l-8.7 5A1 1 0 010 11.5v-10A1 1 0 011.5.6l8.7 5z"/></svg><svg class="i-pause" width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="3.4" height="12" rx="1.1"/><rect x="6.6" y="0" width="3.4" height="12" rx="1.1"/></svg></button>
+            <div class="deck__dots">
+              <button class="deck__dot" type="button" aria-current="true" aria-label="Go to video 1 of 7: US Photoshop Plugin — the panel tour"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 2 of 7: Frequency separation"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 3 of 7: Dodge and burn layers"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 4 of 7: Saved liquify shapes"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 5 of 7: Export sizes for Instagram"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 6 of 7: Cleaning up backgrounds"></button>
+              <button class="deck__dot" type="button" aria-current="false" aria-label="Go to video 7 of 7: Sharpening for print"></button>
             </div>
             <div class="deck__arrows">
               <button class="arrow" type="button" data-deck-step="-1" aria-label="Previous video"><svg width="7" height="11" viewBox="0 0 7 11" fill="none" aria-hidden="true"><path d="M5.5 1L1.5 5.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -7332,7 +7316,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      Native scroll-snap does the moving, so a swipe, a trackpad flick and a
      dot click all land in the same place, and the row still works with JS
      off. This layer only keeps the dots in sync and runs the countdown. */
-  var DECK_MS = 6000;
   /* ---- a caption that runs long folds, and says it folded ----
      Three lines is what the strip under a video can carry before it starts
      covering the picture. Past that the line is folded and a button offers
@@ -7487,49 +7470,26 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     var track  = deck.querySelector('[data-deck-track]'),
         panes  = [].slice.call(track.children),
         dots   = [].slice.call(deck.querySelectorAll('.deck__dot')),
-        toggle = deck.querySelector('[data-deck-toggle]'),
         panel  = deck.closest('.panel'),
         arrows = [].slice.call(deck.querySelectorAll('[data-deck-step]'));
 
     /* One number says which video is showing, and one function moves the row
        to it. Everything else — the dots, the class on the pane, which video
-       plays, the countdown — is drawn from that number, never measured back
-       out of a scroll that is still moving. A scroll the row did not start
-       (a swipe, a trackpad flick) is read only when it comes to rest, and
-       then it just agrees with where it landed. */
+       is stopped — is drawn from that number, never measured back out of a
+       scroll that is still moving. A scroll the row did not start (a swipe, a
+       trackpad flick) is read only when it comes to rest, and then it just
+       agrees with where it landed. The row never moves on its own: it goes
+       where you send it and waits there. */
     var idx = 0,
         want = null,      /* where a scroll we started is heading, or null */
-        timer = null, settle = null, raf = 0,
-        /* the deck waits to be asked. Three of these sit one under another in
-           the plugins section, and a page that starts playing at you the
-           moment it loads is a page you turn the sound off on — even muted,
-           the movement takes the read away from the copy beside it. */
-        playing = false, near = false, seen = false;
+        settle = null, raf = 0;
 
-    /* on screen, on the live tab, and not switched off */
-    function awake(){
-      return playing && seen && !document.hidden && !(panel && panel.hasAttribute('hidden'));
-    }
-    /* hovering holds the countdown but not the video itself — you paused to
-       watch, not to stop it */
-    function held(){ return still || near || !awake(); }
-    /* whichever video is in the middle plays; the rest rewind and wait */
+    /* the video you have left stops and rewinds; nothing starts by itself */
     function reel(){
       panes.forEach(function(pane, n){
         var v = pane.querySelector('video');
-        if(!v) return;
-        if(n === idx && awake() && !still){
-          var p = v.play();
-          if(p && p.catch) p.catch(function(){});
-        } else if(!v.paused){
-          v.pause(); v.currentTime = 0;
-        }
+        if(v && n !== idx && !v.paused){ v.pause(); v.currentTime = 0; }
       });
-    }
-    function tick(){
-      clearTimeout(timer); timer = null;
-      if(held()) return;
-      timer = setTimeout(function(){ go(idx + 1); }, DECK_MS);
     }
     /* everything the current index is worth saying, said in one place */
     function paint(){
@@ -7537,7 +7497,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       panes.forEach(function(p, n){ p.classList.toggle('is-on', n === idx); });
       arrows.forEach(function(a){ a.removeAttribute('disabled'); });
       reel();
-      tick();
     }
     /* the snap line: the track's left edge plus its inset, which is where a
        snapped pane's own left edge sits */
@@ -7627,29 +7586,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         go(n);
       }, true);
     });
-    toggle.addEventListener('click', function(){
-      playing = !playing;
-      toggle.classList.toggle('is-playing', playing);
-      toggle.setAttribute('aria-label', (playing ? 'Pause' : 'Play') +
-        toggle.getAttribute('aria-label').replace(/^(Pause|Play)/, ''));
-      reel();
-      tick();
-    });
-
-    /* hover, focus, a hidden tab or a deck off screen all hold the countdown */
-    deck.addEventListener('pointerenter', function(){ near = true;  tick(); });
-    deck.addEventListener('pointerleave', function(){ near = false; tick(); });
-    deck.addEventListener('focusin',      function(){ near = true;  tick(); });
-    deck.addEventListener('focusout', function(){
-      if(!deck.contains(document.activeElement)){ near = false; tick(); }
-    });
-    if(window.IntersectionObserver){
-      new IntersectionObserver(function(rows){
-        seen = rows[0].isIntersecting; refresh();
-      }, {threshold:.35}).observe(deck);
-    } else { seen = true; }
-
-    function refresh(){ reel(); tick(); }
+    function refresh(){ reel(); }
     /* the row can only be measured once it has a width — a deck in a hidden
        tab has none, so it re-lays itself the moment its tab opens */
     function reset(){
