@@ -2352,29 +2352,18 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    are told apart by which part of the chip changed. */
 .pchip{
   position:relative;flex:none;display:inline-flex;align-items:center;
-  padding:5px 5px 5px 4px;border-radius:var(--r-full);
+  padding:4px;border-radius:var(--r-full);
   border:1px solid var(--border-strong);background:var(--surface);color:var(--fg);
   transition:background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
 .pchip__pick{
-  padding:8px 20px 8px 24px;border-radius:var(--r-full);
+  padding:8px 20px;border-radius:var(--r-full);
   color:var(--fg);font-size:var(--fs-4);font-weight:var(--fw-medium);
   letter-spacing:-0.01em;white-space:nowrap;
-}
-.pchip__buy{
-  position:relative;display:grid;place-items:center;flex:none;
-  width:32px;height:32px;border-radius:var(--r-full);
-  background:var(--surface-sunken);color:var(--fg-body);
-  transition:background var(--dur-1) var(--ease), color var(--dur-1) var(--ease),
-             box-shadow var(--dur-1) var(--ease), transform var(--dur-1) var(--ease);
 }
 /* the body under the pointer moves its edge and nothing else — the disc is a
    separate offer and must not look pressed because the pill was grazed */
 .pchip:hover{border-color:var(--n-400)}
-/* and the disc under the pointer moves the disc and nothing else */
-.pchip__buy:hover,.pchip__buy:focus-visible{
-  background:var(--accent);color:var(--fg-on-accent);transform:scale(1.06);
-}
 /* The one being looked at — v2: the accent solid rather than a tint of it.
    v1 was the tint (--accent-bg with an accent edge and accent-700 ink); it
    is one line away if this reads as too loud.
@@ -2389,98 +2378,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   color:var(--fg-on-accent);font-weight:var(--fw-semibold);
 }
 .pchip:has([aria-selected="true"]):hover{border-color:var(--accent-700);background:var(--accent-700)}
-.pchip:has([aria-selected="true"]) .pchip__buy{
-  background:rgba(255,255,255,.92);color:var(--accent-700);
-}
-.pchip:has([aria-selected="true"]) .pchip__buy:hover,
-.pchip:has([aria-selected="true"]) .pchip__buy:focus-visible{
-  background:#fff;color:var(--accent-700);
-}
-/* and the ring has to be visible against the accent it now sits on */
-.pchip:has([aria-selected="true"]) .pchip__pick:focus-visible,
-.pchip:has([aria-selected="true"]) .pchip__buy:focus-visible{
-  outline-color:#fff;
-}
-/* keyboard: two controls, so two rings */
-.pchip__pick:focus-visible,.pchip__buy:focus-visible{
-  outline:2px solid var(--accent);outline-offset:2px;
-}
-
-/* In the basket — and only the disc says so. Tinting the body here would put
-   it in the same clothes as the pack you are looking at, and those are two
-   different facts about the same chip. The ＋ gives way to a tick inside a
-   disc that never changes size, so nothing on the row moves. */
-.chipbuy__on{display:none}
-.pchip__buy.is-in .chipbuy__o{display:none}
-.pchip__buy.is-in .chipbuy__on{display:block}
-/* written through .pchip so it carries the same weight as the looked-at rule
-   above and, being later, wins it: a chip can be both at once, and when it
-   is, the body is purple and the disc is green — never one colour saying two
-   things. Filled, not tinted: this is a fact about the basket, and the basket
-   says its facts in the green it says everything else in. */
-.pchip .pchip__buy.is-in{
-  background:var(--ok);color:#FFFFFF;box-shadow:0 1px 3px rgba(12,74,45,.35);
-}
-/* On the chip you are looking at, the green disc sits on solid accent — two
-   saturated colours meeting with nothing between them, which reads as a
-   muddle rather than as a disc on a pill. A hairline of white gives it its
-   own edge. Only there: on a white chip the disc already has one.
-   White was too loud a hairline — it read as a cut-out. The system's pale
-   green edge belongs to the disc instead of fighting it, and still separates
-   cleanly from the purple. */
-.pchip:has([aria-selected="true"]) .pchip__buy.is-in{
-  box-shadow:0 0 0 1px var(--ok-edge), 0 1px 3px rgba(12,74,45,.35);
-}
-/* pressing it again takes it out, so under the pointer it becomes the red the
-   rest of the page removes things in — the pale one, because this is an
-   offer, not a warning — and the tick becomes the cross it would leave */
-.pchip .pchip__buy.is-in:hover,.pchip .pchip__buy.is-in:focus-visible{
-  background:#FBEDEB;color:var(--danger);box-shadow:inset 0 0 0 1px rgba(192,57,46,.30);
-}
-.chipbuy__x{display:none}
-.pchip .pchip__buy.is-in:hover .chipbuy__on,
-.pchip .pchip__buy.is-in:focus-visible .chipbuy__on{display:none}
-.pchip .pchip__buy.is-in:hover .chipbuy__x,
-.pchip .pchip__buy.is-in:focus-visible .chipbuy__x{display:block}
-/* the mark answers the press, and only the mark */
-.pchip__buy.is-beat .chipbuy__on{animation:chipPop 420ms cubic-bezier(.2,1.5,.32,1)}
-.pchip__buy.is-beat .chipbuy__o{animation:chipBack 380ms cubic-bezier(.2,1.4,.34,1)}
-@keyframes chipPop{
-  0%{transform:scale(.25) rotate(-30deg)}
-  55%{transform:scale(1.22) rotate(5deg)}
-  78%{transform:scale(.95)}
-  100%{transform:scale(1)}
-}
-@keyframes chipBack{
-  0%{transform:scale(.45);opacity:0}
-  60%{opacity:1;transform:scale(1.14)}
-  100%{transform:scale(1);opacity:1}
-}
-@media (prefers-reduced-motion:reduce){
-  .pchip__buy{transition:background var(--dur-1) var(--ease), color var(--dur-1) var(--ease)}
-  .pchip__buy:hover,.pchip__buy:focus-visible{transform:none}
-  .pchip__buy.is-beat .chipbuy__on,.pchip__buy.is-beat .chipbuy__o{animation:none}
-}
-/* the bundle is holding it. It stays a real button — a dead one cannot be
-   hovered, and a refusal nobody can read is just a control that broke — so it
-   keeps the green and the tick, because it IS in the basket; it just refuses
-   the press, and the bubble says why. */
-.pchip .pchip__buy.is-inbundle,
-.pchip .pchip__buy.is-inbundle:hover,.pchip .pchip__buy.is-inbundle:focus-visible{
-  background:var(--ok);color:#FFFFFF;box-shadow:0 1px 3px rgba(12,74,45,.35);
-  cursor:not-allowed;transform:none;
-}
-.pchip .pchip__buy.is-inbundle .chipbuy__on,
-.pchip .pchip__buy.is-inbundle:hover .chipbuy__on,
-.pchip .pchip__buy.is-inbundle:focus-visible .chipbuy__on{display:block}
-.pchip .pchip__buy.is-inbundle:hover .chipbuy__x,
-.pchip .pchip__buy.is-inbundle:focus-visible .chipbuy__x{display:none}
 
 /* What pressing it would do, said before you press it. It cannot be drawn by
    the chip: the row of chips scrolls sideways, and a scroller clips whatever
    leans out of it — which is why the first version of this was invisible. One
-   bubble on the page, moved to whichever mark is being looked at. */
-.tipbox{
+   bubble on the page, moved to whichever mark is being looked at. */.tipbox{
   position:fixed;z-index:90;pointer-events:none;white-space:nowrap;
   /* the bubble is measured the moment its words change, and a measurement
      after a change forces the browser to lay out whatever is dirty. Contained,
@@ -3910,6 +3812,56 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 }
 [data-done].is-done:hover{background:var(--ok-700);border-color:var(--ok-700)}
 
+/* ── the comparisons, folded away ────────────────────────────────
+   Everything in the fold is a second view of what the shelf above already
+   shows, so it costs the page nothing until somebody asks for it. The band
+   is that ask: white, one hairline top and bottom, the words on the left and
+   the control on the right.
+   Type comes straight off the shelf's own cards — the heading is .card__t's
+   size and weight, the line under it is .card__by's. */
+.section--fold{padding:0}
+.baband{
+  background:var(--n-0);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.baband__in{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-6);padding-block:var(--s-7);flex-wrap:wrap;
+}
+.baband__say{min-width:0}
+.baband__t{
+  margin:0;font-size:var(--fs-6);line-height:var(--lh-snug);
+  font-weight:var(--fw-semibold);letter-spacing:var(--tr-heading);color:var(--fg);
+}
+.baband__d{
+  margin:var(--s-1) 0 0;font-size:var(--fs-2);font-weight:var(--fw-medium);
+  color:var(--fg-muted);
+}
+.baband__go{flex:none}
+.baband__ch{transition:transform var(--dur-2) var(--ease)}
+.baband__go[aria-expanded="true"] .baband__ch{transform:rotate(180deg)}
+/* opened and closed with the row itself rather than a height in pixels:
+   0fr → 1fr needs no measuring and never lands a pixel short */
+.bafold{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows var(--dur-3) var(--ease), opacity var(--dur-2) var(--ease);
+  opacity:0;
+}
+.bafold__in{overflow:hidden;min-height:0}
+.bafold.is-open{grid-template-rows:1fr;opacity:1}
+/* the deck keeps every measure it had; only the room around it is stated
+   here, now that the section's own padding is gone */
+.bafold .pbar{padding-top:var(--s-8)}
+.bafold .bapanel{padding-bottom:var(--s-9)}
+@media (prefers-reduced-motion:reduce){
+  .bafold{transition:none}
+  .baband__ch{transition:none}
+}
+@media (max-width:720px){
+  .baband__in{align-items:flex-start;flex-direction:column;gap:var(--s-4)}
+  .baband__go{width:100%;justify-content:center}
+}
+
 /* ════════════════════════════════════════════════════════════════
    10 · FOOTER
    ════════════════════════════════════════════════════════════════ */
@@ -5265,28 +5217,48 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 <!-- ══════════ 7 · BEFORE / AFTER ══════════
      PLACEHOLDER DATA: the pack names are real, but which photograph belongs to
      which pack is a stand-in and every frame is drawn from the page's pool. -->
-<section class="section" id="results" data-zoomsec>
-  <div class="wrap">
-    <div class="section__head" data-reveal>
-      <div>
-        <p class="eyebrow">Explore Presets</p>
-        <h2>Before &amp; After: See It in Action</h2>
+<section class="section section--fold" id="results" data-zoomsec>
+  <!-- ── the white band that holds the comparisons ──
+       The shelf above already shows every pack's photographs; this is the
+       same material seen a second way, so it is folded away until somebody
+       asks to compare. The band is the ask. -->
+  <div class="baband">
+    <div class="wrap baband__in">
+      <div class="baband__say">
+        <h2 class="baband__t">Compare every look, side by side.</h2>
+        <p class="baband__d">Interactive before &amp; after comparisons for every preset pack.</p>
       </div>
+      <button class="btn btn--primary btn--lg baband__go" type="button"
+              data-bafold aria-expanded="false" aria-controls="baFold">
+        <svg class="baband__ic" width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <rect x="2.2" y="3.4" width="15.6" height="13.2" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M10 3.4v13.2" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M5.6 10h2.2M12.2 10h2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span data-bafold-label>Open comparisons</span>
+        <svg class="baband__ch" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="M2.5 4.2L6 7.8l3.5-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
+  </div>
+  <div class="bafold" id="baFold" data-bafold-panel>
+   <div class="bafold__in">
+  <div class="wrap">
     <div class="pbar" data-reveal>
     <div class="pchips" role="tablist" aria-label="Preset and LUT packs">
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-0" aria-controls="bap-0" aria-selected="true">Lora</button><button class="pchip__buy" type="button" data-chipbuy="Lora Presets" data-tip="Add to cart" aria-label="Add Lora Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-1" aria-controls="bap-1" aria-selected="false">Solis</button><button class="pchip__buy" type="button" data-chipbuy="Solis Presets" data-tip="Add to cart" aria-label="Add Solis Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-2" aria-controls="bap-2" aria-selected="false">Terra</button><button class="pchip__buy" type="button" data-chipbuy="Terra Presets" data-tip="Add to cart" aria-label="Add Terra Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-3" aria-controls="bap-3" aria-selected="false">Jardin</button><button class="pchip__buy" type="button" data-chipbuy="Jardin Presets" data-tip="Add to cart" aria-label="Add Jardin Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-4" aria-controls="bap-4" aria-selected="false">Mely</button><button class="pchip__buy" type="button" data-chipbuy="Mely Presets" data-tip="Add to cart" aria-label="Add Mely Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-5" aria-controls="bap-5" aria-selected="false">Onyx</button><button class="pchip__buy" type="button" data-chipbuy="Onyx Presets" data-tip="Add to cart" aria-label="Add Onyx Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-6" aria-controls="bap-6" aria-selected="false">Doré</button><button class="pchip__buy" type="button" data-chipbuy="Doré Presets" data-tip="Add to cart" aria-label="Add Doré Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-7" aria-controls="bap-7" aria-selected="false">Olbia LUTs</button><button class="pchip__buy" type="button" data-chipbuy="Olbia LUTs" data-tip="Add to cart" aria-label="Add Olbia LUTs to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-8" aria-controls="bap-8" aria-selected="false">Demo</button><button class="pchip__buy" type="button" data-chipbuy="Demo Presets" data-tip="Add to cart" aria-label="Add Demo Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-9" aria-controls="bap-9" aria-selected="false">Vela</button><button class="pchip__buy" type="button" data-chipbuy="Vela Presets" data-tip="Add to cart" aria-label="Add Vela Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-10" aria-controls="bap-10" aria-selected="false">Nord</button><button class="pchip__buy" type="button" data-chipbuy="Nord Presets" data-tip="Add to cart" aria-label="Add Nord Presets to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
-      <span class="pchip" role="none"><button class="pchip__pick" type="button" role="tab" id="bat-11" aria-controls="bap-11" aria-selected="false">Aster LUTs</button><button class="pchip__buy" type="button" data-chipbuy="Aster LUTs" data-tip="Add to cart" aria-label="Add Aster LUTs to basket"><svg class="chipbuy__o" width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><svg class="chipbuy__on" width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.2 10.4l3.9 3.9 7.7-8.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="chipbuy__x" width="13" height="13" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.4 5.4l9.2 9.2M14.6 5.4l-9.2 9.2" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
+      <span class="pchip" role="none" data-pack="Lora Presets"><button class="pchip__pick" type="button" role="tab" id="bat-0" aria-controls="bap-0" aria-selected="true">Lora</button></span>
+      <span class="pchip" role="none" data-pack="Solis Presets"><button class="pchip__pick" type="button" role="tab" id="bat-1" aria-controls="bap-1" aria-selected="false">Solis</button></span>
+      <span class="pchip" role="none" data-pack="Terra Presets"><button class="pchip__pick" type="button" role="tab" id="bat-2" aria-controls="bap-2" aria-selected="false">Terra</button></span>
+      <span class="pchip" role="none" data-pack="Jardin Presets"><button class="pchip__pick" type="button" role="tab" id="bat-3" aria-controls="bap-3" aria-selected="false">Jardin</button></span>
+      <span class="pchip" role="none" data-pack="Mely Presets"><button class="pchip__pick" type="button" role="tab" id="bat-4" aria-controls="bap-4" aria-selected="false">Mely</button></span>
+      <span class="pchip" role="none" data-pack="Onyx Presets"><button class="pchip__pick" type="button" role="tab" id="bat-5" aria-controls="bap-5" aria-selected="false">Onyx</button></span>
+      <span class="pchip" role="none" data-pack="Doré Presets"><button class="pchip__pick" type="button" role="tab" id="bat-6" aria-controls="bap-6" aria-selected="false">Doré</button></span>
+      <span class="pchip" role="none" data-pack="Olbia LUTs"><button class="pchip__pick" type="button" role="tab" id="bat-7" aria-controls="bap-7" aria-selected="false">Olbia LUTs</button></span>
+      <span class="pchip" role="none" data-pack="Demo Presets"><button class="pchip__pick" type="button" role="tab" id="bat-8" aria-controls="bap-8" aria-selected="false">Demo</button></span>
+      <span class="pchip" role="none" data-pack="Vela Presets"><button class="pchip__pick" type="button" role="tab" id="bat-9" aria-controls="bap-9" aria-selected="false">Vela</button></span>
+      <span class="pchip" role="none" data-pack="Nord Presets"><button class="pchip__pick" type="button" role="tab" id="bat-10" aria-controls="bap-10" aria-selected="false">Nord</button></span>
+      <span class="pchip" role="none" data-pack="Aster LUTs"><button class="pchip__pick" type="button" role="tab" id="bat-11" aria-controls="bap-11" aria-selected="false">Aster LUTs</button></span>
       </div>
       <button class="arrow pchips__go" type="button" data-chipstep="-1" aria-label="Earlier packs" disabled><svg width="7" height="11" viewBox="0 0 7 11" fill="none" aria-hidden="true"><path d="M5.5 1L1.5 5.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button class="arrow pchips__go" type="button" data-chipstep="1" aria-label="More packs" disabled><svg width="7" height="11" viewBox="0 0 7 11" fill="none" aria-hidden="true"><path d="M1.5 1l4 4.5-4 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -5736,10 +5708,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         <p class="basoon">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.2" y="3.6" width="15.6" height="12.8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M2.4 12.4l3.9-3.4 3.3 2.8 3-2.4 4.9 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.9" cy="7.2" r="1.35" stroke="currentColor" stroke-width="1.4"/></svg>
           <b>Aster LUTs</b>
-          <span>The before and afters for this pack are being shot. Everything else about it — what is in it, what it costs, adding it to your basket — works from the shelf below and from this chip.</span>
+          <span>The before and afters for this pack are being shot. Everything else about it — what is in it, what it costs, adding it to your basket — works from the shelf above and from this chip.</span>
         </p>
       </div>
     </div>
+  </div>
+   </div>
   </div>
 </section>
 
@@ -8002,9 +7976,63 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      of the bar's clearance — and not the heading either: by the time you are
      pressing a chip you have read it, and what you want on screen is the row
      you are choosing for. */
+  /* ---- the comparisons fold ----
+     The band above it is the only way in. Closed, the whole thing is inert:
+     nothing in it can be tabbed to and nothing in it is announced. Opened,
+     two things have to happen that CSS cannot do — the reveal animation
+     inside has to be settled (it holds its row 14px low until it fires, and
+     a deck measured there lands short), and every deck has to re-lay itself,
+     because a deck in a closed fold has no width and its arrows and progress
+     bar were measured against nothing. */
+  var baFold = document.getElementById('baFold'),
+      baBtn  = document.querySelector('[data-bafold]');
+  function baOpen(want){
+    if(!baFold || !baBtn) return false;
+    var open = want === undefined ? !baFold.classList.contains('is-open') : !!want;
+    baFold.classList.toggle('is-open', open);
+    baFold.inert = !open;
+    baBtn.setAttribute('aria-expanded', String(open));
+    var lbl = baBtn.querySelector('[data-bafold-label]');
+    if(lbl) lbl.textContent = open ? 'Hide comparisons' : 'Open comparisons';
+    if(open){
+      baFold.querySelectorAll('[data-reveal]').forEach(function(el){
+        if(el.classList.contains('is-in')) return;
+        var keep = el.style.transition;
+        el.style.transition = 'none';
+        el.classList.add('is-in');
+        void el.offsetWidth;
+        el.style.transition = keep;
+      });
+      /* after the row has its width, not before */
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ window.dispatchEvent(new Event('resize')); });
+      });
+    }
+    return open;
+  }
+  if(baFold && baBtn){
+    baFold.inert = true;
+    baBtn.addEventListener('click', function(){
+      var open = baOpen();
+      if(!open){
+        /* closing from below the fold would drop the page onto whatever came
+           after it — put the band back under the pointer instead */
+        var band = document.querySelector('.baband');
+        if(band && band.getBoundingClientRect().top < 0){
+          var nav = document.getElementById('nav');
+          window.scrollTo({top: window.scrollY + band.getBoundingClientRect().top -
+                                ((nav ? nav.offsetHeight : 0) + 16),
+                           behavior: still ? 'auto' : 'smooth'});
+        }
+      }
+    });
+  }
+
   function toChips(from){
     var bar = from.closest('section').querySelector('.pbar');
     if(!bar) return;
+    /* a chip pressed from somewhere else has to find the row open */
+    if(baFold && !baFold.classList.contains('is-open')) baOpen(true);
     /* the reveal holds this row 14px low until it fires, and measuring it
        there lands the scroll short — settle it first, without animating */
     if(!bar.classList.contains('is-in')){
@@ -8110,8 +8138,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
        the order of its own cards, and says when that changes. */
     var grid = document.getElementById('presetGrid');
     function packOf(pill){
-      var buy = pill.querySelector('[data-chipbuy]');
-      return buy ? buy.getAttribute('data-chipbuy') : '';
+      /* the chip carries its pack's name itself; it used to be read off the
+         basket button, and that button is gone — comparing is not buying */
+      return pill.getAttribute('data-pack') || '';
     }
     function follow(){
       if(!grid) return;
@@ -9026,65 +9055,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       tipOff();
       card.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
     });
-  });
-
-  /* ---- the basket half of a preset chip ----
-     The chip that shows you a pack's befores and afters can also buy it, and
-     it is the same basket the shelf card carries: one model, so a pack added
-     here is added there and neither has to be told twice. The words on the
-     tooltip are the next move, never the state — the icon is the state. */
-  document.querySelectorAll('[data-chipbuy]').forEach(function(btn){
-    var name = btn.getAttribute('data-chipbuy');
-    var short = name.replace(/\s+Presets$/, '');
-    var pill = btn.closest('.pchip') || btn;
-    var on = false, beat = null;
-    function draw(){
-      var held = Cart.covered(name);
-      btn.classList.toggle('is-in', on || held);
-      btn.classList.toggle('is-inbundle', held);
-      lockTip(btn, held);
-      /* the bubble says the action; the pack's name is on the chip beside it
-         and does not need saying twice */
-      if(held){
-        btn.setAttribute('aria-label', name + ' is in the bundle in your basket — cancel the bundle to remove it');
-      } else if(on){
-        btn.setAttribute('data-tip', 'Remove');
-        btn.setAttribute('aria-label', 'Remove ' + name + ' from basket');
-      } else {
-        btn.setAttribute('data-tip', 'Add to cart');
-        btn.setAttribute('aria-label', 'Add ' + name + ' to basket');
-      }
-      btn.setAttribute('aria-pressed', String(on || held));
-    }
-    btn.setAttribute('aria-pressed', 'false');
-    btn.addEventListener('pointerenter', function(){ tipShow(btn); });
-    btn.addEventListener('focus', function(){ tipShow(btn); });
-    btn.addEventListener('pointerleave', tipOff);
-    btn.addEventListener('blur', tipOff);
-    Cart.watch(function(){
-      on = Cart.has(name) && !Cart.covered(name);
-      draw();
-    });
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      e.stopPropagation();                    /* the name half is not what was pressed */
-      if(Cart.covered(name)){ tipShow(btn); nope(btn); return; }
-      on = !on;
-      if(on){ Cart.add(name); cartTip(name + ' added', ''); } else { Cart.drop(name); }
-      draw();
-      tipShow(btn);           /* the words change with the state under them */
-      /* the pill says what just happened, since the mark alone is 22px of it */
-      /* restarted rather than queued: press it five times in a row without
-         moving and you get five landings, not one */
-      if(!still){
-        btn.classList.remove('is-beat');
-        void btn.offsetWidth;
-        btn.classList.add('is-beat');
-        clearTimeout(beat);
-        beat = setTimeout(function(){ btn.classList.remove('is-beat'); }, 460);
-      }
-    });
-    draw();
   });
 
   /* the panel a tab has just opened resolves rather than appearing. Restarted
