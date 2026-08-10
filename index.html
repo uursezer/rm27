@@ -1534,8 +1534,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .compare__after{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--x)) 0 0)}
 .compare__tag{
   position:absolute;top:var(--s-3);z-index:2;
-  font-size:12px;font-weight:var(--fw-semibold);letter-spacing:.14em;text-transform:uppercase;
-  color:#fff;padding:5px 11px;border-radius:6px;background:rgba(8,20,36,.62);
+  font-size:11px;font-weight:var(--fw-semibold);letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;padding:4px 9px;border-radius:6px;background:rgba(8,20,36,.44);
   backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
 }
 .compare__tag--a{left:var(--s-3)}
@@ -2194,16 +2194,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   top:var(--s-3);z-index:2;
   font-size:0;                      /* the component's own word steps aside */
   font-weight:var(--fw-semibold);text-transform:uppercase;
-  color:#fff;padding:5px 11px;border-radius:6px;
+  color:#fff;padding:4px 9px;border-radius:6px;
   /* the same hairline the stage chips wear, so every pill over a picture
      is edged the same way */
-  background:rgba(8,20,36,.62);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13);
+  background:rgba(8,20,36,.44);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
 }
 /* …and the page's own words take its place, in the page's own language */
 /* the tracking has to live here too: .14em of a zero font size is zero, and
    the label came out unspaced */
-.rmp-pdp .rmp-ba__tag::before{font-size:12px;line-height:1.6;letter-spacing:.14em}
+.rmp-pdp .rmp-ba__tag::before{font-size:11px;line-height:1.6;letter-spacing:.12em}
 .rmp-pdp .rmp-ba__tag.rmp-b::before{content:"Before"}
 .rmp-pdp .rmp-ba__tag.rmp-a::before{content:"After"}
 .rmp-pdp .rmp-ba__tag.rmp-b{left:var(--s-3);right:auto}
@@ -3842,11 +3842,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   margin:0;font-size:var(--fs-6);line-height:var(--lh-snug);
   font-weight:var(--fw-semibold);letter-spacing:var(--tr-heading);color:var(--fg);
 }
-.baband__d{
-  margin:var(--s-1) 0 0;font-size:var(--fs-2);font-weight:var(--fw-medium);
-  color:var(--fg-muted);
-}
 .baband__go{flex:none}
+/* one eye, two states — the same mark a password field uses: closed, the eye
+   is open because pressing will show you something; open, the stroke draws
+   itself across because pressing will hide it again */
+.baband__slash{
+  stroke-dasharray:1;stroke-dashoffset:1;
+  transition:stroke-dashoffset var(--dur-2) var(--ease);
+}
+.baband__go[aria-expanded="true"] .baband__slash{stroke-dashoffset:0}
 .baband__ch{transition:transform var(--dur-2) var(--ease)}
 .baband__go[aria-expanded="true"] .baband__ch{transform:rotate(180deg)}
 /* opened and closed with the row itself rather than a height in pixels:
@@ -3865,6 +3869,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 @media (prefers-reduced-motion:reduce){
   .bafold{transition:none}
   .baband__ch{transition:none}
+  .baband__slash{transition:none}
 }
 @media (max-width:720px){
   .baband__in{align-items:flex-start;flex-direction:column;gap:var(--s-4)}
@@ -3976,6 +3981,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   transition:background var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
 }
 .urail__b:hover{background:var(--surface-sunken);color:var(--accent)}
+/* the bell's count, cut the same way the basket's is cut, so a number in the
+   rail and a number in the bar are one badge. Nothing to say, nothing shown. */
+.urail__n{
+  position:absolute;top:8px;right:8px;min-width:18px;height:18px;padding:0 3px;
+  border-radius:var(--r-full);background:var(--accent);color:var(--fg-on-accent);
+  font-size:10px;font-weight:var(--fw-bold);line-height:14px;text-align:center;
+  border:2px solid var(--surface);box-sizing:border-box;
+}
+.urail__n[hidden]{display:none}
 .urail__b:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .urail__b svg{width:24px;height:24px;display:block}
 /* a hairline between them, drawn by the buttons themselves so the ends of
@@ -5170,14 +5184,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       <div class="baband__say">
         <p class="eyebrow baband__k">Explore presets</p>
         <h2 class="baband__t">Compare every look, side by side</h2>
-        <p class="baband__d">Interactive before &amp; after comparisons for every preset pack.</p>
       </div>
       <button class="btn btn--primary btn--lg baband__go" type="button"
               data-bafold aria-expanded="false" aria-controls="baFold">
         <svg class="baband__ic" width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <rect x="2.2" y="3.4" width="15.6" height="13.2" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M10 3.4v13.2" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M5.6 10h2.2M12.2 10h2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M2 10s3.2-5.4 8-5.4 8 5.4 8 5.4-3.2 5.4-8 5.4S2 10 2 10Z"
+                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+          <path class="baband__slash" d="M3.6 3.6 16.4 16.4" pathLength="1"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
         <span data-bafold-label>Open comparisons</span>
         <svg class="baband__ch" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -6331,6 +6346,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      company. The marks are the page's own: the Installing panel's download,
      the Questions panel's question, and the arrow the old button carried. -->
 <nav class="urail" id="userRail" aria-label="Your tools" hidden>
+  <button class="urail__b" type="button" data-tip="Notifications" data-tip-left
+          data-notif aria-label="Notifications">
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M10 2.6a5.2 5.2 0 00-5.2 5.2c0 3.1-.7 4.6-1.4 5.4a.8.8 0 00.6 1.35h12a.8.8 0 00.6-1.35c-.7-.8-1.4-2.3-1.4-5.4A5.2 5.2 0 0010 2.6Z"
+            stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M8.2 17.1a2 2 0 003.6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </svg>
+    <span class="urail__n tnum" data-notif-n hidden aria-hidden="true">0</span>
+  </button>
   <a class="urail__b" href="#" data-tip="Collaboration" data-tip-left aria-label="Collaboration">
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <circle cx="10" cy="10" r="7.6" stroke="currentColor" stroke-width="1.7"/>

@@ -295,8 +295,9 @@ function buildFrame(it,i){
     wireYT(f,it);
   }
   if(it.type==='instagram'){
-    f.insertAdjacentHTML('beforeend','<a class="rmp-vid__poster" href="'+it.url+'" target="_blank" rel="noopener" aria-label="Instagram\'da aç"><span class="rmp-vid__play"></span></a>'+
-      '<span class="rmp-ig__out"><span class="rmp-ig__cta">Instagram\'da aç ↗</span></span>');
+    /* Kare zaten baştan sona bağlantı; altına bir de gradyanlı düğme koymak
+       aynı şeyi ikinci kez söylemek ve fotoğrafın önünü kapatmaktı. */
+    f.insertAdjacentHTML('beforeend','<a class="rmp-vid__poster" href="'+it.url+'" target="_blank" rel="noopener" aria-label="Instagram\'da aç"><span class="rmp-vid__play"></span></a>');
   }
   return f;
 }
