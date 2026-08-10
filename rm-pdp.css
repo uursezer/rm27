@@ -421,6 +421,13 @@ body.rmp-locked{overflow:hidden}
   letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r-full);
   background:var(--surface);color:var(--n-900);box-shadow:var(--sh-chip);pointer-events:none}
 .rmp-ba__tag.rmp-b{left:var(--s-3)} .rmp-ba__tag.rmp-a{right:var(--s-3)}
+/* Sahnedeki çipler gibi: yalnızca imleç içerik alanındayken. Fotoğrafın
+   üstünde sürekli duran iki etiket, panelin başka bir yerine bakarken
+   resmin önünü kapatıyordu. Dokunmatikte "üzerine gelme" yok, orada
+   hep duruyorlar. */
+.rmp-ba__tag{opacity:0;transition:opacity var(--dur-2) var(--ease)}
+.rmp-stage:hover .rmp-ba__tag{opacity:1}
+@media (hover:none){ .rmp-ba__tag{opacity:1} }
 .rmp-frame.rmp-is-zoomed .rmp-ba__tag{opacity:0}
 
 /* video */
@@ -669,7 +676,9 @@ body.rmp-locked{overflow:hidden}
    mürekkebi ana renge iner. Kapalıyken kutunun kendi koyusunda kalır. */
 .rmp-nav:hover,.rmp-nav:focus-visible{background:#191A3A;
   box-shadow:var(--sh-3), inset 0 0 0 1px var(--accent-border)}
-.rmp-nav:hover .rmp-t em,.rmp-nav:focus-visible .rmp-t em{color:#625CF6}
+/* "Sepete ekle"nin zemini neyse o: iki yerde de aynı ana renk, elle
+   yazılmış yakın bir ton değil */
+.rmp-nav:hover .rmp-t em,.rmp-nav:focus-visible .rmp-t em{color:var(--accent)}
 .rmp-nav:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 /* devre dışıyken açılmasın: sallanan boş bir hap kalıyordu */
 .rmp-nav[disabled]{opacity:.28;cursor:default;pointer-events:none}

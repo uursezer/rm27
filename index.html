@@ -1136,6 +1136,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    weight they were drawn at: bigger and whiter they took the line off the
    headline under them, and taller they made this slide taller than the two
    beside it, which moved the whole hero every time it turned. */
+/* …but here they are DRAWN, not filled: a hairline in the accent's secondary
+   tone with the same ink inside it, so they belong to the eyebrow they sit
+   on rather than to the dark band behind it. The filled version stays where
+   it was made — on the plugin tabs, on white. */
+.eyebrow__apps .ptab__app{
+  background:transparent;border-color:var(--accent-border);color:var(--accent-fg);
+}
 /* and the line holds that height whichever slide is showing, so nothing on
    the page below it shifts when the slide changes */
 #hero .eyebrow{min-height:22px;display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-3)}
@@ -3819,20 +3826,22 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    the control on the right.
    Type comes straight off the shelf's own cards — the heading is .card__t's
    size and weight, the line under it is .card__by's. */
-.section--fold{padding:0}
+.section.section--fold{padding:0;border-top:0}
 .baband{
+  cursor:pointer;
   background:var(--n-0);
   border-top:1px solid var(--border);border-bottom:1px solid var(--border);
   transition:background var(--dur-2) var(--ease);
 }
 /* open, it is no longer an invitation but the head of what is below it, so it
    steps back onto the page's secondary ground */
-.baband:has(+ .bafold.is-open){background:var(--bg-subtle)}
+.baband:has(+ .bafold.is-open){background:#F3F2FD}
 .baband__in{
   display:flex;align-items:center;justify-content:space-between;
   gap:var(--s-6);padding-block:var(--s-7);flex-wrap:wrap;
 }
 .baband__say{min-width:0}
+.baband__k{margin-bottom:var(--s-2)}
 .baband__t{
   margin:0;font-size:var(--fs-6);line-height:var(--lh-snug);
   font-weight:var(--fw-semibold);letter-spacing:var(--tr-heading);color:var(--fg);
@@ -5163,7 +5172,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   <div class="baband">
     <div class="wrap baband__in">
       <div class="baband__say">
-        <h2 class="baband__t">Compare every look, side by side.</h2>
+        <p class="eyebrow baband__k">Explore presets</p>
+        <h2 class="baband__t">Compare every look, side by side</h2>
         <p class="baband__d">Interactive before &amp; after comparisons for every preset pack.</p>
       </div>
       <button class="btn btn--primary btn--lg baband__go" type="button"
@@ -8018,6 +8028,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   }
   if(baFold && baBtn){
     baFold.inert = true;
+    /* the band reads as one rectangle, so the whole rectangle is the control.
+       The button keeps its own click; everything else forwards to it — unless
+       the press ended a text selection, which was never a press at all. */
+    var band0 = document.querySelector('.baband');
+    if(band0) band0.addEventListener('click', function(e){
+      if(e.target.closest('a,button,input,select,textarea,label')) return;
+      var sel = window.getSelection();
+      if(sel && !sel.isCollapsed && band0.contains(sel.anchorNode)) return;
+      baBtn.click();
+    });
     baBtn.addEventListener('click', function(){
       var open = baOpen();
       var band = document.querySelector('.baband');
