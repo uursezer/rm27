@@ -3837,9 +3837,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   gap:var(--s-6);padding-block:var(--s-7);flex-wrap:wrap;
 }
 .baband__say{min-width:0}
-.baband__k{margin-bottom:var(--s-2)}
+/* Every vertical measure in this row is a whole number on purpose. The
+   eyebrow's line box (18) + the gap under it (8) + the heading's line box
+   (24) = 50, the padding adds 64, and the 48px button then centres on
+   exactly 33 either side. Left to the tokens the row came to 16.8 + 8 + 24.3
+   = 49.1, so the button centred on 32.545 — and the compositor, rounding a
+   fraction to a device pixel, painted it a pixel high and left more air
+   under it than over it. Whole numbers make the rounding cancel out. */
+.baband__k{margin-bottom:var(--s-2);line-height:18px}
 .baband__t{
-  margin:0;font-size:var(--fs-6);line-height:var(--lh-snug);
+  margin:0;font-size:var(--fs-6);line-height:24px;
   font-weight:var(--fw-semibold);letter-spacing:var(--tr-heading);color:var(--fg);
 }
 .baband__go{flex:none}
