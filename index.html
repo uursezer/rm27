@@ -2822,14 +2822,21 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      row is shorter for it. Opened up it comes back to reading size. */
   font-size:var(--fs-2);line-height:var(--lh-normal);
   height:calc(var(--q-lines) * var(--lh-normal) * 1em);
-  overflow-y:auto;overscroll-behavior:contain;padding-right:var(--s-2);
-  scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;
+  /* It used to be a scroller with overscroll-behavior:contain. Every quote
+     fits, so the bar never showed — but the moment one did not (a wider
+     font, a browser at 110%, a longer quote), the wheel latched onto this
+     little box and `contain` refused to hand the page back. Standing over a
+     card, you could not scroll the page at all. It clamps instead: nothing
+     here can catch the wheel, and a quote that runs long says so with an
+     ellipsis rather than a hidden bar nobody would find. */
+  overflow:hidden;padding-right:var(--s-2);
   transition:font-size var(--dur-2) var(--ease);
 }
-.vcard__q::-webkit-scrollbar{width:5px}
-.vcard__q::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:var(--r-full)}
-.vcard__q::-webkit-scrollbar-track{background:transparent}
-.vcard__q p{margin:0;font:inherit;color:var(--fg);text-wrap:pretty}
+.vcard__q p{
+  margin:0;font:inherit;color:var(--fg);text-wrap:pretty;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--q-lines);
+  overflow:hidden;
+}
 .vcard__q p::before{content:"\201C"}
 .vcard__q p::after{content:"\201D"}
 /* opened up, the card has the room the quote was written for — bigger type,
@@ -4300,6 +4307,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   opacity:1;transform:none;
   transition:opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
 }
+/* two halves of one section that arrive together read as one slab moving.
+   The second waits a beat — the same 110ms the counters upstairs count on. */
+.has-js [data-reveal="late"].is-in{transition-delay:110ms}
 
 /* ════════════════════════════════════════════════════════════════
    MOTION OFF
@@ -5855,7 +5865,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      the offers rather than a new one arriving at the end.
      ════════════════════════════════════════════════════════════════ -->
 <section class="section section--last" id="start" aria-labelledby="startTitle" lang="tr">
-  <div class="cta cta--wall pbuy--dark" data-lit data-reveal>
+  <div class="cta cta--wall pbuy--dark" data-lit>
     <!-- The wall of photographs, built twice.
          The one underneath is the room: dark, desaturated, drifting. The one
          on top is exactly the same wall in full colour, with every frame
@@ -5874,7 +5884,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       </div>
     </div>
     <div class="wrap">
-      <div class="cta__in">
+      <div class="cta__in" data-reveal>
         <p class="cta__rate"><span class="stars" aria-hidden="true"><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg><svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0l1.8 3.9 4.2.5-3.1 2.9.8 4.2L6 9.4 2.3 11.5l.8-4.2L0 4.4l4.2-.5z"/></svg></span><b class="tnum">4,8</b><span class="cta__rate-n tnum">&#183; 15.000+ de&#287;erlendirme</span><span class="vh">5 &#252;zerinden 4,8, 15.000+ de&#287;erlendirmeye g&#246;re</span></p>
         <p class="cta__faces" aria-hidden="true"><span class="cta__ring"><img src="images/testimonials/dugunumuzvar/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/zariffilm/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ugurdemir/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/ekrulila/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/celalcanik/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"><img src="images/testimonials/mucahitguney/pp.webp" alt="" loading="lazy" width="72" height="72" onerror="this.style.display='none'"></span></p>
         <p class="eyebrow">10.000+ Profesyonel Fotoğrafçının Tercihi</p>
@@ -6048,10 +6058,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      opens the way in first, and signing in from there lights the rest of
      the page at the same moment. Turkish, like the closing call above it. -->
 <section class="section section--last" id="community" aria-labelledby="waTitle" lang="tr">
-  <div class="wa" data-wa data-reveal>
+  <div class="wa" data-wa>
     <span class="wa__pattern" aria-hidden="true"></span>
     <div class="wa__in">
-      <div class="wa__copy" data-wa-copy>
+      <div class="wa__copy" data-wa-copy data-reveal>
         <p class="eyebrow wa__eyebrow"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.5 8V5.9a4.5 4.5 0 019 0V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3.8" y="8" width="12.4" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>Sadece fotoğrafçılara özel</p>
         <h2 id="waTitle" class="wa__say">Özel WhatsApp<br>topluluğuna katıl.</h2>
         <p class="lede wa__lede">Workshop duyurularını, yeni ürünleri ve yalnızca topluluğa özel fırsatları doğrudan WhatsApp&#8217;tan al.</p>
@@ -6076,7 +6086,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         </div>
       </div>
 
-      <div class="wa__phonewrap" aria-hidden="true">
+      <div class="wa__phonewrap" aria-hidden="true" data-reveal="late">
         <div class="wa__phone">
           <span class="wa__paper"></span>
           <div class="wa__head">
@@ -6118,8 +6128,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       </div>
     </div>
 
-    <div class="help" data-reveal>
-      <div class="hpanel help__do">
+    <div class="help">
+      <div class="hpanel help__do" data-reveal>
         <h3 class="hpanel__hd"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.6v9.1M6.4 8.4l3.6 3.6 3.6-3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.2 13.4v2.2a1.8 1.8 0 001.8 1.8h10a1.8 1.8 0 001.8-1.8v-2.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Installing</h3>
         <div class="player">
           <img src="https://retouchmarket.com/_next/image?url=https%3A%2F%2Fapi.retouchmarket.com%2Fimages%2F68440068-b5b3-48e3-8d33-fe8f109f4d72-1775992531988-690770233.webp&amp;w=1080&amp;q=75" alt="Install walkthrough" loading="lazy" onerror="this.style.display='none'">
@@ -6156,7 +6166,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
       </div>
 
-      <div class="hpanel help__ask" id="faq">
+      <div class="hpanel help__ask" id="faq" data-reveal="late">
         <h3 class="hpanel__hd"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7.6" stroke="currentColor" stroke-width="1.7"/><path d="M7.9 7.9a2.15 2.15 0 114.05 1c-.35.65-1.2 1-1.65 1.55-.2.25-.3.55-.3.95" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="14.1" r=".95" fill="currentColor"/></svg>Questions</h3>
         <div class="hpanel__bd">
         <div id="faqList">
@@ -9195,10 +9205,32 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       });
     }, {rootMargin:'0px 0px -10% 0px', threshold:0});
     targets.forEach(function(el){ io.observe(el); });
-    /* Safety net. A layout bug once made a section taller than the page and
-       the observer never fired for anything after it, so the rest of the
-       page stayed invisible. Content must never depend on this working. */
-    setTimeout(function(){ targets.forEach(function(el){ el.classList.add('is-in'); }); }, 2500);
+    /* Safety net, and it used to be a blanket: two and a half seconds after
+       load everything was shown, reached or not. Nobody scrolls to the foot
+       of this page in two and a half seconds, so every section down there was
+       already in by the time you arrived and never animated once. It measures
+       now — whatever the viewport has actually reached is shown, on the same
+       line the observer uses, and it keeps checking as you scroll. A broken
+       observer still cannot leave content invisible; a section far below
+       still gets its turn. */
+    var netRaf = 0;
+    function net(){
+      netRaf = 0;
+      var line = (window.innerHeight || 0) * 0.9, left = 0;
+      targets.forEach(function(el){
+        if(el.classList.contains('is-in')) return;
+        if(el.getBoundingClientRect().top < line){ el.classList.add('is-in'); io.unobserve(el); }
+        else left++;
+      });
+      if(!left){
+        window.removeEventListener('scroll', netSoon);
+        window.removeEventListener('resize', netSoon);
+      }
+    }
+    function netSoon(){ if(!netRaf) netRaf = requestAnimationFrame(net); }
+    window.addEventListener('scroll', netSoon, {passive:true});
+    window.addEventListener('resize', netSoon);
+    setTimeout(net, 2500);
   }
 })();
 </script>
