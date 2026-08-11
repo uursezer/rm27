@@ -53,3 +53,37 @@ Explore Presets bandı ve plugin deck'i bu aşamada oturdu.
 - Rakamlar yer tutucu: 10.000+, 4,8, 15.000+, `presets: 24`.
 - On iki paket açıklaması ÖNİZLEME METNİ.
 - Lightbox'ın Türkçe arayüz metinleri kaynakta sabit — dil sözlüğü gerek.
+
+---
+
+## Sitenin dışarıya bağımlılıkları
+
+Yayındaki kopya (`uursezer/rm27` → uursezer.github.io/rm27/) bu depoyla
+birebir aynı. Sitenin kendi kendine yetmesi için kalan iki eksik:
+
+**1 · 21 eğitim videosu — depoda yok**
+
+```
+videos/retouchx-01.mp4 … -07.mp4
+videos/lightroom-ai-color-01.mp4 … -07.mp4
+videos/us-photoshop-plugin-01.mp4 … -07.mp4
+```
+
+Bunlar hiç yüklenmedi. Yokken kartlar kapak görselini gösteriyor, sayfa
+kırılmıyor. Hero'daki film (`videos/hero-film.mp4`) var ve çalışıyor.
+
+**2 · 15 fotoğraf hâlâ retouchmarket.com'dan çekiliyor**
+
+Sayfada 128 yerde kullanılıyorlar. Depoya indirmek için:
+
+```
+python3 tools/localise-images.py
+```
+
+Betik dosyaları `images/site/` altına indirir ve index.html'i yerel yollara
+çevirir; hepsi inmeden index.html'e dokunmaz. Bu betiği yazan makinenin ağı
+retouchmarket.com'a çıkamıyor, o yüzden senin makinenden çalıştırılması
+gerekiyor.
+
+Yazı tipi artık dışarıdan gelmiyor: Inter `fonts/` altında, iki değişken
+dosya (latin + latin-ext). Sayfa Google'a hiç istek atmıyor.
