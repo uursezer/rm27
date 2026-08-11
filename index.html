@@ -4311,6 +4311,24 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    The second waits a beat — the same 110ms the counters upstairs count on. */
 .has-js [data-reveal="late"].is-in{transition-delay:110ms}
 
+/* THE CLOSING PANEL. One 14px lift of the whole block, over a wall of moving
+   photographs, is not something anyone notices — it is the same distance the
+   wall itself drifts. So the block does not move at all here; its six lines
+   do, one after another, 90ms apart and a little further each. Read down:
+   the rating, the faces, the label, the sentence, the button, the small
+   print. It arrives the way you read it. */
+.has-js .cta__in[data-reveal]{opacity:1;transform:none}
+.has-js .cta__in[data-reveal] > *{opacity:0;transform:translateY(20px)}
+.has-js .cta__in[data-reveal].is-in > *{
+  opacity:1;transform:none;
+  transition:opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
+}
+.has-js .cta__in[data-reveal].is-in > :nth-child(2){transition-delay:90ms}
+.has-js .cta__in[data-reveal].is-in > :nth-child(3){transition-delay:180ms}
+.has-js .cta__in[data-reveal].is-in > :nth-child(4){transition-delay:270ms}
+.has-js .cta__in[data-reveal].is-in > :nth-child(5){transition-delay:380ms}
+.has-js .cta__in[data-reveal].is-in > :nth-child(6){transition-delay:470ms}
+
 /* ════════════════════════════════════════════════════════════════
    MOTION OFF
    Everything above that moves on its own, stopped — declared here and not
@@ -4448,6 +4466,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   html{scroll-behavior:auto}
   *{transition-duration:.001ms !important;animation-duration:.001ms !important}
   .has-js [data-reveal]{opacity:1;transform:none}
+  .has-js .cta__in[data-reveal] > *{opacity:1;transform:none}
 }
 </style>
 </head>
