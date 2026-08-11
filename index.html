@@ -821,26 +821,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    the base is the room's ambient light and drifts slowly,
    ::before is the pool that follows the pointer,
    ::after is one blurred blob that leans against it, for parallax. */
-.topband__glow{
+.topband__glow,.footer__glow{
   position:absolute;inset:-20% -10%;z-index:-1;pointer-events:none;
   background:
     radial-gradient(46% 52% at 10% 84%, rgba(140,88,255,.26) 0%, rgba(140,88,255,0) 70%),
     radial-gradient(40% 44% at 84% 14%, rgba(56,92,235,.22) 0%, rgba(56,92,235,0) 72%);
 }
-/* Neither band drifts now. The head band never could — whatever moves up
-   there moves behind the first thing anyone reads, before they have even
-   arrived. The foot of the page was allowed to, and carried the pointer's
-   light with it; it is the last thing on the page and reads better still, so
-   both of the moving layers below belong to the head band alone and the
-   footer keeps only the ambient pair above, which is a colour rather than a
-   motion. */
-.topband__glow::before{
+/* the band at the foot of the page can drift; the one at the head cannot.
+   Whatever moves up there moves behind the first thing anyone reads, and it
+   is moving before they have even arrived. */
+.footer__glow{animation:bandDrift 34s var(--ease) infinite alternate}
+.topband__glow::before,.footer__glow::before{
   content:"";position:absolute;inset:0;
   background:
     radial-gradient(620px circle at var(--px) var(--py), rgba(92,72,255,.264), transparent 60%),
     radial-gradient(520px circle at calc(var(--px) - 38%) calc(var(--py) + 38%), rgba(39,98,220,.192), transparent 62%);
 }
-.topband__glow::after{
+.topband__glow::after,.footer__glow::after{
   content:"";position:absolute;right:7%;top:14%;
   width:460px;height:460px;border-radius:50%;
   background:rgb(92,70,255);opacity:.19;filter:blur(80px);
@@ -3886,31 +3883,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* ════════════════════════════════════════════════════════════════
    10 · FOOTER
    ════════════════════════════════════════════════════════════════ */
-/* one flat ground, and one very quiet light on it. The footer used to carry
-   the head band's ambient pair — a purple lift in two corners — which read
-   as a gradient rather than as a ground; that is gone. What is here instead
-   is a single soft ellipse sitting on the bottom edge, centred, mostly below
-   the page: just enough colour to keep the black from reading as a printed
-   block. It never moves and never answers the pointer. */
+/* The footer's light is the head band's, and it is alive again: an ambient
+   pair lifting two corners and drifting on a 34s cycle, a pool that follows
+   the pointer across the surface, and a blurred blob leaning against it for
+   depth. It was replaced once by a single still ellipse on the bottom edge —
+   a colour rather than a light — and this is the answering version back,
+   layer for layer, out of the same rules the top of the page uses. The
+   ground under it stays the footer's own deeper black. */
 .footer{position:relative;overflow:hidden;
   background:#06080F;border-top:1px solid var(--border);padding:var(--s-10) 0 var(--s-7)}
-.footer::after{
-  content:"";position:absolute;left:50%;bottom:0;z-index:0;pointer-events:none;
-  width:min(1280px,86vw);height:min(330px,27vw);
-  transform:translate(-50%,52%);border-radius:50%;
-  /* The gradient is written at its FULL strength and held at four fifths at
-     rest, so the pointer arriving can simply let go of it: a quarter more
-     light and a quarter more of it. Opacity and transform only. */
-  background:radial-gradient(closest-side,
-    rgba(99,91,255,.344), rgba(99,91,255,.141) 46%, rgba(99,91,255,0) 82%);
-  filter:blur(74px);opacity:.64;
-  transform-origin:50% 100%;
-  transition:opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
-}
-.footer:hover::after{opacity:1;transform:translate(-50%,52%) scale(1.25)}
-@media (prefers-reduced-motion:reduce){
-  .footer::after{transition:none}
-}
 /* the words stand on the light, not under it */
 .footer > .wrap{position:relative;z-index:1}
 /* the solid a menu opens onto here: the footer's own ground, one step up so
@@ -4337,10 +4318,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    top of the sheet.
    ════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion:reduce){
-  .offer2__glow,.cta__sky{animation:none}
+  .offer2__glow,.footer__glow,.cta__sky{animation:none}
   .pbuy__glow::before{animation:none}
   .pbuy__dots::before,.cta__sky::after{transition:none}
-  .offer2__glow::after,.cta__sky::after{display:none}
+  /* the pool stays — it is where the pointer is, not something moving by
+     itself. The blob is the layer that lags behind it, so it goes. */
+  .offer2__glow::after,.footer__glow::after,.cta__sky::after{display:none}
   .offer2__grid{display:none}
   .prod.is-free,.prod.is-free::after,.prod.is-free .prod__badge,.pbuy__best{animation:none}
 }
@@ -6280,7 +6263,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   </div>
 </div>
 
-<footer class="footer">
+<footer class="footer" data-lit>
+  <div class="footer__glow" aria-hidden="true"></div>
   <div class="wrap">
     <div class="footer__top">
       <div class="footer__intro">
