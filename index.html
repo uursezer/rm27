@@ -2637,6 +2637,45 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
              0 4px 10px -2px rgba(10,25,50,.26),
              0 12px 26px -12px rgba(10,25,50,.40);
 }
+/* A white pill standing still on a photograph is something the eye walks
+   past, and these are the shelf's only signal for which pack is which. So
+   they wear the travelling stroke the free pack wears — the same --ring
+   custom property on the same 2.4s beat, so every moving edge on the page
+   keeps step — in the accent rather than in white, because a white highlight
+   on a white pill is nothing at all. */
+.chip::after{
+  content:"";position:absolute;inset:-1px;z-index:1;pointer-events:none;
+  border-radius:var(--r-full);padding:1.5px;
+  background:conic-gradient(from var(--ring),
+    rgba(99,91,255,0) 0deg, rgba(99,91,255,0) 168deg,
+    rgba(99,91,255,.40) 214deg, #635BFF 248deg, rgba(129,117,255,.55) 282deg,
+    rgba(99,91,255,0) 326deg, rgba(99,91,255,0) 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+  animation:freeRing 2.4s linear infinite;
+}
+/* and the marks answer the hand: touch any pack on the shelf and every mark
+   on it takes its turn, left to right, 45ms apart. What you have found is
+   not one badge — it is the row of them, and the row says so. */
+@keyframes chipMark{
+  0%  {transform:none}
+  28% {transform:translateY(-3px) scale(1.32) rotate(-9deg)}
+  58% {transform:translateY(0)    scale(1.08) rotate(5deg)}
+  100%{transform:none}
+}
+#presetGrid:has(.card:hover) .chip__e{animation:chipMark .66s var(--ease) both}
+#presetGrid:has(.card:hover) > :nth-child(2) .chip__e{animation-delay:45ms}
+#presetGrid:has(.card:hover) > :nth-child(3) .chip__e{animation-delay:90ms}
+#presetGrid:has(.card:hover) > :nth-child(4) .chip__e{animation-delay:135ms}
+#presetGrid:has(.card:hover) > :nth-child(5) .chip__e{animation-delay:180ms}
+#presetGrid:has(.card:hover) > :nth-child(6) .chip__e{animation-delay:225ms}
+#presetGrid:has(.card:hover) > :nth-child(7) .chip__e{animation-delay:270ms}
+#presetGrid:has(.card:hover) > :nth-child(8) .chip__e{animation-delay:315ms}
+#presetGrid:has(.card:hover) > :nth-child(9) .chip__e{animation-delay:360ms}
+#presetGrid:has(.card:hover) > :nth-child(10) .chip__e{animation-delay:405ms}
+#presetGrid:has(.card:hover) > :nth-child(11) .chip__e{animation-delay:450ms}
+#presetGrid:has(.card:hover) > :nth-child(12) .chip__e{animation-delay:495ms}
 /* .chip--best / --hot / --pick / --new stay on the markup as the name of the
    kind, but carry no colour of their own any more */
 .chip__e{
@@ -3295,6 +3334,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .card.is-new{animation:none}
   .prod.is-free::after{animation:none}
   .prod.is-free{animation:none}
+  .chip::after{animation:none}
+  #presetGrid:has(.card:hover) .chip__e{animation:none}
   .pbuy--dark.is-added::after,.shell.is-bought::after{animation:none}
 }
 /* no tile behind the box: the card is already a frame, and a second one
