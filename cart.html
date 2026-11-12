@@ -4541,6 +4541,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .baggrid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:var(--s-8);align-items:start}
 .baggrid__main{display:grid;gap:var(--s-8);min-width:0}
 .baggrid__side{position:sticky;top:calc(var(--nav-h) + var(--s-5));min-width:0}
+/* a summary taller than the window cannot be held in place without its foot
+   — the total — going off the bottom of the screen, so it scrolls with the
+   page instead */
+.baggrid__side.is-tall{position:static}
 .bagsec{min-width:0}
 /* an h2 the size the shelf's card titles are: these are parts of one basket,
    not sections of a page */
@@ -4565,6 +4569,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   display:grid;gap:var(--s-6);min-width:0;
   padding:var(--s-8);border-radius:var(--r-panel);border:1px solid var(--border);
 }
+/* both steps done: the front page's ring for "this is yours now", cut to
+   this panel's own corners rather than a card's */
+.ladder.is-added::after{border-radius:inherit}
 .ladder .eyebrow{margin-bottom:var(--s-3)}
 .ladder__say{
   font-size:clamp(24px,2.5vw,var(--fs-9));line-height:var(--lh-tight);font-weight:var(--fw-bold);
@@ -4638,6 +4645,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .ladder .prod{padding:var(--s-1);border-radius:var(--r-control);height:auto}
 .ladder .prod:hover{transform:none}
 .ladder figure.prod:not(.is-free):hover{border-color:var(--border)}
+/* the front page fades a box's number while its Change button is over it;
+   these boxes have no such button, so the number stays */
+.ladder .prod:hover .prod__no,.ladder .prod:focus-within .prod__no{opacity:1}
 .ladder .prod.is-free::after{border-radius:calc(var(--r-control) + 1px)}
 .ladder .prod__shot{border-radius:6px}
 .ladder .prod__shot--set img:nth-child(2){margin-inline:-9%}
@@ -6221,7 +6231,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         }
       }
       shown = n;
-      if(bagLink) bagLink.setAttribute('aria-label', t('nav_basket', n));
+      /* the bar is the front page's and is in English; this one label is
+         written here, so it says which language it is in */
+      if(bagLink){ bagLink.setAttribute('aria-label', t('nav_basket', n)); bagLink.setAttribute('lang', lang()); }
     }
 
     /* ---- where you are ---- */
@@ -6592,6 +6604,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       document.title = t('title')[view];
     }
 
+    /* a column that stays beside the page only does so while all of it fits */
+    function fitSides(){
+      var room = window.innerHeight - (document.getElementById('nav').offsetHeight + 40);
+      $$('.baggrid__side').forEach(function(side){
+        side.classList.toggle('is-tall', false);
+        side.classList.toggle('is-tall', side.offsetHeight > room);
+      });
+    }
+    window.addEventListener('resize', fitSides);
+
     function render(){
       var p = priced();
       drawCount(p);
@@ -6604,6 +6626,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       drawPay(p);
       drawDone();
       drawBar(p);
+      fitSides();
     }
 
     /* ════════════════════════════════════════════════════════════════
@@ -6759,8 +6782,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(moved && !quiet){
         /* a new step starts at its top, at once: the page scrolls smoothly
            everywhere else, and gliding up a whole basket to get to a form is
-           a wait, not a transition */
-        window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+           a wait, not a transition. (A browser that does not know the word
+           is asked the old way.) */
+        try { window.scrollTo({top: 0, left: 0, behavior: 'instant'}); }
+        catch(e){ window.scrollTo(0, 0); }
         var h = $('[data-view-name="' + v + '"] h1');
         if(h) h.focus({preventScroll: true});
         if(v === 'done') wake($('[data-done]'), 'is-in', 900);
@@ -6842,7 +6867,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     form.addEventListener('focusin', function(e){
       if(e.target.matches('input[type="email"],input[type="text"]')){ typing = true; barShow(); }
     });
-    form.addEventListener('focusout', function(){ typing = false; barShow(); });
+    form.addEventListener('focusout', function(e){
+      /* going from one field to the next is still typing: the bar does not
+         come up between them only to go down again */
+      var to = e.relatedTarget;
+      typing = !!(to && to.matches && to.matches('input[type="email"],input[type="text"]'));
+      barShow();
+    });
 
     /* ---- presses ---- */
     page.addEventListener('click', function(e){
