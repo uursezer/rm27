@@ -229,7 +229,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await page.click('.sum__next'); await page.waitForTimeout(200);
     ok((await read(page)).focus === 'add:Solis Presets', 'and so does the sentence in the summary');
 
-    await page.click('.pick__go'); await page.waitForTimeout(450);
+    await page.click('.pick__go'); await page.waitForTimeout(650);
     r = await read(page);
     ok(r.ladder.say === 'One more and it’s on us.' && r.ladder.why === 'A $59 pack leaves your total at $118. That’s Get 3, Pay 2.', 'two: one more and it is on us', [r.ladder.say, r.ladder.why]);
     ok(r.ladder.pick.label === 'Your free pack' && r.ladder.pick.free && r.ladder.pick.pill && r.ladder.pick.go === 'Add your free pack' && r.ladder.pick.primary,
@@ -269,6 +269,8 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.sum.rows.deal.label === 'Get 3, Pay 2' && r.sum.save === 'You save $59 · 33% off', 'the summary shows the deal and the saving', [r.sum.rows.deal, r.sum.save]);
     ok(r.sum.next === 'With two more $59 packs your total is $177 — one of them is free.', 'and what the second step would come to', r.sum.next);
     ok(r.lines[2].free && r.lines[2].pill && r.lines[2].won === 'with Get 3, Pay 2' && r.lines[2].no === '03', 'the third line wears the pill', r.lines[2]);
+    const weights = await page.evaluate(() => [].map.call(document.querySelectorAll('#main .prod__badge b, #main .rung__mark b'), b => getComputedStyle(b).fontWeight).filter((w, i, a) => a.indexOf(w) === i));
+    ok(weights.join() === '700', 'and the word in it is the front page’s bold, not a fifth weight', weights);
     ok(r.live === 'Terra Presets added to your basket. Get 3, Pay 2 is yours: Terra Presets is free. Total $118.', 'what is announced stops at the total', r.live);
     ok(r.focus === 'ladderSay', 'because the keyboard is on the heading, which says what comes next', r.focus);
     ok(await page.evaluate(() => document.querySelector('[data-lines] .line.is-won') && document.querySelector('[data-lines] .line.is-won').getAttribute('data-line')) === 'Terra Presets', 'and the Free mark arrives on the line that earned it');
@@ -323,7 +325,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     /* ── 2 · taking one out, and putting it back ── */
     section('2 · taking a pack out, and the way back');
     const before = r.stored;
-    await page.click('[data-remove="Jardin Presets"]'); await page.waitForTimeout(300);
+    await page.click('[data-remove="Jardin Presets"]'); await page.waitForTimeout(650);
     r = await read(page);
     ok(r.lines[4] && r.lines[4].undo === 'Jardin Presets removed.', 'the way back is where the line was', r.lines.map(l => l.line || l.undo));
     ok(r.focus === 'undo', 'and focus is on it', r.focus);
@@ -357,6 +359,103 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(!r.ladder.best && r.ladder.rungs[0].is === 'is-current', 'the badge goes back with it', [r.ladder.best, r.ladder.rungs.map(x => x.is)]);
     agrees(r, 'back at 2');
     await ctx.close();
+  }
+
+  /* ── 2b · one press is one press ────────────────────────────────── */
+  section('2b · a double click, a double tap, Enter twice');
+  {
+    const kept = page => page.evaluate(() => JSON.parse(localStorage.getItem('rm-cart') || '{"items":[]}').items.join());
+    const centre = async (page, sel) => { const l = page.locator(sel).first(); await l.scrollIntoViewIfNeeded(); await page.waitForTimeout(120);
+      const b = await l.boundingBox(); return [b.x + b.width / 2, b.y + b.height / 2]; };
+    let o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets', 'Jardin Presets']) });
+    let at = await centre(o.page, '[data-remove="Solis Presets"]');
+    await o.page.mouse.click(at[0], at[1], { clickCount: 2 }); await o.page.waitForTimeout(250);
+    let r = await read(o.page);
+    ok(await kept(o.page) === 'Lora Presets,Terra Presets,Jardin Presets' && r.lines.some(l => l.undo), 'a double click on Remove takes that one line out, and the way back is left standing', [await kept(o.page), r.lines.map(l => l.line || l.undo)]);
+    ok(r.live.indexOf('Solis Presets removed from your basket.') === 0, 'and what was said is that it was removed — not that it came back', r.live);
+    await o.page.waitForTimeout(600);
+    at = await centre(o.page, '[data-undo]');
+    await o.page.mouse.click(at[0], at[1], { clickCount: 2 }); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets,Terra Presets,Jardin Presets', 'a double click on Undo puts it back and leaves it there', await kept(o.page));
+    await o.page.waitForTimeout(600);
+    await o.page.focus('[data-remove="Terra Presets"]');
+    await o.page.keyboard.press('Enter'); await o.page.keyboard.press('Enter'); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets,Jardin Presets' && (await read(o.page)).focus === 'undo', 'Enter twice on Remove: one line out, and the keyboard on the way back', await kept(o.page));
+    await o.page.waitForTimeout(600);
+    await o.page.keyboard.press('Enter'); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets,Terra Presets,Jardin Presets', 'and after a moment Enter on Undo is answered', await kept(o.page));
+    /* two different lines, quickly, are two presses */
+    await o.page.waitForTimeout(600);
+    await o.page.click('[data-remove="Lora Presets"]'); await o.page.waitForTimeout(120);
+    await o.page.click('[data-remove="Jardin Presets"]'); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Solis Presets,Terra Presets', 'two different lines, one straight after the other, are both removed', await kept(o.page));
+    await o.ctx.close();
+
+    /* from the keyboard the same place is "nothing pressed in between" */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets', 'Jardin Presets']) });
+    await o.page.focus('[data-remove="Lora Presets"]');
+    await o.page.keyboard.press('Enter'); await o.page.keyboard.press('Tab'); await o.page.keyboard.press('Enter'); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Terra Presets,Jardin Presets', 'Enter, Tab, Enter — as fast as a hand can — is two presses, and both are answered', await kept(o.page));
+    await o.page.waitForTimeout(600);
+    await o.page.focus('[data-remove="Terra Presets"]');
+    await o.page.keyboard.down('Enter');
+    for(let i = 0; i < 4; i++){ await o.page.waitForTimeout(260); await o.page.keyboard.down('Enter'); }   /* the key repeating, well past the half second */
+    await o.page.keyboard.up('Enter'); await o.page.waitForTimeout(250);
+    r = await read(o.page);
+    ok(await kept(o.page) === 'Jardin Presets' && r.focus === 'undo', 'Enter held down is one press however long it is held: one line out, the way back untouched', [await kept(o.page), r.focus]);
+    /* Enter, and then the mouse somewhere else, at once */
+    await o.page.waitForTimeout(600);
+    await centre(o.page, '[data-remove="Jardin Presets"]');
+    await o.page.focus('.pick__go');
+    await o.page.keyboard.press('Enter');
+    {
+      /* where the line is now — the pack that went in moved it — and no waiting */
+      const line = o.page.locator('[data-remove="Jardin Presets"]');
+      await line.scrollIntoViewIfNeeded();
+      const b = await line.boundingBox();
+      await o.page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    }
+    await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Lora Presets', 'Enter on the pick and then the mouse on a line are two presses: one pack in, one line out', await kept(o.page));
+    await o.ctx.close();
+
+    /* a press made for somebody by software has no key and no place: on
+       the thing the page moved the keyboard to it is the same press, on
+       anything else it is a new one */
+    o = await open({ state: S(['Lora Presets']) });
+    await o.page.focus('.pick__go'); await o.page.keyboard.press('Enter'); await o.page.waitForTimeout(120);
+    await o.page.evaluate(() => document.querySelector('[data-rules]').click()); await o.page.waitForTimeout(120);
+    ok(await o.page.evaluate(() => !document.querySelector('[data-rules-list]').hidden), 'Enter on the pick, then a screen reader pressing “How the deals work” a moment later: the rules open', await kept(o.page));
+    await o.page.waitForTimeout(600);
+    await o.page.evaluate(() => { document.querySelector('.pick__go').click(); document.querySelector('.pick__go').click(); }); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets,Terra Presets', 'and the same software pressing the pick twice in one breath adds one pack', await kept(o.page));
+    await o.ctx.close();
+
+    /* the browser's Back button is not a press on the page: what is pressed after it is answered */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']) });
+    at = await centre(o.page, '.sum__go');
+    await o.page.mouse.click(at[0], at[1]); await o.page.waitForTimeout(700);
+    ok((await read(o.page)).view === 'pay', '(on to payment)');
+    await o.page.goBack(); await o.page.waitForTimeout(60);
+    await o.page.mouse.click(at[0], at[1]); await o.page.waitForTimeout(300);
+    ok((await read(o.page)).view === 'pay', 'Back, and then Continue pressed again at once, goes on to payment', (await read(o.page)).view);
+    await o.ctx.close();
+
+    o = await open({ state: S(['Lora Presets']) });
+    at = await centre(o.page, '.pick__go');
+    await o.page.mouse.click(at[0], at[1], { clickCount: 2 }); await o.page.waitForTimeout(300);
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets', 'a double click on the pick adds one pack, not the one that took its place as well', await kept(o.page));
+    await o.ctx.close();
+
+    /* the second half of a double tap does nothing to the step it arrives on */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']), w: 768, h: 1024, touch: true });
+    await o.page.waitForTimeout(400);
+    at = await centre(o.page, '[data-bar-go]');
+    await o.page.touchscreen.tap(at[0], at[1]); await o.page.touchscreen.tap(at[0], at[1]); await o.page.waitForTimeout(400);
+    r = await read(o.page);
+    const form = await o.page.evaluate(() => ({ agree: document.getElementById('payAgree').checked, errors: [].filter.call(document.querySelectorAll('.field__err'), e => !e.hidden).length }));
+    ok(r.view === 'pay' && !form.agree && form.errors === 0, 'a double tap on Continue arrives at a payment form nobody has touched', [r.view, form]);
+    await o.ctx.close();
   }
 
   /* ── 3 · mixed prices, the sampler, a bundle from the front page ─── */
@@ -410,7 +509,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.cheer === 0 && r.ladder.ring && r.unfold === 'Add another pack', 'it was celebrated where it was bought, not here', [r.cheer, r.ladder.ring, r.unfold]);
     agrees(r, 'bundle and one');
     const kept = r.stored;
-    await o.page.click('[data-remove="Terra Presets"]'); await o.page.waitForTimeout(300);
+    await o.page.click('[data-remove="Terra Presets"]'); await o.page.waitForTimeout(650);
     r = await read(o.page);
     ok(JSON.parse(r.stored).bundle === null && JSON.parse(r.stored).items.join() === 'Full Plugin Pack,Lora Presets,Solis Presets,Jardin Presets,Aster LUTs',
        'taking one out lets go of the bundle and keeps the rest', r.stored);
@@ -437,7 +536,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await o.page.click('.pick__go'); await o.page.waitForTimeout(400);
     r = await read(o.page);
     ok(r.h1.join() === 'Your basket' && r.linesShown && r.sum && r.lines.length === 1, 'one press and it is a basket', [r.h1, r.lines]);
-    await o.page.click('[data-remove]'); await o.page.waitForTimeout(300);
+    await o.page.click('[data-remove]'); await o.page.waitForTimeout(650);
     r = await read(o.page);
     ok(r.undoSolo === 'Lora Presets removed.' && r.h1.join() === 'Your basket is empty.', 'the last line out leaves the way back standing', [r.undoSolo, r.h1]);
     ok(r.live === 'Lora Presets removed from your basket. Your basket is empty.', 'and it is said', r.live);
@@ -574,6 +673,20 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await o.ctx.close();
     o = await open({ state: S(['Demo Presets']), hash: 'pay' });
     ok(await o.page.evaluate(() => document.querySelector('[data-paybox]').hidden && document.querySelector('[data-pay-go]').textContent === 'Complete order — Free'), 'a basket that costs nothing asks for no card');
+    ok(await o.page.evaluate(() => !!document.querySelector('[data-paysum] .sum__mini .choice__shot--mark svg')), 'and what has no box wears the shop’s mark in the summary, as on its line');
+    await o.ctx.close();
+
+    /* Done says the basket is as it was left only while it is */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']), hash: 'pay' });
+    await o.page.fill('#payEmail', 'a@b.co'); await o.page.fill('#payName', 'A B'); await o.page.check('#payAgree');
+    await o.page.click('[data-pay-go]'); await o.page.waitForTimeout(400);
+    const still = () => o.page.evaluate(() => { const el = document.querySelector('.done__still'); return !el.hidden && el.getClientRects().length > 0; });
+    ok(await still(), 'straight after the order: "Your basket is still as you left it."');
+    await o.page.click('[data-view-name="done"] [data-go="basket"]'); await o.page.waitForTimeout(700);
+    await o.page.click('[data-remove="Solis Presets"]'); await o.page.waitForTimeout(300);
+    await o.page.goBack(); await o.page.waitForTimeout(400);
+    r = await read(o.page);
+    ok(r.view === 'done' && !(await still()) && r.sum.mini === 3, 'after the basket has been changed the receipt still shows what was ordered, and no longer says that', [r.view, await still(), r.sum && r.sum.mini]);
     await o.ctx.close();
     /* the one echo of the campaign on the payment step, and only when it is true */
     o = await open({ state: S(['Lora Presets', 'Solis Presets']), hash: 'pay' });
@@ -613,7 +726,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.ladder.say === '2 ürün daha ekle, 5 üründen 2’si bizden.' && r.ladder.why === '3 Al 2 Öde fırsatını yakaladın — Terra Presets bedava. $59’lık iki ürün daha toplamına yalnızca $59 ekler.', 'the next step, and why', [r.ladder.say, r.ladder.why]);
     agrees(r, 'Turkish, 3 products');
     await page.waitForTimeout(2500);
-    await page.click('[data-remove="Terra Presets"]'); await page.waitForTimeout(300);
+    await page.click('[data-remove="Terra Presets"]'); await page.waitForTimeout(650);
     r = await read(page);
     ok(r.live === 'Terra Presets sepetten çıkarıldı. 3 Al 2 Öde artık geçerli değil. Toplam $118. 1 ürün daha ekle, 1 ürün bedava kazan.', 'a deal lost is said plainly', r.live);
     ok(r.lines.some(l => l.undo === 'Terra Presets sepetten çıkarıldı. 3 Al 2 Öde artık geçerli değil.'), 'in the way back too', r.lines.filter(l => l.undo));
@@ -678,6 +791,17 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await home.goto(BASE + 'index.html', { waitUntil: 'load' }); await home.waitForTimeout(600);
     ok(await home.evaluate(() => document.querySelector('.cart__n').textContent) === '1', 'the front page opens with the same one product in its bar');
     ok(await home.evaluate(() => document.querySelector('[data-basket]').getAttribute('href')) === 'cart.html', 'and its basket goes to the basket page');
+    {
+      const old = await o.ctx.newPage();
+      await old.goto(BASE + 'index.html', { waitUntil: 'load' });
+      await old.evaluate(() => localStorage.setItem('rm-cart', JSON.stringify({ v: 1, items: ['A pack no longer on sale'], bundle: null })));
+      await old.reload({ waitUntil: 'load' }); await old.waitForTimeout(500);
+      const bar = await old.evaluate(() => [document.querySelector('.cart__n').textContent, document.querySelector('[data-basket]').getAttribute('aria-label')]);
+      ok(bar.join('|') === '0|Basket, empty', 'a name the catalogue no longer has is not counted in the front page’s bar', bar);
+      await old.evaluate(() => localStorage.setItem('rm-cart', JSON.stringify({ v: 1, items: ['Lora Presets'], bundle: null })));
+      await old.close();
+      await home.reload({ waitUntil: 'load' }); await home.waitForTimeout(600);
+    }
     await o.page.focus('[data-remove="Lora Presets"]');
     await home.evaluate(() => { [].slice.call(document.querySelectorAll('.card__add')).filter(b => /Onyx Presets/.test(b.getAttribute('aria-label')))[0].click(); });
     await o.page.waitForTimeout(400);
@@ -776,9 +900,10 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
             await o.page.evaluate(([s]) => { if(s) localStorage.setItem('rm-cart', s); else localStorage.removeItem('rm-cart'); }, [STATES[name]]);
             await o.page.goto(BASE + 'cart.html', { waitUntil: 'load' });
             if(hash) await o.page.goto(BASE + 'cart.html#' + hash, { waitUntil: 'load' });
-            /* everything that opens is opened: the rest of the shelf, the rules */
+            /* everything that opens is opened: the rest of the shelf, the rules — and, on the payment step, the summary */
             else await o.page.evaluate(() => { ['[data-unfold]', '[data-more-all]', '[data-rules]'].forEach(s => {
               const b = document.querySelector(s); if(b && !b.hidden) b.click(); }); });
+            if(hash) await o.page.evaluate(() => { const d = document.querySelector('details.sum--fold'); if(d) d.open = true; });
             await o.page.waitForTimeout(60);
             count++;
             const m = await o.page.evaluate(() => {
@@ -800,8 +925,8 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
                 if(r.right > vw + 0.5 || r.left < -0.5) out.cut.push((el.className || el.tagName) + ' ' + Math.round(r.left) + '..' + Math.round(r.right));
               });
               /* a product's name is never cut short with three dots, and neither is what a pack would add */
-              document.querySelectorAll('#main .addrow__t, #main .pick__t, #main .line__t, #main .addrow__with, #main .sum__mini li > b').forEach(el => {
-                if(seen(el) && el.scrollWidth > el.clientWidth + 1 && !el.matches('.sum__mini li > b')) out.short.push((el.className || el.tagName) + ' “' + el.textContent + '” ' + el.clientWidth + '<' + el.scrollWidth);
+              document.querySelectorAll('#main .addrow__t, #main .pick__t, #main .line__t, #main .addrow__with, #main .sum__mini li > b, #main .tile__t').forEach(el => {
+                if(seen(el) && el.scrollWidth > el.clientWidth + 1) out.short.push((el.className || el.tagName) + ' “' + el.textContent + '” ' + el.clientWidth + '<' + el.scrollWidth);
               });
               /* and nothing in the campaign hangs out of its panel, which would clip it */
               const lad = document.querySelector('#ladder');
@@ -828,7 +953,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(wide.length === 0, 'nothing is wider than the window (' + count + ' pages)', wide.slice(0, 6));
     ok(cut.length === 0, 'nothing that is read runs off the edge or out of the panel', cut.slice(0, 6));
     ok(small.length === 0, 'everything a finger is asked to hit is 44px tall', small.slice(0, 8));
-    ok(names.length === 0, 'no product’s name is cut short, at any width, in either language', names.slice(0, 8));
+    ok(names.length === 0, 'no product’s name and no place’s caption is cut short, at any width, in either language', names.slice(0, 8));
   }
 
   /* ── 10 · the shape of the page ─────────────────────────────────── */
@@ -888,16 +1013,27 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
   /* ── 11 · the same bar and the same footer ──────────────────────── */
   section('11 · the bar and the footer are the front page’s, property for property');
   {
+    /* Every computed property of every element, and where every element is.
+       A margin is read as it is computed (auto stays auto), not as the browser
+       resolves it: Chromium reports an auto margin's used value as 0px or as
+       the real figure from one load to the next for the very same layout —
+       so that figure is not compared, and the box it produces is. */
     const snap = sel => {
       const root = document.querySelector(sel);
       if(!root) return null;
-      const out = [];
+      const out = [], at = root.getBoundingClientRect(), n = v => Math.round(v * 2) / 2;
       [root].concat([].slice.call(root.querySelectorAll('*'))).forEach(el => {
         [null, '::before', '::after'].forEach(ps => {
           const cs = getComputedStyle(el, ps);
           if(ps && (cs.content === 'none' || cs.content === 'normal')){ out.push(null); return; }
-          const o = {};
-          for(let i = 0; i < cs.length; i++) o[cs[i]] = cs.getPropertyValue(cs[i]);
+          const o = {}, typed = !ps && el.computedStyleMap ? el.computedStyleMap() : null;
+          for(let i = 0; i < cs.length; i++){
+            let v = cs.getPropertyValue(cs[i]);
+            if(typed && /^margin-/.test(cs[i])){ try { v = String(typed.get(cs[i])); } catch(e){} }
+            o[cs[i]] = v;
+          }
+          /* (what is not drawn has no box to be anywhere) */
+          if(!ps){ const r = el.getBoundingClientRect(); o['(box)'] = el.getClientRects().length ? [n(r.left - at.left), n(r.top - at.top), n(r.width), n(r.height)].join(' ') : 'none'; }
           out.push({ tag: el.tagName + '.' + String(el.className && el.className.baseVal === undefined ? el.className : '').split(' ').join('.') + (ps || ''), o });
         });
       });
@@ -935,7 +1071,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
       }
       await ctx.close();
     }
-    ok(compared > 100000, 'compared ' + compared + ' computed properties');
+    ok(compared > 100000, 'compared ' + compared + ' computed properties and boxes');
   }
 
   section('12 · nothing went wrong');

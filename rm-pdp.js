@@ -598,10 +598,21 @@ function buildBuy(p){
   var B=window.RMBasket||null;
   function sepette(){ return B ? B.has(p.name) : !!SEPET[p.name]; }
   ciz(btn, sepette());
+  /* Set (bundle) içindeki paket tek başına çıkarılamaz. Düğme bunu söyler —
+     raftaki düğme gibi: okunamayan bir ret, bozulmuş bir düğmedir. */
+  function setinde(){
+    if(!(B && B.covered(p.name))) return false;
+    btn.setAttribute('aria-disabled','true');
+    btn.querySelector('.rmp-lb--in').textContent='Setinde';
+    btn.querySelector('.rmp-lb--out').textContent='Önce seti çıkar';
+    return true;
+  }
+  setinde();
   btn.addEventListener('click',function(){
     var vardi=sepette();
     if(B){
-      if(B.covered(p.name)) return;      /* the bundle holds it: taken out with the bundle, as on the shelf */
+      if(setinde()){ live.textContent = p.name + ' sepetindeki sette. Çıkarmak için önce seti çıkar.'; return; }
+      btn.removeAttribute('aria-disabled');
       if(vardi) B.drop(p.name); else B.add(p.name);
     } else if(vardi) delete SEPET[p.name]; else SEPET[p.name]=true;
     ciz(btn, sepette());

@@ -6537,11 +6537,17 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     function same(a, b){
       return a.length === b.length && a.every(function(x, i){ return x === b[i]; });
     }
+    /* The first reading always draws, even when it finds what the page
+       already has — nothing. The count in the bar is written before the
+       first paint from what is kept as it is kept; if that turns out to be
+       names the catalogue no longer has, this is what puts the bar right. */
+    var synced = false;
     function sync(){
       if(!Kept) return;
       var kept = Kept.load();
-      if(same(kept.items, loose()) &&
+      if(synced && same(kept.items, loose()) &&
          same(kept.bundle ? kept.bundle.packs : [], bundle ? bundle.packs : [])) return;
+      synced = true;
       singles = {};
       kept.items.forEach(function(name){ singles[name] = true; });
       bundle = kept.bundle ? { label: kept.bundle.label, packs: kept.bundle.packs.slice() } : null;

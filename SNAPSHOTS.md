@@ -167,6 +167,14 @@ bunlar gider.
 - Bir ürün eklenince ya da çıkarılınca, basılan düğmenin yerine gelen şey
   (sıradaki ürün, "Geri al") tam parmağın olduğu yerde kalır: üstte ne
   açılıp kapanırsa kapansın sayfa ona göre kayar.
+- **Bir basış bir basıştır.** Yukarıdaki kural yüzünden çift tıklamanın
+  ikinci yarısı kimsenin nişan almadığı bir şeye denk gelirdi ("Çıkar"a çift
+  basınca satır hemen geri geliyor, öneriye çift basınca iki ürün giriyordu).
+  Bir şey ekleyen, çıkaran, geri alan ya da adım değiştiren bir basıştan
+  sonra yarım saniye boyunca aynı yere gelen ikinci basış yanıtlanmaz; başka
+  bir yere basış hemen yanıtlanır. Klavyede "aynı yer", arada başka tuşa
+  basılmamış olmasıdır: Enter-Enter tek basış, basılı tutulan Enter tek
+  basış, Enter-Tab-Enter iki basış. Tarayıcının Geri tuşu basış sayılmaz.
 - Kurallar (hepsi `rm-cart.js`'te, `node tools/test-cart.js` ile kanıtlı):
   sepette tek kampanya geçer — ulaşılan en büyüğü; bedava olan her zaman en
   ucuz olandır, eşitlerde en son eklenen; 6. üründen sonrası kendi fiyatıyla;
@@ -190,7 +198,8 @@ bunlar gider.
   bağlantıya çevrilecek ve o satır kaldırılacak.
 - "İçeriğe geç" bağlantısı ve footer'daki henüz yazılmamış sayfa
   bağlantıları (`#`) adımı değiştirmez. Geri tuşu sepete, bırakıldığı
-  yerden döner.
+  yerden döner. "Sepetin bıraktığın gibi duruyor" cümlesi Tamam adımında
+  yalnızca sepet gerçekten öyle durduğu sürece görünür.
 - İki dil: footer'daki dil seçici Türkçe'ye alınırsa sayfanın tamamı Türkçe
   olur (üst bar ve footer ana sayfadaki gibi İngilizce kalır); belge de
   `lang="tr"` olur, İngilizce kalan bölümler `lang="en"` taşır. Türkçede
@@ -204,7 +213,9 @@ bunlar gider.
 
 - Ürün penceresindeki (lightbox) "Sepete ekle" düğmesi artık sayfanın gerçek
   sepetini kullanır (`window.RMBasket`); eskiden kendi gizli listesini
-  tutuyordu, orada eklenen ürün sepete hiç ulaşmıyordu.
+  tutuyordu, orada eklenen ürün sepete hiç ulaşmıyordu. Sepetteki setin
+  içinde olan bir ürünün penceresinde düğme "Setinde — önce seti çıkar" der
+  (eskiden "Sepetten çıkar" yazıp hiçbir şey yapmıyordu).
 - Sepet sayacı ilk karede doğru sayıyı gösterir (eskiden sayfanın en altındaki
   betik çalışana kadar 0 yazıyordu).
 - "… added" notu barın durduğu yere göre konumlanır; sepet ikonunun üstüne
@@ -229,7 +240,7 @@ python3 tools/sync-cart.py --check  # iki sayfa uyumlu mu, onu söyler
 
 ```
 node tools/test-cart.js     # hesap: kampanya kuralları + ana sayfayla aynı ürün/fiyat mı (109 kontrol)
-node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (440+ kontrol)
+node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (460+ kontrol)
 ```
 
 ---

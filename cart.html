@@ -4509,11 +4509,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    added together. */
 html{scroll-padding-top:calc(var(--nav-h) + var(--s-4))}
 .bag [id]{scroll-margin-top:0}
-html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px))}
+html.has-paybar{scroll-padding-bottom:calc(var(--paybar-h) + var(--s-4) + env(safe-area-inset-bottom, 0px))}
+/* the bar under the window is this tall, wherever that is needed */
+:root{--paybar-h:72px}
 
 /* ── the page's own heading ─────────────────────────────────────── */
 .bag__title{margin:0 0 var(--s-7)}
-.bag__title .eyebrow{margin-bottom:var(--s-2)}
 /* a bare h1 on this site is the hero's headline; here it is a section's */
 .bag__title h1{
   font-size:clamp(28px,3.2vw,var(--fs-10));line-height:var(--lh-tight);
@@ -4572,7 +4573,10 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 /* both steps done: the front page's ring for "this is yours now", cut to
    this panel's own corners rather than a card's */
 .ladder.is-added::after{border-radius:inherit}
-.ladder.is-added{border-color:var(--accent)}
+.ladder.is-added{
+  border-color:var(--accent);
+  background-image:linear-gradient(145deg,rgba(104,88,255,.20),rgba(255,255,255,.04) 42%,rgba(45,92,210,.14));
+}
 .ladder .eyebrow{margin-bottom:var(--s-3)}
 .ladder__say{
   font-size:clamp(24px,2.5vw,var(--fs-9));line-height:var(--lh-tight);font-weight:var(--fw-bold);
@@ -4635,6 +4639,10 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
    the switch: here it sits over the second step. It names the step, it is
    not a way to choose it. */
 .rung .osbest{left:50%;cursor:default;pointer-events:none}
+/* the word in the pill and the number in the disc are marked up as <b> inside
+   something already bold, and a browser makes that "bolder": a fifth weight
+   on a page that has four. They take their parent's. */
+.prod__badge b,.rung__mark b{font-weight:inherit}
 .rung__tiles{display:grid;gap:var(--g);margin-top:auto}
 .rung--3 .rung__tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
 .rung--5 .rung__tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -4647,6 +4655,11 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
   .rungs .prod__badge{padding:3px 7px}
   .rungs .prod__badge b{display:none}
   .rungs .prod--empty .prod__badge{display:none}
+  /* and the caption keeps its words — "Add a pack" is the only writing on the
+     one place that can be pressed — by giving up the number, which the line
+     under the panel repeats */
+  .rungs .tile__cap .prod__no{display:none}
+  .rungs .tile__cap{padding-inline:2px}
 }
 
 /* A place. It is the front page's box — frame, render, ring and pill — a
@@ -4702,6 +4715,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 /* the place that is free the moment something is put in it */
 .ladder .prod--empty.is-nextfree{border-color:var(--accent);animation:freeLift 2.4s var(--ease) infinite alternate}
 .ladder .prod--empty.is-nextfree .prod__shot{border-color:var(--accent);background:var(--accent-bg)}
+.ladder .prod--empty.is-nextfree:hover .prod__shot{background:rgba(99,91,255,.26)}
 /* the second step's places, while the first is still being worked on: there
    to be seen, not yet to be filled */
 .ladder .prod--later{opacity:.6;cursor:default}
@@ -4712,7 +4726,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .pick{
   display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"label" "row";
   gap:var(--s-3) var(--s-4);align-items:center;min-width:0;
-  padding:var(--s-3) var(--s-4) var(--s-4);border-radius:var(--r-card);
+  padding:var(--s-3) var(--s-3) var(--s-4);border-radius:var(--r-card);
   border:1px solid var(--border);background:rgba(255,255,255,.03);     /* a picker row's ground */
 }
 .pick.is-free{border-color:var(--accent-border);background:var(--accent-bg)}
@@ -4762,7 +4776,6 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 /* a pack that would cost nothing right now: the picker's own chosen look */
 .addrow.is-free{border-color:var(--accent-border);background:var(--accent-bg)}
 .addrow.is-free:hover{border-color:var(--accent)}
-.addrow.is-new{animation:lineIn var(--dur-3) var(--ease) both}
 .addrow .choice__shot{grid-area:shot}
 .addrow__txt{grid-area:txt;min-width:0}
 .addrow__t{
@@ -4782,7 +4795,13 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .shelf__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2) var(--s-5);flex-wrap:wrap}
 .more__all{height:44px}
 /* the four rules, for anyone who wants them: a line that opens, not a page */
+/* a .link that is a <button> keeps the browser's own padding unless it is
+   told otherwise, and then sits six pixels off the edge everything else
+   lines up on */
+.bag button.link{padding:0}
 .shelf__rules{min-height:44px;font-size:var(--fs-3)}
+/* and every word that can be pressed answers the pointer, the page's own way */
+.shelf__rules:hover span,.undo .link:hover,.sum__top .link:hover,.sum--fold .sum__edit:hover{text-decoration:underline;text-underline-offset:3px}
 .shelf__rules svg,.shelf__rules:hover svg{transform:none}
 .shelf__rules[aria-expanded="true"] svg{transform:rotate(180deg)}
 .rules{
@@ -4846,6 +4865,9 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
   transition:color var(--dur-1) var(--ease);
 }
 .line__rm:hover,.line__rm:focus-visible{color:var(--danger);text-decoration:underline;text-underline-offset:3px}
+/* its 44px are made with negative margins, so a ring drawn round them ran
+   through the price above and was cut by the list's own edge below */
+.line__rm:focus-visible{outline-offset:-6px}
 /* what was just taken out, and the way back */
 .undo{
   display:flex;align-items:center;justify-content:space-between;gap:var(--s-2) var(--s-4);flex-wrap:wrap;
@@ -4854,6 +4876,8 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 }
 .undo p{margin:0;min-width:0}
 .undo .link{flex:none;min-height:44px;font-size:var(--fs-3)}
+/* the word flush with the column's edge, the room to hit it kept either side */
+.bag .undo button.link{padding:0 var(--s-2);margin-inline:calc(var(--s-2) * -1)}
 .undo--solo{border:1px solid var(--border);border-radius:var(--r-card);margin:0 0 var(--s-6)}
 
 /* the picker's own thumbnail frame, on white instead of on the dark panel */
@@ -4867,7 +4891,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
   border:1px solid var(--border);background:var(--bg-subtle);
 }
 .sum__top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4);margin:0 0 var(--s-5)}
-.sum__h{font-size:var(--fs-6);line-height:var(--lh-snug)}
+.sum__h{font-size:var(--fs-6);line-height:var(--lh-snug);font-weight:var(--fw-semibold)}
 .sum__top .link{font-size:var(--fs-3)}
 /* on a phone the payment step's summary is one line until it is asked for:
    the form is what the step is for */
@@ -4884,11 +4908,15 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .sum--fold .sum__edit{display:inline-flex;margin-top:var(--s-4);font-size:var(--fs-3);min-height:44px}
 .sum__mini{display:grid;gap:var(--s-3);margin:0 0 var(--s-5);padding:0 0 var(--s-5);border-bottom:1px solid var(--border)}
 .sum__mini li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--s-3)}
-/* the name, and only the name: the Free pill beside it has a <b> of its own */
+/* the name, and only the name: the Free pill beside it has a <b> of its own.
+   Never cut short — beside a pill on a small phone it takes a second line. */
 .sum__mini li > b{
   min-width:0;font-size:var(--fs-3);font-weight:var(--fw-medium);color:var(--fg);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:var(--lh-snug);overflow-wrap:break-word;
 }
+/* what has no box wears the shop's own mark, here as on its line */
+.choice__shot--mark{display:grid;place-items:center}
+.choice__shot--mark svg{width:18px;height:18px}
 .sum__mini .price b{font-size:var(--fs-3)}
 .sum__rows{display:grid;gap:var(--s-3);margin:0}
 .sum__row{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4);font-size:var(--fs-4)}
@@ -4900,7 +4928,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .sum__row--deal dd{font-weight:var(--fw-semibold);color:var(--ok)}
 .sum__total{align-items:baseline;margin-top:var(--s-1);padding-top:var(--s-4);border-top:1px solid var(--border)}
 .sum__total dt{font-size:var(--fs-5);font-weight:var(--fw-semibold);color:var(--fg)}
-.sum__total dd{font-size:var(--fs-8);font-weight:var(--fw-bold);letter-spacing:var(--tr-heading);line-height:1.2}
+.sum__total dd{font-size:var(--fs-8);font-weight:var(--fw-bold);letter-spacing:var(--tr-heading);line-height:var(--lh-tight)}
 .sum .osave{justify-content:flex-end;margin-top:var(--s-2)}
 /* what the next step would come to, in money — and the way to it */
 .sum__next{
@@ -4921,7 +4949,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .sum__assure{margin:var(--s-4) 0 0;text-align:center;font-size:var(--fs-2);color:var(--fg-muted)}
 /* the campaign's echo: three places, then two */
 .minitrack{display:grid;grid-template-columns:3fr 2fr;gap:var(--s-1);width:120px;margin-top:var(--s-2)}
-.minitrack i{display:block;height:4px;border-radius:var(--r-full);background:var(--n-200);overflow:hidden}
+.minitrack i{display:block;height:4px;border-radius:var(--r-full);background:var(--border);overflow:hidden}
 .minitrack i::after{
   content:"";display:block;height:100%;width:calc(var(--f, 0) * 100%);border-radius:inherit;
   background:var(--accent);transition:width var(--dur-3) var(--ease), background var(--dur-2) var(--ease);
@@ -4943,21 +4971,23 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .paybar.is-on{transform:none;visibility:visible}
 .paybar .minitrack{position:absolute;left:0;right:0;top:-1px;width:auto;margin:0;gap:2px}
 .paybar .minitrack i{height:3px;border-radius:0}
-.paybar__in{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);min-height:72px}
+.paybar__in{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);min-height:var(--paybar-h)}
 .paybar__sum{display:grid;min-width:0;margin:0}
 .paybar__sum b{
-  font-size:var(--fs-7);font-weight:var(--fw-bold);letter-spacing:var(--tr-heading);line-height:1.2;
+  font-size:var(--fs-7);font-weight:var(--fw-bold);letter-spacing:var(--tr-heading);line-height:var(--lh-tight);
   color:var(--fg);font-variant-numeric:tabular-nums;
 }
 .paybar__sum b s{margin-left:var(--s-2);font-size:var(--fs-3);font-weight:var(--fw-regular);color:var(--fg-muted)}
 .paybar__sum span{
-  font-size:var(--fs-1);font-weight:var(--fw-semibold);color:var(--accent-fg);
+  /* a shade down the ramp: the bar is glass, and over the dark panel the
+     usual accent ink fell under 4.5:1 at this size */
+  font-size:var(--fs-1);font-weight:var(--fw-semibold);color:var(--accent-700);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .paybar .btn{flex:none}
 .paybar__short{display:none}
 /* the way back up moves out of the bar's way rather than sitting on it */
-.has-paybar .totop{bottom:calc(72px + var(--s-4) + env(safe-area-inset-bottom))}
+.has-paybar .totop{bottom:calc(var(--paybar-h) + var(--s-4) + env(safe-area-inset-bottom))}
 .totop{transition:opacity var(--dur-2) var(--ease), transform var(--dur-2) var(--ease),
   visibility var(--dur-2), box-shadow var(--dur-2) var(--ease), bottom var(--dur-2) var(--ease)}
 
@@ -4990,7 +5020,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
   display:grid;gap:var(--s-4);padding:var(--s-5);border-radius:var(--r-card);
   border:1px dashed var(--border-strong);background:var(--bg-subtle);
 }
-.paybox__h{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);margin:0;font-size:var(--fs-5);line-height:var(--lh-snug)}
+.paybox__h{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);margin:0;font-size:var(--fs-5);line-height:var(--lh-snug);font-weight:var(--fw-semibold)}
 .paybox__grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3) var(--s-4)}
 .paybox__f{display:grid;gap:var(--s-2);min-width:0}
 .paybox__f:first-child{grid-column:1 / -1}
@@ -5018,7 +5048,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .previewnote p{margin:0}
 .previewnote svg{margin-top:3px;color:var(--fg-muted)}
 .previewnote b{font-weight:var(--fw-semibold);color:var(--fg)}
-.pay__h{margin:0;font-size:var(--fs-6);line-height:var(--lh-snug)}
+.pay__h{margin:0;font-size:var(--fs-6);line-height:var(--lh-snug);font-weight:var(--fw-semibold)}
 .pay .field + .field{margin-top:calc(var(--s-2) * -1)}
 .pay__go{width:100%}
 .pay__fine{margin:calc(var(--s-4) * -1) 0 0;text-align:center;font-size:var(--fs-2);color:var(--fg-muted)}
@@ -5037,12 +5067,10 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 .done .sum{margin:var(--s-7) 0 0}
 .done__still{margin:var(--s-4) 0 0;font-size:var(--fs-3);color:var(--fg-muted)}
 .done__go,.bagempty__go{display:flex;flex-wrap:wrap;gap:var(--s-3);margin:var(--s-6) 0 0}
-.bagempty{max-width:720px}
 .bagempty__mark{
   display:grid;place-items:center;width:72px;height:72px;border-radius:var(--r-full);
   margin:0 0 var(--s-5);background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent-fg);
 }
-.bagempty .lede{font-size:var(--fs-5);line-height:var(--lh-relaxed)}
 
 /* ════════════════════════════════════════════════════════════════
    NARROWER — the front page's own steps: 1100, 1000, 860, 600, 380
@@ -5115,7 +5143,13 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
   .done__go .btn,.bagempty__go .btn{width:100%}
   .paybar__in{gap:var(--s-3)}
   .paybar .btn{padding:0 var(--s-5)}
-  .has-paybar .totop{bottom:calc(72px + var(--s-3) + env(safe-area-inset-bottom))}
+  .has-paybar .totop{bottom:calc(var(--paybar-h) + var(--s-3) + env(safe-area-inset-bottom))}
+}
+@media (max-width:430px){
+  /* over a step two places wide the badge has to be short to stay over it:
+     the words stay, the star goes */
+  .rung .osbest{padding:6px var(--s-2)}
+  .rung .osbest svg{display:none}
 }
 @media (max-width:380px){
   /* the pill on a line keeps its word and gives its mark's room to the name beside it */
@@ -6407,7 +6441,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
          as the front page's picker does; the sampler has no box, so it wears
          the shop's own mark */
       var src = it.imgs ? it.imgs[0] : it.img;
-      return '<span class="choice__shot" aria-hidden="true">' + (src ? img(src) : '') + '</span>';
+      return '<span class="choice__shot' + (src ? '' : ' choice__shot--mark') + '" aria-hidden="true">' + (src ? img(src) : BRANDMARK) + '</span>';
     }
     function maker(it, cls){
       return '<span class="' + cls + '"><span class="avatar" aria-hidden="true">' + esc(it.ini) + '</span><span>' + esc(it.by) + '</span></span>';
@@ -6761,6 +6795,8 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
     function drawDone(){
       if(!order) return;
       $('[data-donesum]').innerHTML = mini(order.m) + sumRows(order.m, {done: true});
+      /* "Your basket is still as you left it" — while it is */
+      $('.done__still').hidden = order.m.have.join('|') !== names().join('|');
     }
 
     /* ---- the bar under the window ----
@@ -6989,14 +7025,67 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
     /* ════════════════════════════════════════════════════════════════
        DOING IT
        ════════════════════════════════════════════════════════════════ */
-    var lastAdd = 0;
+    /* One press is one press. Everything here puts something else exactly
+       where the press was — Undo where Remove stood, the next pack where this
+       one stood, the form where the button stood — so the other half of a
+       double click, a double tap, or Enter held a moment too long would land
+       on a thing nobody aimed at: the line came straight back, a second pack
+       went in, the agreement was ticked. For half a second after such a
+       press, another in the same place is the same press and is not
+       answered. A press anywhere else is answered at once. */
+    var lullUntil = 0, lullAt = null, lullEl = null, unsettled = false, press = null;
+    function near(a, b, target){
+      if(!a || !b) return false;
+      var close = Math.abs(a.x - b.x) < 24 && Math.abs(a.y - b.y) < 24;
+      /* A press made without a pointer — Enter, Space, or one made for
+         somebody by a screen reader or a switch — has no place of its own,
+         so it is given the middle of what it pressed. It is the same press
+         if it lands there again, or on the very thing this page moved the
+         keyboard to. The same software pressing something else, somewhere
+         else, is somebody choosing something else. */
+      if(a.key || b.key) return !!(a.key && b.key) && (close || (!!lullEl && (lullEl === target || lullEl.contains(target))));
+      return close;
+    }
+    function lull(){
+      /* by the press being answered now — not by one long past, when what
+         changed the view was the browser's own Back button */
+      lullAt = press && Date.now() - press.t < 400 ? press : null;
+      lullUntil = lullAt ? Date.now() + 500 : 0;
+      lullEl = null; unsettled = !!lullAt;
+    }
+    /* called when a press has been answered: where the keyboard is now */
+    function settled(){
+      if(!unsettled) return;
+      unsettled = false;
+      var on = document.activeElement;
+      lullEl = on && on !== document.body && on !== document.documentElement ? on : null;
+    }
+    page.addEventListener('click', function(e){
+      var at = {x: e.clientX, y: e.clientY, t: Date.now()};
+      if(e.detail === 0){
+        /* made by Enter or Space, or by software: the middle of the control */
+        var on = (e.target.closest && e.target.closest('button,a,input,label,summary')) || e.target;
+        var box = on.getBoundingClientRect();
+        at = {key: true, x: box.left + box.width / 2, y: box.top + box.height / 2, t: at.t};
+      }
+      if(Date.now() < lullUntil && near(at, lullAt, e.target)){ e.preventDefault(); e.stopPropagation(); return; }
+      press = at;
+    }, true);
+    /* From the keyboard, that is "nothing else pressed in between". Enter
+       twice running is one press, and so is Enter held down for however
+       long; Enter, Tab, Enter is two, however fast — and so is Enter and
+       then the mouse. */
+    page.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'){
+        if(e.repeat && e.key === 'Enter') e.preventDefault();
+        return;
+      }
+      if(lullAt && lullAt.key) lullUntil = 0;
+    }, true);
+    document.addEventListener('pointerdown', function(){ if(lullAt && lullAt.key) lullUntil = 0; }, true);
     function add(name, from, at, pressed){
-      /* a second press that lands on whatever moved into the first one's
-         place is the same press, not another pack */
-      var now = Date.now();
-      if(now - lastAdd < 350) return;
       if(!C.find(name) || C.has(state, name)) return;
-      lastAdd = now;
+      lull();
       var y0 = pressed ? pressed.getBoundingClientRect().top : null;
       /* whether this press reaches a deal is the price list's to say */
       var opens = C.adding(names(), name).opens;
@@ -7040,6 +7129,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
       var at = before.lines.map(function(l){ return l.name; }).indexOf(name);
       if(at === -1) return;
       var prev = state;
+      lull();
       state = C.write(C.remove(state, name));
       var pa = C.price(names()), pb = before.p;
       undo = {
@@ -7068,6 +7158,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
       var y0 = pressed ? pressed.getBoundingClientRect().top : null;
       var u = undo;
       undo = null;
+      lull();
       state = C.write(u.prev);
       /* nothing arrives and nothing rings: it is simply back where it was */
       var m = render();
@@ -7099,7 +7190,12 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
       var moved = v !== view;
       /* what was taken out can be put back only while you are still looking
          at where it was */
-      if(moved){ undo = null; kept[view] = window.scrollY; }
+      if(moved){
+        undo = null; kept[view] = window.scrollY;
+        /* and the second half of a double tap on the way here does nothing
+           to the step it arrives on */
+        if(!quiet) lull();
+      }
       view = v;
       $$('[data-view-name]').forEach(function(s){ s.hidden = s.getAttribute('data-view-name') !== v; });
       page.setAttribute('data-view', v);
@@ -7216,6 +7312,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
          form that has already been completed */
       history.replaceState(null, '', '#done');
       route();
+      settled();
     });
 
     /* ---- presses ---- */
@@ -7258,6 +7355,7 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
       } else if(el.hasAttribute('data-bar-go')){
         go('pay');
       }
+      settled();
     });
     /* the basket in the bar is this page: from the payment step it is the way
        back to the lines, and on the basket itself it is the way to the top */
@@ -7265,9 +7363,17 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
 
     /* ---- the world outside this tab ---- */
     function reread(){
+      var was = view;
       state = C.load();
       undo = null; fresh = null;
       route(true);
+      /* if what happened elsewhere took this view away — the basket emptied
+         while this tab was on the payment step — the one it falls back to is
+         shown from its top, not from wherever the other was scrolled to */
+      if(view !== was){
+        try { window.scrollTo({top: 0, left: 0, behavior: 'instant'}); }
+        catch(e){ window.scrollTo(0, 0); }
+      }
     }
     C.watch(reread);
     /* the language, changed in another tab or on the other page: this page
