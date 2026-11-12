@@ -4510,7 +4510,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     <div class="nav__icons">
       <button class="iconbtn" type="button" id="searchToggle" aria-expanded="false" aria-controls="searchBar" aria-label="Search"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.8" cy="8.8" r="6.3" stroke="currentColor" stroke-width="1.6"/><path d="M13.5 13.5l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       <a class="iconbtn" href="#" aria-label="Log in"><svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="6.7" r="3.4" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 17.3c0-3.3 2.9-5.4 6.5-5.4s6.5 2.1 6.5 5.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>
-      <a class="iconbtn" href="#" aria-label="Basket, empty" data-basket><svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="cart__n tnum" aria-hidden="true">0</span></a>
+      <a class="iconbtn" href="cart.html" aria-label="Basket, empty" data-basket><svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.4 6.6h13.2l-.95 9.9a1.6 1.6 0 01-1.6 1.4H5.95a1.6 1.6 0 01-1.6-1.4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7.1 8.4V5.5a2.9 2.9 0 015.8 0v2.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="cart__n tnum" aria-hidden="true">0</span></a>
     </div>
     <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
       <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true"><path d="M0 1h18M0 6h18M0 11h18" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -6417,6 +6417,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   </button>
 </nav>
 
+<!-- The basket both pages share: what is on sale, what a basket is worth, and
+     where it is kept between this page and the basket page. Loaded ahead of
+     the page's own script, which reads it as it starts. -->
+<script src="rm-cart.js"></script>
 <script>
 (function(){
   "use strict";
@@ -6460,11 +6464,22 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   var Cart = (function(){
     var singles = {}, bundle = null, watchers = [];
     var say = document.querySelector('[data-status]');
+    /* The basket is kept where the basket page can read it — rm-cart.js, one
+       entry in localStorage — so what goes in here is there when you get to
+       the basket, and what was taken out there is gone when you come back.
+       Without it the page works as it always did and forgets when you leave. */
+    var Kept = window.RMCart || null, quiet = false;
     function covered(name){ return !!bundle && bundle.packs.indexOf(name) > -1; }
     function size(){
       var n = 0, k;
       for(k in singles){ if(singles[k]) n++; }
       return n + (bundle ? bundle.packs.length : 0);
+    }
+    /* what is loose in the basket, by name and in the order it went in */
+    function loose(){
+      var out = [], k;
+      for(k in singles){ if(singles[k]) out.push(k); }
+      return out;
     }
     var link = document.querySelector('[data-basket]');
     /* the badge opens at nought and every change after that is a change */
@@ -6475,7 +6490,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         basketCount.textContent = String(n);
         /* only on a change, and only after the first draw — the page does not
            open by congratulating you on an empty basket */
-        if(shown !== n && !still){
+        if(shown !== n && !still && !quiet){
           basketCount.classList.remove('is-hit');
           void basketCount.offsetWidth;
           basketCount.classList.add('is-hit');
@@ -6487,7 +6502,26 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(link) link.setAttribute('aria-label',
         'Basket, ' + (n ? n + ' item' + (n > 1 ? 's' : '') : 'empty'));
       if(say && msg) say.textContent = msg;
+      if(Kept && !quiet) Kept.write({items: loose(), bundle: bundle});
       watchers.forEach(function(fn){ fn(); });
+    }
+    /* Take the basket from where it is kept: when the page opens, when it is
+       shown again after the basket page, and when another tab changes it.
+       Quietly — nothing was done here, so nothing is announced and the count
+       does not ring — and not at all if what is kept is what is already here. */
+    function same(a, b){
+      return a.length === b.length && a.every(function(x, i){ return x === b[i]; });
+    }
+    function sync(){
+      if(!Kept) return;
+      var kept = Kept.load();
+      if(same(kept.items, loose()) &&
+         same(kept.bundle ? kept.bundle.packs : [], bundle ? bundle.packs : [])) return;
+      singles = {};
+      kept.items.forEach(function(name){ singles[name] = true; });
+      bundle = kept.bundle ? { label: kept.bundle.label, packs: kept.bundle.packs.slice() } : null;
+      quiet = true;
+      try { draw(''); } finally { quiet = false; }
     }
     function list(names){
       if(names.length === 1) return names[0];
@@ -6511,11 +6545,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       },
       /* what is loose in the basket, by name — the bundle replaces all of
          it, and the warning over the button says so before you press it */
-      loose: function(){
-        var out = [], k;
-        for(k in singles){ if(singles[k]) out.push(k); }
-        return out;
+      loose: loose,
+      /* the bundle in the basket, if there is one: its label and its packs */
+      bundle: function(){
+        return bundle ? { label: bundle.label, packs: bundle.packs.slice() } : null;
       },
+      sync: sync,
       /* the bundle takes the basket's place rather than sitting beside it,
          so nothing can be in there twice */
       addBundle: function(label, packs){
@@ -7314,6 +7349,51 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       });
     });
     render();
+
+    /* The basket can change without this panel being pressed: it is kept
+       between pages, and the basket page lists a bundle as its packs, any of
+       which can be taken out there. So the panel reads the basket, the way
+       the shelf's buttons do. A bundle that is in the basket is shown as
+       bought, with its packs in the places; one that is no longer in it is no
+       longer shown as bought. Nothing is announced and nothing celebrates —
+       this is the page catching up, not the customer buying. */
+    function settle(on){
+      var act = go.closest('.oact');
+      bought = on;
+      go.classList.toggle('is-added', on);
+      if(act) act.classList.toggle('is-bought', on);
+      if(shell) shell.classList.toggle('is-bought', on);
+      if(on) bill(false); else go.removeAttribute('aria-label');
+    }
+    Cart.watch(function(){
+      var held = Cart.bundle();
+      if(!held){
+        if(bought){ settle(false); render(); }
+        return;
+      }
+      var mine = names();
+      if(bought && held.packs.length === mine.length &&
+         held.packs.every(function(n){ return mine.indexOf(n) > -1; })) return;
+      var ids = held.packs.map(function(n){
+        for(var i = 0; i < PACKS.length; i++){ if(PACKS[i].name === n) return i; }
+        return -1;
+      });
+      if(ids.indexOf(-1) > -1 ||
+         !DEALS.some(function(d){ return d.get === ids.length; })) return;
+      bought = false;              /* so that drawing it does not take it back out */
+      state.get = ids.length;
+      state.picks = ids;
+      tabs.forEach(function(t){
+        var on = Number(t.getAttribute('data-deal')) === state.get;
+        t.setAttribute('aria-checked', String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      slide();
+      was = null;                  /* a different bundle, not a step in this one */
+      open(false);
+      render();
+      settle(true);
+    });
   })();
 
   /* ---- clip rails: arrows + disabled states ---- */
@@ -8450,7 +8530,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(band) band.classList.toggle('is-added', inCart || held);
     }
     Cart.watch(function(){
-      if(inCart && !Cart.has(pack)) inCart = false;
+      /* read the basket rather than remembering, as the shelf's buttons do:
+         it is kept between pages, so it can be holding this pack without
+         this button ever having been pressed */
+      inCart = Cart.has(pack) && !Cart.covered(pack);
       draw(false);
     });
     /* the two prices in the button are the offer, so the gap between them is
@@ -8530,6 +8613,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     btn.addEventListener('focus', function(){ draw(true); if(Cart.covered(name)) tipShow(btn); });
     btn.addEventListener('blur', function(){ draw(false); tipOff(); });
   });
+
+  /* ---- the basket is kept between pages ----
+     Every button that can change the basket is listening by now, so this is
+     the moment to hand them what was already in it: on arrival, on being
+     shown again when you come back from the basket page (a page restored
+     from the back/forward cache does not run its scripts again), and
+     whenever another tab changes it. */
+  Cart.sync();
+  window.addEventListener('pageshow', function(e){ if(e.persisted) Cart.sync(); });
+  if(window.RMCart) window.RMCart.watch(function(){ Cart.sync(); });
 
   /* ---- the shelf is twelve deep ----
      Three across and four down is the shelf; anything past that waits

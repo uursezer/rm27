@@ -154,6 +154,37 @@ section('3 · one more never costs less than nothing, or more than its price');
   console.log('  ✓  4,000 additions');
 })();
 
+/* ── 3b · the places a page can draw the basket in ────────────────── */
+section('3b · every line that counts knows its place in the deal');
+(function(){
+  var wrong = {perm:0, order:0, gift:0, free:0};
+  for(var t = 0; t < 4000; t++){
+    var n = Math.floor(rnd() * 10), prices = [];
+    for(var i = 0; i < n; i++) prices.push(pick([0, 10, 59, 59, 59, 149, 299]));
+    var r = C.rate(lines(prices));
+    var paid = r.lines.filter(function(l){ return l.price > 0; });
+    var seen = paid.map(function(l){ return l.place; }).sort(function(a, b){ return a - b; });
+    if(seen.some(function(v, k){ return v !== k; })) wrong.perm++;
+    /* dearest first, and among equals the earlier line first */
+    var byPlace = paid.slice().sort(function(a, b){ return a.place - b.place; });
+    for(var k = 1; k < byPlace.length; k++){
+      var a = byPlace[k - 1], b = byPlace[k];
+      if(a.price < b.price || (a.price === b.price && r.lines.indexOf(a) > r.lines.indexOf(b))) wrong.order++;
+    }
+    if(r.lines.some(function(l){ return l.price === 0 && l.place !== null; })) wrong.gift++;
+    /* the free ones are exactly the places from `pay` up to `get` */
+    var want = [];
+    if(r.deal){ for(var q = r.deal.pay; q < r.deal.get; q++) want.push(q); }
+    var got = r.lines.filter(function(l){ return l.free; }).map(function(l){ return l.place; }).sort(function(a, b){ return a - b; });
+    if(got.join() !== want.join()) wrong.free++;
+  }
+  ok(wrong.perm === 0, 'the places are 0, 1, 2 … with none missing and none twice (' + wrong.perm + ')');
+  ok(wrong.order === 0, 'dearest first, and among equals the earlier one first (' + wrong.order + ')');
+  ok(wrong.gift === 0, 'a line that costs nothing has no place (' + wrong.gift + ')');
+  ok(wrong.free === 0, 'the free lines are the third place under Get 3, Pay 2 and the fourth and fifth under Get 5, Pay 3 (' + wrong.free + ')');
+  console.log('  ✓  4,000 baskets');
+})();
+
 /* ── 4 · the real catalogue, pack by pack ─────────────────────────── */
 section('4 · the shop’s own packs');
 (function(){
@@ -292,6 +323,26 @@ section('7 · the basket as it is kept');
   ok(!mem.hasOwnProperty(C.KEY), 'an empty basket leaves nothing behind');
   mem[C.KEY] = '{not json';
   ok(JSON.stringify(C.read()) === '{"items":[],"bundle":null}', 'a damaged entry reads as an empty basket');
+
+  /* what a page starts from: only what is still on sale, and a bundle only
+     while it is still one of the two deals' worth of packs */
+  C.write({items:['Lora Presets', 'A pack that was renamed', 'Demo Presets'], bundle:null});
+  ok(JSON.stringify(C.load().items) === '["Lora Presets","Demo Presets"]', 'load() leaves out what the catalogue no longer has');
+  var five = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Presets', 'Jardin Presets'];
+  C.write({items:['Aster LUTs'], bundle:{label:'Bestseller bundle', packs:five}});
+  var kept = C.load();
+  ok(kept.bundle && kept.bundle.label === 'Bestseller bundle' && JSON.stringify(kept.bundle.packs) === JSON.stringify(five) &&
+     JSON.stringify(kept.items) === '["Aster LUTs"]', 'load() keeps a whole bundle as a bundle');
+  C.write({items:['Aster LUTs'], bundle:{label:'Bestseller bundle', packs:five.slice(0, 4)}});
+  kept = C.load();
+  ok(kept.bundle === null && JSON.stringify(kept.items) === JSON.stringify(five.slice(0, 4).concat(['Aster LUTs'])),
+     'a bundle of four is not a bundle: its packs go on as ordinary lines, ahead of the rest');
+  C.write({items:[], bundle:{label:'Bestseller bundle', packs:['Lora Presets', 'Gone', 'Solis Presets']}});
+  kept = C.load();
+  ok(kept.bundle === null && JSON.stringify(kept.items) === '["Lora Presets","Solis Presets"]',
+     'nor is one that has lost a pack the catalogue no longer has');
+  C.write(C.blank());
+  ok(JSON.stringify(C.load()) === '{"items":[],"bundle":null}', 'and nothing kept loads as an empty basket');
   delete globalThis.localStorage;
   ok(JSON.stringify(C.read()) === '{"items":[],"bundle":null}', 'and so does no storage at all');
 })();

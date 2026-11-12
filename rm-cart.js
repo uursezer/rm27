@@ -73,17 +73,26 @@
      the front page's rule too, and for a basket of exactly three or five
      the two give the same answer, pack for pack.
 
-     One deal, once. A sixth pack is a pack at its own price. */
+     One deal, once. A sixth pack is a pack at its own price.
+
+     Each line that counts is also told its `place` in that order — 0 for
+     the dearest, and among equals the earlier one first. It is the order
+     the deal is applied in, so a page that draws the basket as places can
+     draw them in it: under Get 3, Pay 2 the free one is always the third
+     place, under Get 5, Pay 3 always the fourth and fifth. A line that
+     costs nothing has no place (null). */
   function rate(lines){
     var counted = [], subtotal = 0;
     lines.forEach(function(l, i){
       l.free = false;
+      l.place = null;
       subtotal += l.price;
       if(l.price > 0) counted.push({i:i, price:l.price});
     });
     /* dearest first; among equals, the earlier one first — which leaves the
        later ones at the cheap end, where the free places are */
     var ranked = counted.slice().sort(function(a, b){ return (b.price - a.price) || (a.i - b.i); });
+    ranked.forEach(function(r, at){ lines[r.i].place = at; });
 
     var best = null;
     DEALS.forEach(function(d){
@@ -125,7 +134,7 @@
     (names || []).forEach(function(name){
       var p = find(name);
       if(!p){ unknown.push(name); return; }
-      lines.push({name:p.name, item:p, price:p.price, was:p.was, gift:p.price === 0, free:false});
+      lines.push({name:p.name, item:p, price:p.price, was:p.was, gift:p.price === 0, free:false, place:null});
     });
     var out = rate(lines);
     out.unknown = unknown;
@@ -187,6 +196,24 @@
     return c;
   }
 
+  /* What a page starts from: what is kept, less anything that is no longer
+     on sale — a name the catalogue does not know cannot be shown, priced or
+     taken back out, so it is not carried. A bundle is one of the two deals'
+     worth of packs; one that has lost a pack that way, or was never that
+     size, is not a bundle any more, and its packs go on as ordinary lines. */
+  function load(){
+    var c = read();
+    function known(n){ return !!find(n); }
+    if(c.bundle){
+      var packs = c.bundle.packs.filter(known);
+      var whole = packs.length === c.bundle.packs.length &&
+        DEALS.some(function(d){ return d.get === packs.length; });
+      if(!whole){ c.items = packs.concat(c.items); c.bundle = null; }
+    }
+    c.items = c.items.filter(known);
+    return c;
+  }
+
   /* everything in the basket as one list, in the order it is shown: what the
      bundle holds, then what was added on its own */
   function names(state){
@@ -228,7 +255,7 @@
   var api = {
     KEY: KEY, DEALS: DEALS, CATALOGUE: CATALOGUE,
     find: find, rate: rate, price: price, adding: adding,
-    blank: blank, clean: clean, read: read, write: write,
+    blank: blank, clean: clean, read: read, write: write, load: load,
     names: names, has: has, add: add, remove: remove, watch: watch
   };
   root.RMCart = api;
