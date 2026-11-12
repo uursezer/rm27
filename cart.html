@@ -4668,9 +4668,12 @@ html.has-paybar{scroll-padding-bottom:calc(var(--paybar-h) + var(--s-4) + env(sa
   .rungs .prod__badge{padding:3px 7px}
   .rungs .prod__badge b{display:none}
   .rungs .prod--empty .prod__badge{display:none}
-  /* and the caption keeps its words — "Add a pack" is the only writing on the
-     one place that can be pressed — by giving up the number, which the line
-     under the panel repeats */
+}
+/* and the caption keeps its words — "Add a pack" is the only writing on the
+   one place that can be pressed — by giving up the number, which the line
+   under the panel repeats. It needs that room for longer than the pill needs
+   its own: beside a number "Plugin Pack" is cut until the row is 632px wide. */
+@container (max-width:660px){
   .rungs .tile__cap .prod__no{display:none}
   .rungs .tile__cap{padding-inline:2px}
 }
@@ -5183,10 +5186,18 @@ html.has-paybar{scroll-padding-bottom:calc(var(--paybar-h) + var(--s-4) + env(sa
   .rung .osbest{padding:6px var(--s-2)}
   .rung .osbest svg{display:none}
 }
+@media (max-width:340px){
+  /* and on the narrowest phones its letters sit a little closer, which keeps
+     the Turkish badge off the first step */
+  .rung .osbest{letter-spacing:.03em}
+}
 @media (max-width:380px){
   /* the pill on a line keeps its word and gives its mark's room to the name beside it */
   .line .prod__badge--inline .nav__gift{display:none}
-  /* the bar's button says it in one word; its name for a screen reader does not change */
+  /* and in the summary it leaves what the pack was to the rows under the
+     list: beside the whole pill a name had 40px and broke inside its words */
+  .sum__mini .prod__was{display:none}
+  /* the bar's button says it more shortly where the language has a shorter way */
   .paybar__long{display:none}
   .paybar__short{display:inline}
 }

@@ -984,8 +984,11 @@ function spelled(file){
       'bundle+1': S(['Aster LUTs'], { label: 'Bestseller bundle', packs: FIVE }),
       'nine': S(['Lora Presets', 'Demo Presets', 'Solis Presets', 'Full Plugin Pack', 'Terra Presets', 'Jardin Presets', 'Mely Presets', 'Olbia LUTs', 'Doré Presets'])
     };
-    let wide = [], small = [], cut = [], names = [], count = 0;
-    for(const w of [320, 360, 390, 430, 600, 601, 768, 860, 1000, 1001, 1100, 1200, 1201, 1440, 1920]){
+    let wide = [], small = [], cut = [], names = [], split = [], badge = [], count = 0;
+    /* (730 and 1160 are not steps of the layout: they are where the row of
+       places is at its narrowest while each place still shows its number, and
+       a caption was cut there while every width on either side passed) */
+    for(const w of [320, 360, 390, 430, 600, 601, 730, 768, 860, 1000, 1001, 1100, 1160, 1200, 1201, 1440, 1920]){
       for(const lang of ['', 'tr']){
         const o = await open({ state: STATES.one, lang, w, h: 900, touch: w < 700 });
         for(const name of Object.keys(STATES)){
@@ -1001,7 +1004,7 @@ function spelled(file){
             await o.page.waitForTimeout(60);
             count++;
             const m = await o.page.evaluate(() => {
-              const de = document.documentElement, vw = de.clientWidth, out = { over: de.scrollWidth - vw, small: [], cut: [], short: [] };
+              const de = document.documentElement, vw = de.clientWidth, out = { over: de.scrollWidth - vw, small: [], cut: [], short: [], split: [], badge: [] };
               const seen = el => !el.closest('[hidden]') && el.getClientRects().length > 0;
               /* anything a finger is asked to hit is at least 44px tall, unless it is a link in a sentence */
               if(matchMedia('(pointer:coarse)').matches || vw < 700){
@@ -1022,6 +1025,25 @@ function spelled(file){
               document.querySelectorAll('#main .addrow__t, #main .pick__t, #main .line__t, #main .addrow__with, #main .sum__mini li > b, #main .tile__t').forEach(el => {
                 if(seen(el) && el.scrollWidth > el.clientWidth + 1) out.short.push((el.className || el.tagName) + ' “' + el.textContent + '” ' + el.clientWidth + '<' + el.scrollWidth);
               });
+              /* a name may take two lines, but in whole words: a word in two pieces is a name nobody can read */
+              document.querySelectorAll('#main .addrow__t, #main .pick__t, #main .line__t, #main .sum__mini li > b').forEach(el => {
+                if(!seen(el)) return;
+                const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+                for(let n = walk.nextNode(); n; n = walk.nextNode()){
+                  const word = /\S+/g;
+                  for(let m = word.exec(n.data); m; m = word.exec(n.data)){
+                    const r = document.createRange(); r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length);
+                    const lines = new Set([].map.call(r.getClientRects(), q => Math.round(q.top)));
+                    if(lines.size > 1) out.split.push((el.className || el.tagName) + ' “' + el.textContent + '” breaks inside “' + m[0] + '”');
+                  }
+                }
+              });
+              /* the gold badge hangs over the second step, and over nothing else */
+              const gold = document.querySelector('#ladder .osbest'), first = document.querySelector('#ladder [data-rung]');
+              if(gold && first && seen(gold)){
+                const g = gold.getBoundingClientRect(), f = first.getBoundingClientRect();
+                if(g.left < f.right - 0.5 && g.right > f.left) out.badge.push('over the first step by ' + (f.right - g.left).toFixed(1) + 'px');
+              }
               /* and nothing in the campaign hangs out of its panel, which would clip it */
               const lad = document.querySelector('#ladder');
               if(seen(lad)){
@@ -1039,6 +1061,8 @@ function spelled(file){
             if(m.small.length) small.push(at + ' ' + m.small.slice(0, 3).join(', '));
             if(m.cut.length) cut.push(at + ' ' + m.cut.slice(0, 3).join(', '));
             if(m.short.length) names.push(at + ' ' + m.short.slice(0, 3).join(', '));
+            if(m.split.length) split.push(at + ' ' + m.split.slice(0, 2).join(', '));
+            if(m.badge.length) badge.push(at + ' ' + m.badge[0]);
           }
         }
         await o.ctx.close();
@@ -1048,6 +1072,8 @@ function spelled(file){
     ok(cut.length === 0, 'nothing that is read runs off the edge or out of the panel', cut.slice(0, 6));
     ok(small.length === 0, 'everything a finger is asked to hit is 44px tall', small.slice(0, 8));
     ok(names.length === 0, 'no product’s name and no place’s caption is cut short, at any width, in either language', names.slice(0, 8));
+    ok(split.length === 0, 'and no name is broken inside one of its words', split.slice(0, 6));
+    ok(badge.length === 0, 'the gold badge lies over the second step and nothing else', badge.slice(0, 6));
   }
 
   /* ── 10 · the shape of the page ─────────────────────────────────── */

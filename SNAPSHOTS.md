@@ -279,6 +279,18 @@ node tools/test-cart.js     # hesap: kampanya kuralları + ana sayfayla aynı ü
 node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (510+ kontrol)
 ```
 
+Genişlik taraması 320'den 1920'ye 17 genişlikte, altı sepet durumunda ve iki
+dilde bakar: hiçbir şey pencereden taşmaz, hiçbir ürün adı üç noktayla
+kesilmez ya da kelimesinin ortasından bölünmez, altın rozet yalnızca kendi
+adımının üstünde durur. (730 ve 1160 düzenin kırılma noktası değil; yer
+kutularının numarayla birlikte en dar olduğu genişlikler — "Add a pack"
+yazısı tam orada kesiliyordu ve iki yanındaki genişlikler geçtiği için
+görünmüyordu.)
+
+```
+node tools/check-cart.js --quick   # genişlik taraması olmadan, birkaç dakikada
+```
+
 ---
 
 ## RM28 — `c49448d` · 10 Ağustos 2026
