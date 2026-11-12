@@ -593,11 +593,18 @@ function buildBuy(p){
   var btn=buy.querySelector('#rmp-add');
   /* Durum ÜRÜNE bağlı: paket değişince buton o paketin durumunu gösterir,
      eskiden hep sıfırlanıyordu. Aynı butona tekrar basmak sepetten çıkarır. */
-  ciz(btn, !!SEPET[p.name]);
+  /* the page's own basket when there is one (index.html hands it over as
+     window.RMBasket); the panel's private list only where there is none */
+  var B=window.RMBasket||null;
+  function sepette(){ return B ? B.has(p.name) : !!SEPET[p.name]; }
+  ciz(btn, sepette());
   btn.addEventListener('click',function(){
-    var vardi=!!SEPET[p.name];
-    if(vardi) delete SEPET[p.name]; else SEPET[p.name]=true;
-    ciz(btn, !vardi);
+    var vardi=sepette();
+    if(B){
+      if(B.covered(p.name)) return;      /* the bundle holds it: taken out with the bundle, as on the shelf */
+      if(vardi) B.drop(p.name); else B.add(p.name);
+    } else if(vardi) delete SEPET[p.name]; else SEPET[p.name]=true;
+    ciz(btn, sepette());
     live.textContent = p.name + (vardi ? ' sepetten çıkarıldı' : ' sepete eklendi');
   });
   syncBuyH();

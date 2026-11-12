@@ -347,5 +347,52 @@ section('7 · the basket as it is kept');
   ok(JSON.stringify(C.read()) === '{"items":[],"bundle":null}', 'and so does no storage at all');
 })();
 
+/* ── the same catalogue, wherever it is written down ─────────────────
+   Names and prices are in four places: here in rm-cart.js, and on the front
+   page three times over — the offer's own list, the shelf's cards, and the
+   plugin band. A price changed in one of them alone would be shown as one
+   thing and charged as another; a name changed alone would drop out of the
+   basket without a word, because the basket is kept by name. */
+section('8 · the front page and rm-cart.js sell the same things at the same prices');
+(function(){
+  var fs = require('fs');
+  var html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  var money = function(s){ return Number(String(s).replace(/[^\d.]/g, '')) || 0; };
+  var found = html.match(/var PACKS = (\[\{"name".*?\}\]);/);
+  ok(!!found, 'the front page still has its list of packs where this test can read it');
+  if(!found) return;
+  var packs = JSON.parse(found[1]);
+  packs.forEach(function(p){
+    var c = C.find(p.name);
+    ok(!!c && c.price === money(p.price) && c.was === money(p.was) && c.by === p.by && c.ini === p.ini &&
+       c.img === p.img && JSON.stringify(c.imgs || null) === JSON.stringify(p.imgs || null),
+       'the offer\u2019s ' + p.name + ' is rm-cart.js\u2019s: price, was-price, maker and art');
+  });
+  ok(JSON.stringify(packs.map(function(p){ return p.name; })) ===
+     JSON.stringify(C.CATALOGUE.filter(function(c){ return c.price > 0; }).map(function(c){ return c.name; })),
+     'the same paid products, in the same order');
+  var cards = html.split('<article class="card"').slice(1).map(function(a){ return a.slice(0, a.indexOf('</article>')); });
+  ok(cards.length >= 12, 'the shelf has its cards (' + cards.length + ')');
+  cards.forEach(function(a){
+    var name = (a.match(/<h3 class="card__t"><a[^>]*>([^<]+)</) || [])[1];
+    var by = (a.match(/<span class="card__by"><span class="avatar">([^<]*)<\/span><span>([^<]*)</) || []).slice(1, 3);
+    var price = (a.match(/<span class="price"><b>([^<]*)<\/b>(?:<s>([^<]*)<\/s>)?/) || []).slice(1, 3);
+    var aria = (a.match(/class="card__add"[^>]*aria-label="([^"]+)"/) || [])[1];
+    var c = C.find(name);
+    ok(!!c && money(price[0]) === c.price && (price[1] ? money(price[1]) : null) === c.was && by[1] === c.by && by[0] === c.ini,
+       'the shelf\u2019s ' + name + ' is rm-cart.js\u2019s: price, was-price and maker');
+    ok(aria === 'Add ' + name + ' to basket', name + ': its button is named for it (the basket is kept by that name)');
+  });
+  var band = html.match(/data-packgo="([^"]+)"[^>]*>([\s\S]*?)<\/button>/);
+  ok(!!band, 'the plugin band has its button');
+  if(band){
+    var now = (band[2].match(/<b[^>]*>([^<]+)<\/b>/) || [])[1], was = (band[2].match(/<s[^>]*>([^<]+)<\/s>/) || [])[1];
+    var cb = C.find(band[1]);
+    ok(!!cb && cb.price === money(now) && cb.was === money(was), 'the plugin band\u2019s ' + band[1] + ' is rm-cart.js\u2019s: ' + now + ' and ' + was);
+  }
+  var deals = html.match(/var DEALS = (\[\{"get".*?\}\]);/);
+  ok(!!deals && JSON.stringify(JSON.parse(deals[1])) === JSON.stringify(C.DEALS), 'and the two deals are the same two deals');
+})();
+
 console.log('\n' + (bad ? bad + ' of ' + ran + ' checks FAILED' : 'all ' + ran + ' checks pass'));
 process.exit(bad ? 1 : 0);

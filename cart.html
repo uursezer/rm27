@@ -15,6 +15,9 @@
      Kaçar are in latin-ext, so on this page it is not the rare case. -->
 <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/inter-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+<!-- the basket's arithmetic: the page's script waits for it, so it is asked
+     for with the first byte -->
+<link rel="preload" href="rm-cart.js" as="script">
 <script>document.documentElement.className+=' has-js';</script>
 <!-- ▼ shared:style · index.html's whole stylesheet, byte for byte. Cut in by tools/sync-cart.py — change it there, never here. -->
 <style>
@@ -5186,6 +5189,19 @@ html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0p
   </div>
 </header>
 <!-- ▲ shared:header -->
+<script>
+/* the count, before the first paint: the page's own script is at the foot of
+   the file, and until it ran the bar said 0 over a basket that was not empty.
+   (The front page does the same, and names the basket too; here the name is
+   left to the page's script, which knows what language it is in.) */
+(function(){
+  try{
+    var k = JSON.parse(localStorage.getItem('rm-cart') || 'null'), n = 0;
+    if(k) n = (Array.isArray(k.items) ? k.items.length : 0) + (k.bundle && Array.isArray(k.bundle.packs) ? k.bundle.packs.length : 0);
+    if(n) document.querySelector('.cart__n').textContent = n;
+  }catch(e){}
+})();
+</script>
 
 <main id="main" class="bag" data-view="basket">
 <div class="wrap">

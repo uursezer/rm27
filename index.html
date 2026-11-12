@@ -23,6 +23,10 @@
      every weight the page uses. latin-ext is not optional here: ğ, ş, İ and
      the rest of the Turkish set live in it. -->
 <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<!-- The basket's arithmetic is a file of its own, and the page's script waits
+     for it two thirds of the way down. Asked for here, with the first byte,
+     it has arrived by then. -->
+<link rel="preload" href="rm-cart.js" as="script">
 <!-- The product panel a pack opens into. Dropped in as shipped: it brings its
      own CSS, builds its own markup, and everything it owns is rmp- prefixed,
      so none of it can reach the page's own .btn / .nav / .price / .rate /
@@ -4544,6 +4548,19 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     </form>
   </div>
 </header>
+<script>
+/* the count, before the first paint: the page's own script is 2,000 lines further down */
+(function(){
+  try{
+    var k = JSON.parse(localStorage.getItem('rm-cart') || 'null'), n = 0;
+    if(k) n = (Array.isArray(k.items) ? k.items.length : 0) + (k.bundle && Array.isArray(k.bundle.packs) ? k.bundle.packs.length : 0);
+    if(!n) return;
+    var c = document.querySelector('.cart__n');
+    c.textContent = n;
+    c.parentNode.setAttribute('aria-label', 'Basket, ' + n + ' item' + (n > 1 ? 's' : ''));
+  }catch(e){}
+})();
+</script>
 
 <main id="main">
 
@@ -6572,6 +6589,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     };
   })();
 
+  /* the product panel is a file of its own: this is how it reaches the same basket */
+  window.RMBasket = Cart;
+
   /* ---- and where it went ----
      The basket is what changed, so the confirmation is at the basket with
      its point in it. It says what landed and what is in there now — and, if
@@ -6613,7 +6633,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       var w = tipEl.offsetWidth;
       var mid = m.left + m.width / 2;
       var left = Math.max(8, Math.min(vw - 8 - w, Math.round(mid + 26 - w)));
-      tipEl.style.top = Math.round(r.bottom + 8) + 'px';
+      /* …and against where the bar rests, not where it is this instant: in the
+         shelf it slides away on a transform and slides back without a scroll,
+         and a note placed from the moving rectangle ended up cut by the top of
+         the window and then sitting on the basket it was pointing at */
+      var bar = document.getElementById('nav');
+      var slid = bar ? new DOMMatrixReadOnly(getComputedStyle(bar).transform).m42 : 0;
+      tipEl.style.top = Math.round(r.bottom - slid + 8) + 'px';
       tipEl.style.left = left + 'px';
       tipEl.style.right = 'auto';
       /* the arrow is 14px across, so its own middle is 7px in from where it
@@ -6641,9 +6667,18 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      saying Added underneath. */
   var TICKBIG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
     '<path d="M5.6 12.6l4 4 8.8-9.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var newsGo = null;
   function basketNews(title, line){
-    setTimeout(function(){ cartTip(title, line); }, still ? 900 : 1500);
+    clearTimeout(newsGo);
+    newsGo = setTimeout(function(){ cartTip(title, line); }, still ? 900 : 1500);
   }
+  /* leaving the page ends whatever it was about to say: a page kept in the
+     back/forward cache picks its timers up where they stopped */
+  window.addEventListener('pagehide', function(){
+    clearTimeout(newsGo); clearTimeout(tipGo);
+    if(tipEl) tipEl.classList.remove('is-on');
+    document.querySelectorAll('.cheer').forEach(function(c){ if(c.parentNode) c.parentNode.removeChild(c); });
+  });
   function cheer(host, saved){
     if(!host || !saved) return;
     var slim = host.getBoundingClientRect().height < 210;
@@ -7075,6 +7110,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         var back = go.closest('.oact');
         if(back) back.classList.remove('is-bought');
         if(shell) shell.classList.remove('is-bought');
+        go.removeAttribute('aria-label');
         Cart.dropBundle();
       }
       go.innerHTML = short > 0
@@ -7313,6 +7349,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     tabs.forEach(function(tab, n){
       tab.tabIndex = tab.getAttribute('aria-checked') === 'true' ? 0 : -1;
       tab.addEventListener('click', function(){
+        if(Number(tab.getAttribute('data-deal')) === state.get) return;
         state.get = Number(tab.getAttribute('data-deal'));
         /* arriving at the tier the badge recommends is worth one beat from the
            badge — restarted rather than queued, so switching back and forth
@@ -7365,10 +7402,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(shell) shell.classList.toggle('is-bought', on);
       if(on) bill(false); else go.removeAttribute('aria-label');
     }
+    /* the page catching up is not news: the panel's own status line is held
+       silent while it is redrawn, and the pill is put under its tier, not slid */
+    function hush(fn){
+      var st = offer.querySelector('[data-status]');
+      if(st) st.setAttribute('aria-live', 'off');
+      try { fn(); } finally { if(st) setTimeout(function(){ st.removeAttribute('aria-live'); }, 0); }
+    }
+    function jump(){
+      var thumb = track && track.querySelector('.tiers__thumb');
+      if(thumb) thumb.style.transition = 'none';
+      slide();
+      if(thumb){ void thumb.offsetWidth; thumb.style.transition = ''; }
+    }
     Cart.watch(function(){
       var held = Cart.bundle();
       if(!held){
-        if(bought){ settle(false); render(); }
+        if(bought){ settle(false); hush(render); }
         return;
       }
       var mine = names();
@@ -7388,10 +7438,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         t.setAttribute('aria-checked', String(on));
         t.tabIndex = on ? 0 : -1;
       });
-      slide();
+      jump();
       was = null;                  /* a different bundle, not a step in this one */
       open(false);
-      render();
+      hush(render);
       settle(true);
     });
   })();
