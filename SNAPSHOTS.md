@@ -119,6 +119,60 @@ buton → küçük not. Son satır ilkinden ~0.9 sn sonra oturur.
 
 ---
 
+## Kayıttan sonra eklenenler
+
+Bunlar "Tasarım 16 Ağustos" kaydının **üstüne** geldi; o kayda dönülürse
+bunlar gider.
+
+### Sepet & ödeme sayfası — `cart.html` · 12 Kasım 2026
+
+- Ana sayfadaki sepet ikonu artık buraya gider. Sepet sayfalar arasında
+  hatırlanır: iki sayfa da `rm-cart.js`'i okur, sepet tarayıcıda `rm-cart`
+  anahtarında durur. Sayfayı yenileyince, başka sekmede değiştirince ya da
+  geri tuşuyla dönünce iki taraf da aynı sepeti gösterir.
+- Tek dosyada üç adım: **Sepet → Ödeme → Tamam** (adres çubuğunda `#pay`,
+  `#done`).
+- **Kampanya paneli** ana sayfadaki teklifin diliyle: koyu, ışıklı zemin,
+  aynı kutular, aynı "Free!" rozeti ve dönen çizgi, aynı altın "Best deal".
+  İki adım yan yana durur: önce **3 Al 2 Öde** (3 yer), sonra **5 Al 3 Öde**
+  (2 yer daha). Sıradaki adım için tek cümle, tek öneri ve tek düğme var:
+  "1 ürün daha ekle, 1 ürün bedava kazan."
+- Kurallar (hepsi `rm-cart.js`'te, `node tools/test-cart.js` ile kanıtlı):
+  sepette tek kampanya geçer — ulaşılan en büyüğü; bedava olan her zaman en
+  ucuz olandır, eşitlerde en son eklenen; 6. üründen sonrası kendi fiyatıyla;
+  ücretsiz Demo Presets kampanyaya sayılmaz. Ana sayfada kurulan paket
+  burada ürün ürün listelenir, biri çıkarılırsa paket çözülür ama kalanlar
+  hak ettikleri kampanyayı korur.
+- Altında fiş: ürün satırları (çıkar / geri al), "ürün ekle" listesi (her
+  ürünün yanında sepete **gerçekte** ekleyeceği tutar: `$59`, `Free`, ya da
+  plugin paketi için `$90`), yanında sipariş özeti.
+- **Ödeme adımı bir önizlemedir**: e-posta, ad soyad ve onay kutusu gerçek;
+  kart alanları çizili ama canlı değil (oraya ödeme sağlayıcısının kendi
+  formu gelecek). Hiçbir yere bir şey gönderilmez, yazılanlar saklanmaz,
+  sepet de boşaltılmaz. Sayfa bunu açıkça söyler.
+- İki dil: footer'daki dil seçici Türkçe'ye alınırsa sayfanın tamamı Türkçe
+  olur (üst bar ve footer ana sayfadaki gibi İngilizce kalır).
+- Telefonda ödeme düğmesi ekranda değilken altta sabit bir çubuk toplamı ve
+  düğmeyi taşır; footer'a gelince çekilir.
+
+**Ortak parçalar tek yerden gelir.** `cart.html`'in stili, üst barı ve
+footer'ı `index.html`'den kesilir — elle yazılmaz. `index.html`'de stil,
+üst bar ya da footer değişince:
+
+```
+python3 tools/sync-cart.py          # ortak parçaları yeniden keser
+python3 tools/sync-cart.py --check  # iki sayfa uyumlu mu, onu söyler
+```
+
+**Testler**
+
+```
+node tools/test-cart.js     # hesap: kampanya kuralları (67 kontrol)
+node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (300 kontrol)
+```
+
+---
+
 ## RM28 — `c49448d` · 10 Ağustos 2026
 
 *Bir önceki kayıt.* Explore Presets bandı ve plugin deck'i bu aşamada oturdu.
