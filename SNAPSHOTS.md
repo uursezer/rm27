@@ -199,6 +199,23 @@ bunlar gider.
   bir çubuk kampanyanın durumunu, toplamı ve düğmeyi taşır; footer'a
   gelince çekilir. Ödeme adımında çubuk yoktur.
 
+**Ana sayfada bu işle birlikte düzelenler** (sepet artık gerçek olduğu için
+önem kazananlar):
+
+- Ürün penceresindeki (lightbox) "Sepete ekle" düğmesi artık sayfanın gerçek
+  sepetini kullanır (`window.RMBasket`); eskiden kendi gizli listesini
+  tutuyordu, orada eklenen ürün sepete hiç ulaşmıyordu.
+- Sepet sayacı ilk karede doğru sayıyı gösterir (eskiden sayfanın en altındaki
+  betik çalışana kadar 0 yazıyordu).
+- "… added" notu barın durduğu yere göre konumlanır; sepet ikonunun üstüne
+  binip ilk tıklamayı yutmaz. Geri tuşuyla dönülen sayfa eski bir notu
+  sonradan göstermez.
+- Paket sepetteyken zaten seçili olan kademeye (ya da altın rozete) basmak
+  paketi sepetten çıkarmaz.
+- Telefonda, koyu bandın üstündeyken menü düğmesi artık görünür (koyu zeminde
+  koyu çizgilerdi). 320 piksel genişlikte sayfa 10 piksel taşmaz.
+- `rm-cart.js` iki sayfada da ilk bayt ile birlikte istenir (preload).
+
 **Ortak parçalar tek yerden gelir.** `cart.html`'in stili, üst barı ve
 footer'ı `index.html`'den kesilir — elle yazılmaz. `index.html`'de stil,
 üst bar ya da footer değişince:
@@ -211,7 +228,7 @@ python3 tools/sync-cart.py --check  # iki sayfa uyumlu mu, onu söyler
 **Testler**
 
 ```
-node tools/test-cart.js     # hesap: kampanya kuralları (67 kontrol)
+node tools/test-cart.js     # hesap: kampanya kuralları + ana sayfayla aynı ürün/fiyat mı (109 kontrol)
 node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (440+ kontrol)
 ```
 

@@ -904,6 +904,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .nav.is-dark .nav__links a,.nav.is-dark .iconbtn{color:#D3DAE8}
 .nav.is-dark .nav__links a:hover,.nav.is-dark .iconbtn:hover{background:rgba(255,255,255,.08)}
 .nav.is-dark .iconbtn[aria-expanded="true"]{background:rgba(255,255,255,.16);color:#fff}
+/* the menu button is one of the bar's marks too. Over the band it was the one
+   thing still drawn in the page's dark ink — three dark lines on a dark
+   ground, at the top of every phone's first screen. */
+.nav.is-dark .nav__toggle{color:#D3DAE8}
+.nav.is-dark .nav__toggle:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav.is-dark .nav__toggle[aria-expanded="true"]{background:rgba(255,255,255,.16);color:#fff}
 .nav.is-dark .cart__n{border-color:#080C18}
 .nav.is-dark.is-stuck{box-shadow:none}
 /* ── the search drawer, on whichever ground the bar is on ─────────
@@ -4395,7 +4401,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .slide__copy{order:2}
   .hero__slides{position:relative}
   /* one panel over the other */
-  .help{grid-template-columns:1fr;gap:var(--s-6)}
+  /* minmax(0,…), as the two-column rule has it: a bare 1fr is as wide as its
+     widest word allows, which at 320px was ten pixels wider than the page */
+  .help{grid-template-columns:minmax(0,1fr);gap:var(--s-6)}
 }
 @media (max-width:860px){
   .rail{--per-view:3}
