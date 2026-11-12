@@ -36,12 +36,26 @@ function section(name){ console.log('\n' + name); }
 const S = (items, bundle) => JSON.stringify({ v:1, items: items || [], bundle: bundle || null });
 const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Presets', 'Jardin Presets'];
 
+/* Where the site is served, Images/Lora.webp is not images/lora.webp. On a
+   disk that does not mind, this server minds for it: every part of the path
+   has to be spelled the way the folder spells it. */
+const folders = new Map();
+function spelled(file){
+  let dir = ROOT;
+  return path.relative(ROOT, file).split(path.sep).every(part => {
+    if(!folders.has(dir)) folders.set(dir, new Set(fs.readdirSync(dir)));
+    const ok = folders.get(dir).has(part);
+    dir = path.join(dir, part);
+    return ok;
+  });
+}
+
 (async () => {
   const server = http.createServer((req, res) => {
     let rel = decodeURIComponent(req.url.split('?')[0].split('#')[0]);
     if(rel.endsWith('/')) rel += 'index.html';
     const file = path.join(ROOT, rel);
-    if(!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()){ res.writeHead(404); res.end(); return; }
+    if(!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory() || !spelled(file)){ res.writeHead(404); res.end(); return; }
     res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
     fs.createReadStream(file).pipe(res);
   });
@@ -57,6 +71,17 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
       reducedMotion: opts.still ? 'reduce' : 'no-preference',
       hasTouch: !!opts.touch, isMobile: !!opts.touch
     });
+    /* The driver brings a thing into view before it presses it, and this
+       site scrolls smoothly: on a busy machine a press can be aimed while the
+       page is still gliding, and land beside what it was meant for. So the
+       scrolling nobody asked for by name is made instant here. Every scroll
+       the page itself asks for says how it wants to go (smooth, or at once),
+       and those are left exactly as they are. */
+    await ctx.addInitScript(() => document.addEventListener('DOMContentLoaded', () => {
+      const still = document.createElement('style');
+      still.textContent = 'html{scroll-behavior:auto !important}';
+      document.head.appendChild(still);
+    }));
     /* the basket page must not reach for anything that is not this site.
        (The front page still borrows fifteen photographs from the live shop —
        see SNAPSHOTS.md — so what it asks for is turned away but not counted.) */
@@ -70,6 +95,10 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const page = await ctx.newPage();
     page.on('pageerror', e => errors.push(String(e)));
     page.on('console', m => { if(m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
+    /* a picture or a script this site was asked for and does not have: the
+       page hides a broken picture, and the address of a file is case-
+       sensitive where the site is served, so only the answer itself shows it */
+    page.on('response', res => { if(res.status() >= 400 && res.url().startsWith(BASE)) errors.push(res.status() + ' ' + res.url().slice(BASE.length)); });
     await page.goto(BASE + 'cart.html', { waitUntil: 'load' });
     await page.evaluate(([state, lang]) => {
       if(state) localStorage.setItem('rm-cart', state); else localStorage.removeItem('rm-cart');
@@ -90,7 +119,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const txt = el => el ? el.textContent.replace(/\s+/g, ' ').trim() : null;
     const seen = el => !!el && !el.closest('[hidden]') && el.getClientRects().length > 0;
     const main = q('#main'), view = main.getAttribute('data-view');
-    const sum = q(view === 'pay' ? '[data-paysum]' : view === 'done' ? '[data-donesum]' : '[data-sum]');
+    const sum = q(view === 'pay' ? '[data-paysum]:not([hidden])' : view === 'done' ? '[data-donesum]' : '[data-sum]');
     const rows = {};
     qa('.sum__row', sum).forEach(r => {
       const k = r.classList.contains('sum__total') ? 'total' : r.classList.contains('sum__row--deal') ? 'deal' : 'subtotal';
@@ -163,6 +192,17 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
         placed: price.lines.filter(l => l.place !== null).length }
     };
   });
+  /* The page keeps its three blocks transparent until they are revealed.
+     Nothing else here looks at opacity, and a browser will press a button
+     nobody can see: so, once, in each place a view is first read — whatever
+     is on the screen can be seen. */
+  const visible = page => page.waitForFunction(() => [].every.call(document.querySelectorAll('#main [data-reveal]'), e => {
+    if(e.closest('[hidden]') || !e.getClientRects().length) return true;
+    const r = e.getBoundingClientRect();
+    if(r.top > innerHeight * 0.9 || r.bottom < 0) return true;
+    for(let n = e, o = 1; n && n.nodeType === 1; n = n.parentElement){ o *= +getComputedStyle(n).opacity; if(o < 0.99) return false; }
+    return true;
+  }), null, { timeout: 3000 }).then(() => true, () => false);
   /* a step reached is celebrated once the panel is where it can be seen — which
      may be a moment after the press, if the window had to bring it there */
   const cheered = page => page.waitForSelector('[data-cheer] > .cheer', { timeout: 3000 }).then(() => page.waitForTimeout(150), () => {});
@@ -199,6 +239,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const { ctx, page } = await open({ state: S(['Lora Presets']) });
     let r = await read(page);
     ok(r.view === 'basket' && r.title === 'Your basket — Retouch Market', 'opens on the basket', [r.view, r.title]);
+    ok(await visible(page), 'and the campaign, the lines and the summary can be seen');
     ok(r.h1.length === 1 && r.h1[0] === 'Your basket', 'one heading: Your basket', r.h1);
     ok(r.eyebrow === 'Basket · 1 item', 'the eyebrow counts', r.eyebrow);
     ok(r.ladder.eyebrow === 'Step 1 of 2 · Get 3, Pay 2', 'Get 3, Pay 2 is the first step shown', r.ladder.eyebrow);
@@ -208,11 +249,12 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.ladder.rungs[0].n === '1 / 3' && r.ladder.rungs[1].n === 'Next', 'their captions', r.ladder.rungs.map(x => x.n));
     ok(r.ladder.rungs[0].vh === 'Step 1: Get 3, Pay 2 — 1 of 3.' && r.ladder.rungs[1].vh === 'Step 2: Get 5, Pay 3 — next step.', 'and the same in a sentence, for a screen reader', r.ladder.rungs.map(x => x.vh));
     ok(r.ladder.rungs[0].filled === 1 && r.ladder.rungs[0].button === 1 && r.ladder.rungs[0].wait === 1 && r.ladder.rungs[1].later === 2, 'one place filled, one to fill now, one waiting, two for later', r.ladder.rungs);
-    ok(r.ladder.rungs[0].place === 'Choose a pack for place 2', 'the next place says which place it is', r.ladder.rungs[0].place);
+    ok(r.ladder.rungs[0].place === 'Add a pack: choose one for place 2', 'the next place is called what it shows, and says which place it is', r.ladder.rungs[0].place);
     ok(r.ladder.rungs[0].ghost === 1 && r.ladder.rungs[0].nextfree === 0, 'the third place wears the pill as a promise', r.ladder.rungs[0]);
     ok(!r.ladder.best, 'the gold badge waits until the first step is done', r.ladder.best);
-    ok(r.ladder.pick && r.ladder.pick.name === 'Solis Presets' && r.ladder.pick.label === 'Our pick' && !r.ladder.pick.free && r.ladder.pick.go === 'Add to basket' && !r.ladder.pick.primary,
-       'the pick is the next pack on the shelf, at its price', r.ladder.pick);
+    ok(r.ladder.pick && r.ladder.pick.name === 'Solis Presets' && r.ladder.pick.label === 'Our pick' && !r.ladder.pick.free && r.ladder.pick.go === 'Add to cart' && !r.ladder.pick.primary,
+       'the pick is the next pack on the shelf, at its price, behind the front page’s own words for the press', r.ladder.pick);
+    ok(r.ladder.pick.aria === 'Add to cart: Solis Presets — $59', 'and its button is called what is printed on it, then the rest', r.ladder.pick.aria);
     ok(r.more && r.more.h === 'Or choose another' && r.more.sub === 'Any pack on the shelf counts.', 'the rest of the shelf is under it', r.more);
     ok(r.more.cols === 2 && r.more.rows.map(x => x.name).join() === 'Terra Presets,Jardin Presets,Mely Presets,Onyx Presets' && r.more.all === 'Show all 10 packs', 'four of them in two columns, without the pick, and a way to the rest', [r.more.cols, r.more.rows.map(x => x.name), r.more.all]);
     ok(r.unfold === null, 'nothing is folded away while there is a step to take', r.unfold);
@@ -223,8 +265,16 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     agrees(r, '1 product');
 
     /* the empty place and the summary's sentence both lead to the pick */
+    /* (the offer's answer lasts under a second: it is noted by the page itself
+       as it happens, not looked for after a wait a busy machine can outlast) */
+    await page.evaluate(() => { const pick = document.querySelector('.pick'); window.__called = [];
+      new MutationObserver(() => { if(pick.classList.contains('is-called')) window.__called.push(getComputedStyle(pick).animationName); })
+        .observe(pick, { attributes: true, attributeFilter: ['class'] }); });
     await page.click('[data-place]'); await page.waitForTimeout(200);
     ok((await read(page)).focus === 'add:Solis Presets', 'pressing the next place goes to the pack offered for it');
+    const led = await page.evaluate(() => ({ called: window.__called.slice(), ring: document.activeElement.matches(':focus-visible'), outline: getComputedStyle(document.activeElement).outlineStyle }));
+    ok(led.called.length === 1 && led.called[0] === 'pickCall' && led.ring && led.outline === 'solid', 'and is seen to: the offer answers once, and its button wears the ring though a mouse pressed', led);
+    ok(await page.waitForFunction(() => !document.querySelector('.pick').classList.contains('is-called'), null, { timeout: 4000, polling: 100 }).then(() => true, () => false), 'and then the answer is over');
     await page.evaluate(() => document.activeElement.blur());
     await page.click('.sum__next'); await page.waitForTimeout(200);
     ok((await read(page)).focus === 'add:Solis Presets', 'and so does the sentence in the summary');
@@ -256,15 +306,17 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
       return { above: c.bottom <= p.top + 0.5, edges: Math.abs(c.left - l.left) < 2 && Math.abs(c.right - l.right) < 2 && Math.abs(c.top - l.top) < 2 };
     });
     ok(clear.above && clear.edges, 'it reaches the panel’s edges and never covers the way to the next pack', clear);
-    await page.waitForTimeout(900);
-    ok(await page.evaluate(() => document.querySelector('[data-cheer-n]') && document.querySelector('[data-cheer-n]').textContent) === '59', 'and counts up to what it saved: $59');
+    /* (asked until it is there, not after a fixed wait: a busy machine draws fewer frames) */
+    ok(await page.waitForFunction(() => { const n = document.querySelector('[data-cheer-n]'); return !!n && n.textContent === '59'; }, null, { timeout: 2500, polling: 50 }).then(() => true, () => false),
+       'and counts up to what it saved: $59', await page.evaluate(() => document.querySelector('[data-cheer-n]') && document.querySelector('[data-cheer-n]').textContent));
+    await page.waitForTimeout(300);
     ok(r.ladder.eyebrow === 'Step 2 of 2 · Get 5, Pay 3', 'now the page points at Get 5, Pay 3', r.ladder.eyebrow);
     ok(r.ladder.say === 'Two more and 2 of the 5 are on us.', 'the sentence', r.ladder.say);
     ok(r.ladder.why === 'Get 3, Pay 2 is yours — Terra Presets is free. Two more $59 packs add just $59.', 'and why', r.ladder.why);
     ok(r.ladder.rungs[0].is === 'is-done' && r.ladder.rungs[0].n === 'Done' && r.ladder.rungs[1].is === 'is-current' && r.ladder.rungs[1].n === '3 / 5', 'step one done, step two the one to do', r.ladder.rungs.map(x => [x.is, x.n]));
     ok(r.ladder.rungs[0].vh === 'Step 1: Get 3, Pay 2 — yours, 1 pack free.' && r.ladder.rungs[1].vh === 'Step 2: Get 5, Pay 3 — 3 of 5. Best deal.', 'and in a sentence', r.ladder.rungs.map(x => x.vh));
     ok(r.ladder.best, 'the gold badge arrives with the second step', r.ladder.best);
-    ok(r.ladder.rungs[0].free === 1 && r.ladder.rungs[1].button === 1 && r.ladder.rungs[1].wait === 1 && r.ladder.rungs[1].later === 0 && r.ladder.rungs[1].place === 'Choose a pack for place 4',
+    ok(r.ladder.rungs[0].free === 1 && r.ladder.rungs[1].button === 1 && r.ladder.rungs[1].wait === 1 && r.ladder.rungs[1].later === 0 && r.ladder.rungs[1].place === 'Add a pack: choose one for place 4',
        'the third place is ringed; the fourth is the one to fill', r.ladder.rungs);
     ok(r.sum.rows.deal.label === 'Get 3, Pay 2' && r.sum.save === 'You save $59 · 33% off', 'the summary shows the deal and the saving', [r.sum.rows.deal, r.sum.save]);
     ok(r.sum.next === 'With two more $59 packs your total is $177 — one of them is free.', 'and what the second step would come to', r.sum.next);
@@ -422,13 +474,18 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     /* a press made for somebody by software has no key and no place: on
        the thing the page moved the keyboard to it is the same press, on
        anything else it is a new one */
-    o = await open({ state: S(['Lora Presets']) });
+    o = await open({ state: S([]) });
     await o.page.focus('.pick__go'); await o.page.keyboard.press('Enter'); await o.page.waitForTimeout(120);
     await o.page.evaluate(() => document.querySelector('[data-rules]').click()); await o.page.waitForTimeout(120);
     ok(await o.page.evaluate(() => !document.querySelector('[data-rules-list]').hidden), 'Enter on the pick, then a screen reader pressing “How the deals work” a moment later: the rules open', await kept(o.page));
     await o.page.waitForTimeout(600);
     await o.page.evaluate(() => { document.querySelector('.pick__go').click(); document.querySelector('.pick__go').click(); }); await o.page.waitForTimeout(250);
-    ok(await kept(o.page) === 'Lora Presets,Solis Presets,Terra Presets', 'and the same software pressing the pick twice in one breath adds one pack', await kept(o.page));
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets', 'and the same software pressing the pick twice in one breath adds one pack', await kept(o.page));
+    /* the press that reaches a deal sends the keyboard to the heading, and a
+       wider button gives way to a narrower one: still one press */
+    await o.page.waitForTimeout(600);
+    await o.page.evaluate(() => { document.querySelector('.pick__go').click(); document.querySelector('.pick__go').click(); }); await o.page.waitForTimeout(250);
+    ok(await kept(o.page) === 'Lora Presets,Solis Presets,Terra Presets', 'also on the press that reaches a deal', await kept(o.page));
     await o.ctx.close();
 
     /* the browser's Back button is not a press on the page: what is pressed after it is answered */
@@ -531,7 +588,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.h1.join() === 'Your basket is empty.' && r.emptyOnly >= 3, 'it says so, and offers the two ways on', [r.h1, r.emptyOnly]);
     ok(!r.linesShown && r.sum === null && r.bar.hidden, 'no lines, no summary, no bar under the window', [r.linesShown, r.sum, r.bar]);
     ok(r.ladder.say === 'Pick any 3 and 1 of them is on us.' && r.ladder.why === 'Three $59 packs come to $118 instead of $177.', 'the campaign is still there, from the start', r.ladder);
-    ok(r.ladder.rungs[0].place === 'Choose a pack for place 1' && r.ladder.rungs[0].wait === 2, 'with its first place to fill', r.ladder.rungs[0]);
+    ok(r.ladder.rungs[0].place === 'Add a pack: choose one for place 1' && r.ladder.rungs[0].wait === 2, 'with its first place to fill', r.ladder.rungs[0]);
     ok(r.badge === '0' && r.bagLabel === 'Basket, empty', 'the bar says empty', [r.badge, r.bagLabel]);
     await o.page.click('.pick__go'); await o.page.waitForTimeout(400);
     r = await read(o.page);
@@ -652,6 +709,8 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await o.page.goBack(); await o.page.waitForTimeout(400);
     r = await read(o.page);
     ok(r.view === 'basket' && Math.abs(r.scrollY - left) < 3, 'and the way back returns to where the basket was left', [r.view, r.scrollY, left]);
+    ok(await o.page.evaluate(() => document.activeElement.classList.contains('sum__go')), 'with the keyboard on the button that was pressed to leave it, not on a heading off the screen',
+       await o.page.evaluate(() => document.activeElement.outerHTML.slice(0, 80)));
     await o.ctx.close();
 
     /* whatever is typed stays text, and stays in the field */
@@ -690,7 +749,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await o.ctx.close();
     /* the one echo of the campaign on the payment step, and only when it is true */
     o = await open({ state: S(['Lora Presets', 'Solis Presets']), hash: 'pay' });
-    ok(await o.page.evaluate(() => { const n = document.querySelector('.sum__nudge'); return !!n && n.textContent.replace(/\s+/g, ' ').trim(); }) === 'One more pack would be free. Back to basket', 'two packs: the payment step says one more would be free');
+    ok(await o.page.evaluate(() => { const n = document.querySelector('.sum__nudge'); return !!n && n.textContent.replace(/\s+/g, ' ').trim(); }) === 'One more $59 pack would be free. Back to basket', 'two packs: the payment step says one more would be free — at the price it is true for');
     await o.ctx.close();
     o = await open({ state: S(['Lora Presets']), hash: 'pay' });
     ok(await o.page.evaluate(() => !document.querySelector('.sum__nudge')), 'one pack: it says nothing');
@@ -704,6 +763,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const page = o.page;
     let r = await read(page);
     ok(r.lang === 'tr' && r.htmlLang === 'tr' && r.title === 'Sepetim — Retouch Market' && r.h1.join() === 'Sepetim', 'the page is in Turkish, and the document says it is', [r.lang, r.htmlLang, r.title, r.h1]);
+    ok(await visible(page), 'and can be seen');
     ok(await o.page.evaluate(() => ['#nav', 'footer.footer', 'a.skip', '#toTop'].map(s => document.querySelector(s).getAttribute('lang')).join()) === 'en,en,en,en', 'while what stays English says so for itself');
     ok(r.ladder.say === '1 ürün daha ekle, 1 ürün bedava kazan.', 'two products: the owner’s own sentence', r.ladder.say);
     ok(r.ladder.why === '$59’lık bir ürün toplamını değiştirmez: yine $118. 3 Al 2 Öde tam da bu.', 'and why', r.ladder.why);
@@ -715,7 +775,8 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.sum.next === '$59’lık 1 ürün daha eklersen toplamın yine $118.' && r.sum.go === 'Ödemeye geç', 'the summary', r.sum);
     ok(r.rules.button === 'Kampanyalar nasıl işliyor?' && r.rules.list[0] === 'Kampanyaya yalnızca ücretli ürünler dahil. Demo Presets zaten ücretsiz.'
        && r.rules.list[1] === 'Her sepette tek kampanya geçerli: hak kazandığın en avantajlısı.' && r.rules.list[3] === 'Kampanyalar birleştirilemez: altıncı ürün kendi fiyatındadır.', 'the rules, as a shop in Türkiye writes them', r.rules);
-    ok(r.bagLabel === 'Sepet, 2 ürün' && r.bar.label === 'Toplam ve ödeme' && r.bar.go === 'Ödemeye geç' && r.bar.short === 'Devam', 'the bar in the header and the bar under the window', [r.bagLabel, r.bar]);
+    ok(r.bagLabel === 'Sepet, 2 ürün' && r.bar.label === 'Toplam ve ödeme' && r.bar.go === 'Ödemeye geç' && r.bar.short === 'Ödemeye geç' && r.bar.aria === 'Ödemeye geç', 'the bar in the header and the bar under the window, whose button is called what it shows at every width', [r.bagLabel, r.bar]);
+    ok(r.ladder.pick.aria === 'Bedava ürününü ekle: Terra Presets — 3 Al 2 Öde ile bedava', 'the pick’s button is called what is printed on it', r.ladder.pick.aria);
     await page.click('.pick__go'); await page.waitForTimeout(400);
     r = await read(page);
     ok(r.cheerLead === 'Kazancın', 'the celebration is in Turkish too', r.cheerLead);
@@ -825,6 +886,38 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     r = await read(o.page);
     ok(r.lang === 'tr' && r.h1.join() === 'Sepetim' && r.cheer === 0, 'the language chosen on the front page is followed here, quietly', [r.lang, r.h1, r.cheer]);
     await o.ctx.close();
+
+    /* the product panel on the front page keeps the same basket, and follows it while it is open */
+    const q = await open({ state: '' });
+    const shop = q.page;
+    await shop.goto(BASE + 'index.html', { waitUntil: 'load' }); await shop.waitForTimeout(900);
+    const card = shop.locator('#presetGrid .card', { hasText: 'Lora Presets' }).first();
+    await card.scrollIntoViewIfNeeded(); await shop.waitForTimeout(300);
+    await card.locator('.card__t').first().click(); await shop.waitForTimeout(900);
+    const face = () => shop.evaluate(() => { const b = document.getElementById('rmp-add'); const t = el => el ? el.textContent.replace(/\s+/g, ' ').trim() : null;
+      return b ? { words: t(b), pressed: b.getAttribute('aria-pressed'), off: b.getAttribute('aria-disabled'), live: t(document.getElementById('rmp-live')), badge: t(document.querySelector('.cart__n')) } : null; });
+    let f = await face();
+    ok(f && f.words === 'Sepete ekle' && f.pressed === 'false' && f.badge === '0', 'the product panel opens on a pack that is not in the basket', f);
+    const elsewhere = await q.ctx.newPage();
+    await elsewhere.goto(BASE + 'cart.html', { waitUntil: 'load' });
+    await elsewhere.evaluate(state => localStorage.setItem('rm-cart', state), S([], { label: 'Bestseller bundle', packs: ['Lora Presets', 'Solis Presets', 'Terra Presets'] }));
+    await shop.waitForTimeout(600);
+    f = await face();
+    ok(f.words === 'SetindeÖnce seti çıkar' && f.pressed === 'true' && f.off === 'true' && f.badge === '3', 'a bundle holding that pack arrives from another tab: the open panel says so by itself', f);
+    /* (a real press at the button's place: the test driver will not press what says it is disabled, and a customer can) */
+    await shop.bringToFront();
+    { const at = await shop.locator('#rmp-add').boundingBox(); await shop.mouse.click(at.x + at.width / 2, at.y + at.height / 2); }
+    await shop.waitForTimeout(300);
+    f = await face();
+    ok(f.live === 'Lora Presets sepetindeki sette. Çıkarmak için önce seti çıkar.' && f.badge === '3', 'and a press on it is explained — not swallowed, and not an error', f);
+    await elsewhere.evaluate(state => localStorage.setItem('rm-cart', state), S([]));
+    await shop.waitForTimeout(600);
+    f = await face();
+    ok(f.words === 'Sepete ekle' && f.off === null && f.badge === '0', 'the bundle is taken away elsewhere, and the button is a button again', f);
+    await shop.click('#rmp-add'); await shop.waitForTimeout(300);
+    f = await face();
+    ok(f.pressed === 'true' && f.badge === '1' && await shop.evaluate(() => JSON.parse(localStorage.getItem('rm-cart')).items.join()) === 'Lora Presets', 'which puts the pack in the basket both pages read', f);
+    await q.ctx.close();
   }
 
   /* ── 8 · the bar under the window ───────────────────────────────── */
@@ -835,6 +928,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await page.waitForTimeout(400);
     let r = await read(page);
     ok(r.bar.on && !r.bar.hidden && r.bar.go === 'Continue to payment' && r.bar.note === 'Get 3, Pay 2 · 1 / 3', 'on a phone it is there while the real button is below the fold', r.bar);
+    ok(await visible(page), 'and what is on the phone’s first screen can be seen');
     ok(r.bar.aria === 'Continue to payment' && r.bar.label === 'Total and checkout', 'its button and the bar itself have names', r.bar);
     const words = () => page.evaluate(() => [getComputedStyle(document.querySelector('.paybar__long')).display, getComputedStyle(document.querySelector('.paybar__short')).display]);
     let d = await words();
@@ -1008,6 +1102,208 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(still.cheer === 1 && still.sparks === 0 && still.n === '59', 'with motion turned down the saving is shown, and nothing flies', still);
     agrees(await read(o.page), 'motion down');
     await o.ctx.close();
+  }
+
+  /* ── 10b · a phone, a keyboard, a screen reader ──────────────────── */
+  section('10b · a phone, a keyboard, a screen reader');
+  {
+    /* the "+" place, when the pack offered for it is behind the bar under the window */
+    let o = await open({ state: S(['Lora Presets']), w: 390, h: 720, touch: true });
+    await o.page.waitForTimeout(500);
+    const under = () => o.page.evaluate(() => { const bar = document.querySelector('[data-paybar]'), go = document.querySelector('.pick__go').getBoundingClientRect();
+      return { on: bar.classList.contains('is-on'), over: Math.round(go.bottom - bar.getBoundingClientRect().top) }; });
+    const was = await under();
+    await o.page.tap('[data-place]'); await o.page.waitForTimeout(900);
+    const now = await under();
+    ok(was.on && was.over > 0 && now.over <= 0, 'on a phone the pack offered was partly behind the bar; pressing the place brings it clear of the bar', [was, now]);
+    await o.ctx.close();
+
+    /* payment: what the keyboard reaches next is what the eye reaches next */
+    const order = async (w, h) => {
+      const q = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']), w, h, hash: 'pay' });
+      const got = await q.page.evaluate(() => {
+        const host = document.querySelector('[data-paysum]:not([hidden])'), form = document.getElementById('payForm');
+        const a = host.getBoundingClientRect(), b = form.getBoundingClientRect();
+        return { hosts: document.querySelectorAll('[data-paysum]').length, shown: document.querySelectorAll('[data-paysum]:not([hidden])').length,
+          empty: [].every.call(document.querySelectorAll('[data-paysum][hidden]'), x => x.innerHTML === ''),
+          before: !!(host.compareDocumentPosition(form) & Node.DOCUMENT_POSITION_FOLLOWING), above: a.bottom <= b.top + 1, beside: a.left >= b.right - 1 };
+      });
+      await q.page.focus('.pay__back');
+      const tabs = [];
+      for(let i = 0; i < 3; i++){ await q.page.keyboard.press('Tab'); tabs.push(await q.page.evaluate(() => { const a = document.activeElement;
+        return a.id || (a.tagName === 'SUMMARY' ? 'summary' : a.getAttribute('data-go') ? 'go:' + a.getAttribute('data-go') : a.tagName); })); }
+      await q.ctx.close();
+      return { got, tabs };
+    };
+    let v = await order(390, 844);
+    ok(v.got.hosts === 2 && v.got.shown === 1 && v.got.empty && v.got.before && v.got.above && v.tabs.join() === 'summary,payEmail,payName',
+       'on a phone the summary is above the form on the screen and before it for the keyboard: Back, summary, email, name', v);
+    v = await order(1440, 900);
+    ok(v.got.shown === 1 && v.got.empty && !v.got.before && v.got.beside && v.tabs.join() === 'payEmail,payName,payAgree',
+       'on a desk it is beside the form and after it: Back, email, name, the box', v);
+
+    /* a failed attempt: the field it leaves the keyboard on is seen to have it */
+    o = await open({ state: S(['Lora Presets']), hash: 'pay' });
+    const box = () => o.page.evaluate(() => document.getElementById('payAgree').getAttribute('aria-invalid'));
+    ok(await box() === 'false', 'nothing is called invalid before anything has been pressed — the box that must be ticked included', await box());
+    await o.page.click('[data-pay-go]'); await o.page.waitForTimeout(200);
+    const ring = await o.page.evaluate(() => { const el = document.activeElement, cs = getComputedStyle(el);
+      return { on: el.id, invalid: el.getAttribute('aria-invalid'), outline: cs.outlineStyle + ' ' + cs.outlineWidth, agree: document.getElementById('payAgree').getAttribute('aria-invalid') }; });
+    ok(ring.on === 'payEmail' && ring.invalid === 'true' && ring.outline === 'solid 2px' && ring.agree === 'true', 'after a failed attempt the field in error that has the keyboard wears a ring as well as its red edge', ring);
+    await o.page.check('#payAgree'); await o.page.waitForTimeout(100);
+    ok(await box() === 'false', 'and the box is no longer invalid the moment it is ticked', await box());
+    await o.ctx.close();
+
+    /* what was last said does not outlive the view it was about */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']) });
+    await o.page.click('[data-remove="Terra Presets"]'); await o.page.waitForTimeout(700);
+    ok((await read(o.page)).live !== '', '(a removal is announced)');
+    await o.page.click('.sum__go'); await o.page.waitForTimeout(300);
+    ok((await read(o.page)).live === '', 'on the payment step the announcement about the basket is gone', (await read(o.page)).live);
+    await o.page.click('[data-pay-go]'); await o.page.waitForTimeout(200);
+    ok((await read(o.page)).live === '2 things need fixing before you can continue.' || /need fixing|needs fixing/.test((await read(o.page)).live), '(a failed attempt is announced)', (await read(o.page)).live);
+    await o.page.fill('#payEmail', 'a@b.co'); await o.page.fill('#payName', 'A B'); await o.page.check('#payAgree');
+    await o.page.click('[data-pay-go]'); await o.page.waitForTimeout(400);
+    let r = await read(o.page);
+    ok(r.view === 'done' && r.live === '', 'and Done does not end with “… need fixing before you can continue.”', [r.view, r.live]);
+    await o.ctx.close();
+
+    /* the bar reads its two prices as a sentence */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']), w: 390, h: 844, touch: true });
+    const pair = () => o.page.evaluate(() => ({ read: document.querySelector('[data-bar-read]').textContent, hid: document.querySelector('[data-bar-total]').getAttribute('aria-hidden'),
+      shown: document.querySelector('[data-bar-total]').textContent }));
+    let b = await pair();
+    ok(b.read === '$118, was $177' && b.hid === 'true' && b.shown === '$118$177', 'the bar’s two prices are read as “$118, was $177”, like every other pair on the page', b);
+    await o.ctx.close();
+    o = await open({ state: S(['Lora Presets']), w: 390, h: 844, touch: true, lang: 'tr' });
+    b = await pair();
+    ok(b.read === '$59', 'and one price is one price', b);
+    r = await read(o.page);
+    ok(r.more.sub === 'Listedeki her ürün kampanyaya dahil.' && r.ladder.rungs[0].place === 'Ürün ekle: 2. yer için seç' && r.ladder.pick.aria === 'Sepete ekle: Solis Presets — $59',
+       'in Turkish: the shelf’s line says what is true of the list, and the place and the pick are called what they show', [r.more.sub, r.ladder.rungs[0].place, r.ladder.pick.aria]);
+    await o.ctx.close();
+    o = await open({ state: S(['Lora Presets', 'Solis Presets']), hash: 'pay', lang: 'tr' });
+    ok(await o.page.evaluate(() => document.querySelector('.sum__nudge').textContent.replace(/\s+/g, ' ').trim()) === '$59’lık bir ürün daha eklersen bedava. Sepete dön', 'and the payment step’s one sentence about money names its price');
+    await o.ctx.close();
+
+    /* small text that has to be read, and the ring on the dark panel */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']), w: 390, h: 844, touch: true });
+    const ink = await o.page.evaluate(() => {
+      const as = (v, host) => { const i = document.createElement('i'); i.style.color = v; (host || document.body).appendChild(i); const c = getComputedStyle(i).color; i.remove(); return c; };
+      const won = document.querySelector('.line__won'), was = document.querySelector('.paybar__sum b s');
+      document.querySelector('[data-place]').focus({ focusVisible: true });
+      const place = document.querySelector('[data-place]'), ladder = document.getElementById('ladder');
+      return { won: getComputedStyle(won).color === as('var(--accent-700)'), was: getComputedStyle(was).color === as('var(--fg-body)'),
+        ring: getComputedStyle(place).outlineColor === as('var(--accent-fg)', ladder), notLight: as('var(--accent-fg)', ladder) !== as('var(--accent)') };
+    });
+    ok(ink.won && ink.was, 'the caption under a free line’s pill and the struck price in the bar are a shade darker than the accent', ink);
+    ok(ink.ring && ink.notLight, 'and on the dark panel the keyboard’s ring is the accent that is read on dark', ink);
+    await o.ctx.close();
+
+    /* a phone on its side: the open menu can be scrolled to its end */
+    for(const [w, h, side] of [[844, 390, true], [390, 844, false]]){
+      o = await open({ state: S(['Lora Presets']), w, h, touch: true });
+      await o.page.click('#navToggle'); await o.page.waitForTimeout(250);
+      const menu = await o.page.evaluate(() => { const p = document.getElementById('navPanel'), cs = getComputedStyle(p);
+        return { flow: cs.overflowY, tall: p.scrollHeight > p.clientHeight + 1, foot: Math.round(p.getBoundingClientRect().bottom), vh: innerHeight }; });
+      if(side){
+        ok(menu.flow === 'auto' && menu.tall && menu.foot <= menu.vh, 'held sideways, the open menu ends inside the window and scrolls', menu);
+        await o.page.locator('#navPanel .langpick__btn').scrollIntoViewIfNeeded(); await o.page.waitForTimeout(150);
+        await o.page.click('#navPanel .langpick__btn'); await o.page.waitForTimeout(150);
+        const picker = await o.page.evaluate(() => { const m = document.querySelector('#navPanel .langpick__menu'), r = m.getBoundingClientRect();
+          return { open: !m.hidden, top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }; });
+        ok(picker.open && picker.top >= 64 && picker.bottom <= picker.vh, 'and its language list, the last thing in it, can be reached and opens inside the window', picker);
+      } else {
+        ok(menu.flow === 'visible' && !menu.tall, 'upright, nothing about the menu has changed', menu);
+      }
+      await o.ctx.close();
+    }
+
+    /* the language list says which is chosen, and gives the keyboard back */
+    o = await open({ state: S(['Lora Presets']) });
+    const langs = () => o.page.evaluate(() => [].map.call(document.querySelectorAll('footer .langpick__menu button'), x => x.getAttribute('data-lang') + ':' + x.getAttribute('aria-checked')).join());
+    ok(await langs() === 'tr:false,en:true', 'the language list says which one is chosen', await langs());
+    await o.page.click('footer .langpick__btn'); await o.page.waitForTimeout(100);
+    await o.page.focus('footer .langpick__menu button[data-lang="tr"]');
+    await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(100);
+    ok(await o.page.evaluate(() => document.activeElement.classList.contains('langpick__btn') && document.querySelector('footer .langpick__menu').hidden), 'Escape closes it and puts the keyboard back on its button',
+       await o.page.evaluate(() => document.activeElement.outerHTML.slice(0, 80)));
+    await o.page.click('footer .langpick__btn'); await o.page.click('footer .langpick__menu button[data-lang="tr"]'); await o.page.waitForTimeout(200);
+    ok(await langs() === 'tr:true,en:false', 'and follows the choice', await langs());
+    await o.ctx.close();
+
+    /* a link is still a link: with Ctrl, Cmd or Shift held, the press is the
+       browser's to answer — a new tab, a new window — and the page neither
+       stops it nor changes its own step. (Asked of the page directly: whether
+       a tab then opens is the browser's business, and it was looked at by
+       hand.) */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets']) });
+    const pressWith = (sel, keys) => o.page.evaluate(([sel, keys]) => {
+      const a = document.querySelector(sel), box = a.getBoundingClientRect();
+      const e = new MouseEvent('click', Object.assign({ bubbles: true, cancelable: true, detail: 1, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 }, keys));
+      /* heard last, after the page has had its say: what the page did with
+         the press is noted, and then the press is stopped here — a click made
+         by a script would otherwise follow the link in this tab */
+      let stopped = null;
+      const last = ev => { stopped = ev.defaultPrevented; ev.preventDefault(); };
+      document.addEventListener('click', last);
+      a.dispatchEvent(e);
+      document.removeEventListener('click', last);
+      return { stopped, view: document.getElementById('main').getAttribute('data-view'), hash: location.hash };
+    }, [sel, keys]);
+    let c = await pressWith('.sum__go', { ctrlKey: true });
+    ok(!c.stopped && c.view === 'basket' && c.hash === '', 'Ctrl-click on Continue is left to the browser, and this tab stays on the basket', c);
+    c = await pressWith('.sum__go', { metaKey: true });
+    ok(!c.stopped && c.view === 'basket', 'Cmd-click too', c);
+    c = await pressWith('.sum__go', { shiftKey: true });
+    ok(!c.stopped && c.view === 'basket', 'and Shift-click', c);
+    c = await pressWith('.sum__go', {});
+    ok(c.stopped && c.view === 'pay' && c.hash === '#pay', 'a plain click is the page’s: on to payment, in this tab', c);
+    await o.page.waitForTimeout(700);
+    c = await pressWith('[data-basket]', { ctrlKey: true });
+    ok(!c.stopped && c.view === 'pay', 'the same for the basket in the bar: Ctrl-click is left to the browser, and this tab stays on the payment step', c);
+    c = await pressWith('[data-basket]', {});
+    ok(c.stopped && c.view === 'basket', 'and a plain click on it is the way back to the basket', c);
+    await o.ctx.close();
+  }
+
+  /* ── 10c · the price list does not arrive ────────────────────────── */
+  section('10c · rm-cart.js missing, or an older copy of it');
+  {
+    const visit = async (file, how, lang) => {
+      const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      const page = await ctx.newPage();
+      const thrown = [];
+      page.on('pageerror', e => thrown.push(String(e)));
+      await page.goto(BASE + file, { waitUntil: 'load' });
+      await page.evaluate(([state, l]) => { localStorage.setItem('rm-cart', state); if(l) localStorage.setItem('rm-lang', l); }, [S(['Lora Presets', 'Solis Presets']), lang || '']);
+      await page.route('**/rm-cart.js', route => how === 'missing' ? route.fulfill({ status: 404, body: '' })
+        : route.fulfill({ status: 200, contentType: 'text/javascript', body: 'window.RMCart = { KEY: "rm-cart", read: function(){ return {items: [], bundle: null}; } };' }));
+      await page.reload({ waitUntil: 'load' });
+      await page.waitForTimeout(300);
+      return { ctx, page, thrown };
+    };
+    for(const how of ['missing', 'stale']){
+      let q = await visit('cart.html', how);
+      let got = await q.page.evaluate(() => { const seen = el => !!el && !el.closest('[hidden]') && el.getClientRects().length > 0;
+        return { h1: document.querySelector('[data-h]').textContent, say: document.querySelector('[data-s="empty_p"]').textContent, sayShown: seen(document.querySelector('[data-s="empty_p"]')),
+          grid: seen(document.querySelector('[data-grid]')), button: seen(document.querySelector('.bagempty__go button')) ? document.querySelector('.bagempty__go button').textContent : null,
+          count: document.querySelector('.cart__n').textContent, bar: document.querySelector('[data-paybar]').hidden }; });
+      ok(got.h1 === 'We couldn’t load your basket.' && got.sayShown && got.say === 'What you added is still kept. Reload the page to try again.' && !got.grid && got.button === 'Reload the page' && got.bar && q.thrown.length === 0,
+         how + ': the basket page says so and offers a reload, instead of a frame with nothing in it', [got, q.thrown]);
+      await q.page.unroute('**/rm-cart.js');
+      await Promise.all([q.page.waitForNavigation({ waitUntil: 'load' }), q.page.click('.bagempty__go button')]); await q.page.waitForTimeout(300);
+      ok(await q.page.evaluate(() => document.querySelectorAll('[data-lines] .line').length) === 2, how + ': and the reload brings the basket back, both packs in it');
+      await q.ctx.close();
+      q = await visit('index.html', how);
+      const front = await q.page.evaluate(() => ({ basket: typeof window.RMBasket, count: document.querySelector('.cart__n').textContent }));
+      ok(q.thrown.length === 0 && front.basket === 'object', how + ': the front page does not stop half way down its script', [q.thrown.slice(0, 2), front]);
+      await q.ctx.close();
+    }
+    const q = await visit('cart.html', 'missing', 'tr');
+    ok(await q.page.evaluate(() => document.querySelector('[data-h]').textContent + ' | ' + document.querySelector('[data-s="empty_p"]').textContent + ' | ' + document.querySelector('.bagempty__go button').textContent + ' | ' + document.getElementById('main').getAttribute('lang'))
+       === 'Sepetin yüklenemedi. | Eklediklerin duruyor. Sayfayı yenileyip tekrar dene. | Sayfayı yenile | tr', 'and in Turkish when that is the language chosen');
+    await q.ctx.close();
   }
 
   /* ── 11 · the same bar and the same footer ──────────────────────── */

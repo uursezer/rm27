@@ -601,18 +601,26 @@ function buildBuy(p){
   /* Set (bundle) içindeki paket tek başına çıkarılamaz. Düğme bunu söyler —
      raftaki düğme gibi: okunamayan bir ret, bozulmuş bir düğmedir. */
   function setinde(){
-    if(!(B && B.covered(p.name))) return false;
+    if(!(B && B.covered(p.name))){ btn.removeAttribute('aria-disabled'); return false; }
+    /* önce "sepette" yüzü çizilir: iki etiket yalnızca o yüzde var. Panel
+       "Sepete ekle" derken set başka bir sekmeden gelirse düğme hâlâ öbür
+       yüzündeydi ve bu satırlar olmayan bir etikete yazmaya çalışıyordu. */
+    ciz(btn, true);
     btn.setAttribute('aria-disabled','true');
     btn.querySelector('.rmp-lb--in').textContent='Setinde';
     btn.querySelector('.rmp-lb--out').textContent='Önce seti çıkar';
     return true;
   }
   setinde();
+  /* Sepet başka bir yerden değişirse — raftaki düğme, paket kurucu, başka
+     bir sekme — açık duran paneldeki düğme de onu izler. Tek abonelik:
+     panel hangi paketi gösteriyorsa onun düğmesi yeniden çizilir. */
+  sepetCiz=function(){ if(document.body.contains(btn)){ ciz(btn, sepette()); setinde(); } };
+  if(B && B.watch && !sepetIzle){ sepetIzle=true; B.watch(function(){ if(sepetCiz) sepetCiz(); }); }
   btn.addEventListener('click',function(){
     var vardi=sepette();
     if(B){
       if(setinde()){ live.textContent = p.name + ' sepetindeki sette. Çıkarmak için önce seti çıkar.'; return; }
-      btn.removeAttribute('aria-disabled');
       if(vardi) B.drop(p.name); else B.add(p.name);
     } else if(vardi) delete SEPET[p.name]; else SEPET[p.name]=true;
     ciz(btn, sepette());
@@ -694,6 +702,7 @@ document.addEventListener('click',function(e){
 /* Sepetteki paketler — ürün adına göre; oturum boyunca korunur. */
 var SEPET={};
 /* Butonun üç yüzü: ekle · eklendi (imleç üstünde "Çıkar") */
+var sepetIzle=false, sepetCiz=null;   /* sayfanın sepetine tek abonelik; o an çizilecek düğme */
 function ciz(btn, icinde){
   btn.classList.toggle('rmp-done', icinde);
   btn.setAttribute('aria-pressed', icinde?'true':'false');

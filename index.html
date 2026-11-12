@@ -4406,6 +4406,19 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     background:var(--surface);border-bottom:1px solid var(--border);
     padding:var(--s-3) var(--gutter) var(--s-6);box-shadow:var(--sh-2);
   }
+  /* A phone on its side: the open menu is taller than the window, and it
+     hangs from the bar, so scrolling the page cannot bring the rest of it
+     up. It scrolls itself there instead, and the language list opens upward
+     to stay inside it. Only in a short window — in an upright one the list
+     opens downward past the panel's edge, and a panel that clips would cut
+     it off. */
+  @media (max-height:520px){
+    .nav__panel.is-on{
+      max-height:calc(100vh - var(--nav-h));max-height:calc(100dvh - var(--nav-h));
+      overflow-y:auto;overscroll-behavior:contain;
+    }
+    .nav__panel .langpick__menu{top:auto;bottom:calc(100% + 6px)}
+  }
   .nav__panel a{display:block;padding:var(--s-3) 0;font-size:var(--fs-5);font-weight:var(--fw-medium);color:var(--fg-body);border-bottom:1px solid var(--border)}
   .nav__panel .btn{width:100%;margin-top:var(--s-5)}
   /* mobile order: image, then headline, then button — the sample photo is
@@ -4540,8 +4553,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           <span class="langpick__flag"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="4"/></svg></span><span class="langpick__code">EN</span><svg class="chev" width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
         <div class="langpick__menu" id="langMenuPanel" role="menu" hidden>
-          <button type="button" role="menuitemradio" data-lang="tr" aria-current="false"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#E30A17"/><circle cx="12" cy="10" r="5" fill="#fff"/><circle cx="13.6" cy="10" r="4" fill="#E30A17"/><path d="M19.5 7.4l.61 1.76 1.86.04-1.48 1.12.54 1.78-1.53-1.06-1.53 1.06.54-1.78-1.48-1.12 1.86-.04z" fill="#fff"/></svg>Türkçe<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button type="button" role="menuitemradio" data-lang="en" aria-current="true"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="4"/></svg>English<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" role="menuitemradio" data-lang="tr" aria-checked="false" aria-current="false"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#E30A17"/><circle cx="12" cy="10" r="5" fill="#fff"/><circle cx="13.6" cy="10" r="4" fill="#E30A17"/><path d="M19.5 7.4l.61 1.76 1.86.04-1.48 1.12.54 1.78-1.53-1.06-1.53 1.06.54-1.78-1.48-1.12 1.86-.04z" fill="#fff"/></svg>Türkçe<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" role="menuitemradio" data-lang="en" aria-checked="true" aria-current="true"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="4"/></svg>English<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
   </div>
@@ -5014,8 +5027,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
             <svg class="chev" width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </button>
           <div class="sort__menu" id="sortMenu" role="menu" aria-label="Sort by" hidden>
-            <button type="button" role="menuitemradio" data-sort="popular" aria-current="true">Popular</button>
-            <button type="button" role="menuitemradio" data-sort="added" aria-current="false">Newest</button>
+            <button type="button" role="menuitemradio" data-sort="popular" aria-checked="true" aria-current="true">Popular</button>
+            <button type="button" role="menuitemradio" data-sort="added" aria-checked="false" aria-current="false">Newest</button>
           </div>
         </div>
       </div>
@@ -6350,8 +6363,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           <span class="langpick__flag"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="4"/></svg></span><span class="langpick__code">EN</span><svg class="chev" width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
         <div class="langpick__menu" id="langMenuFoot" role="menu" hidden>
-          <button type="button" role="menuitemradio" data-lang="tr" aria-current="false"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#E30A17"/><circle cx="12" cy="10" r="5" fill="#fff"/><circle cx="13.6" cy="10" r="4" fill="#E30A17"/><path d="M19.5 7.4l.61 1.76 1.86.04-1.48 1.12.54 1.78-1.53-1.06-1.53 1.06.54-1.78-1.48-1.12 1.86-.04z" fill="#fff"/></svg>Türkçe<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button type="button" role="menuitemradio" data-lang="en" aria-current="true"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="4"/></svg>English<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" role="menuitemradio" data-lang="tr" aria-checked="false" aria-current="false"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#E30A17"/><circle cx="12" cy="10" r="5" fill="#fff"/><circle cx="13.6" cy="10" r="4" fill="#E30A17"/><path d="M19.5 7.4l.61 1.76 1.86.04-1.48 1.12.54 1.78-1.53-1.06-1.53 1.06.54-1.78-1.48-1.12 1.86-.04z" fill="#fff"/></svg>Türkçe<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" role="menuitemradio" data-lang="en" aria-checked="true" aria-current="true"><svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="2"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="4"/></svg>English<svg class="langpick__check" width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3.4 3.4L11 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
       </div>
       </div>
@@ -6492,8 +6505,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     /* The basket is kept where the basket page can read it — rm-cart.js, one
        entry in localStorage — so what goes in here is there when you get to
        the basket, and what was taken out there is gone when you come back.
-       Without it the page works as it always did and forgets when you leave. */
-    var Kept = window.RMCart || null, quiet = false;
+       Without it the page works as it always did and forgets when you leave.
+       (An older copy of the file, kept by a browser for a few minutes after
+       the page has changed, counts as no file — better than stopping half
+       way down this script.) */
+    var Kept = window.RMCart && typeof window.RMCart.load === 'function' && typeof window.RMCart.write === 'function'
+      ? window.RMCart : null, quiet = false;
     function covered(name){ return !!bundle && bundle.packs.indexOf(name) > -1; }
     function size(){
       var n = 0, k;
@@ -8510,6 +8527,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       pick.querySelectorAll('.langpick__menu button').forEach(function(opt){
         var on = opt.getAttribute('data-lang') === code;
         opt.setAttribute('aria-current', String(on));
+        opt.setAttribute('aria-checked', String(on));   /* what a radio in a menu is asked: which one is chosen */
         if(on){
           pick.querySelector('.langpick__flag').innerHTML = opt.querySelector('.flag').outerHTML;
           pick.querySelector('.langpick__code').textContent = code.toUpperCase();
@@ -8556,7 +8574,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   document.addEventListener('click', langCloseAll);
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
+    /* a list closed from inside takes the keyboard with it: it goes back to
+       the button that opened the list */
+    var open = document.querySelector('.langpick__btn[aria-expanded="true"]');
+    var inside = open && open.parentNode.contains(document.activeElement);
     langCloseAll();
+    if(inside) open.focus();
     if(sBar.classList.contains('is-on')) searchOpen(false);
   });
 
@@ -8686,7 +8709,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
      whenever another tab changes it. */
   Cart.sync();
   window.addEventListener('pageshow', function(e){ if(e.persisted) Cart.sync(); });
-  if(window.RMCart) window.RMCart.watch(function(){ Cart.sync(); });
+  if(window.RMCart && typeof window.RMCart.watch === 'function') window.RMCart.watch(function(){ Cart.sync(); });
 
   /* ---- the shelf is twelve deep ----
      Three across and four down is the shelf; anything past that waits
@@ -8776,6 +8799,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         opt.addEventListener('click', function(){
           menu.querySelectorAll('button').forEach(function(x){
             x.setAttribute('aria-current', String(x === opt));
+            x.setAttribute('aria-checked', String(x === opt));
           });
           if(now) now.textContent = opt.textContent.trim();
           pick(opt);

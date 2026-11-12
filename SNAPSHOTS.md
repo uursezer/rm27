@@ -159,6 +159,8 @@ bunlar gider.
   yapar). En ucuz adım en üstte. Beş üründen sonra liste "Bir ürün daha
   ekle" düğmesinin arkasına katlanır. "Kampanyalar nasıl işliyor?" satırı
   dört kuralı açar. Ürün adları hiçbir genişlikte üç noktayla kesilmez.
+  Önerinin düğmesi İngilizcede ana sayfadaki raf düğmesiyle aynı sözü
+  taşır: "Add to cart" (Türkçesi iki sayfada da "Sepete ekle").
 - Bir adım tamamlanınca ana sayfadaki yeşil kutlama panelin üst yarısında
   oynar ("Kazancın $59"); sıradaki ürünün düğmesini hiç örtmez. Panelin
   üstü o an ekranda değilse (telefonda rafın aşağısından eklendiyse) sayfa
@@ -175,6 +177,12 @@ bunlar gider.
   bir yere basış hemen yanıtlanır. Klavyede "aynı yer", arada başka tuşa
   basılmamış olmasıdır: Enter-Enter tek basış, basılı tutulan Enter tek
   basış, Enter-Tab-Enter iki basış. Tarayıcının Geri tuşu basış sayılmaz.
+  Ekran okuyucu gibi yardımcı yazılımların *başka* bir düğmeye basması da
+  yeni bir basıştır.
+- **Boş yerdeki "+" görünür biçimde bir yere götürür.** Basınca sayfa
+  öneriyi ("Önerimiz") gerekirse alttaki çubuğun üstüne kadar kaydırır,
+  önerinin çevresinde bir halka açılıp kapanır ve düğmesi klavye halkasını
+  takar. (Eskiden öneri zaten ekrandaysa hiçbir şey olmuyor gibi görünüyordu.)
 - Kurallar (hepsi `rm-cart.js`'te, `node tools/test-cart.js` ile kanıtlı):
   sepette tek kampanya geçer — ulaşılan en büyüğü; bedava olan her zaman en
   ucuz olandır, eşitlerde en son eklenen; 6. üründen sonrası kendi fiyatıyla;
@@ -198,8 +206,23 @@ bunlar gider.
   bağlantıya çevrilecek ve o satır kaldırılacak.
 - "İçeriğe geç" bağlantısı ve footer'daki henüz yazılmamış sayfa
   bağlantıları (`#`) adımı değiştirmez. Geri tuşu sepete, bırakıldığı
-  yerden döner. "Sepetin bıraktığın gibi duruyor" cümlesi Tamam adımında
-  yalnızca sepet gerçekten öyle durduğu sürece görünür.
+  yerden — ve klavye, ayrılırken basılan düğmenin üstünde — döner. "Sepetin
+  bıraktığın gibi duruyor" cümlesi Tamam adımında yalnızca sepet gerçekten
+  öyle durduğu sürece görünür. Ctrl / Cmd / Shift ile tıklanan "Ödemeye geç"
+  ve sepet ikonu tarayıcıya bırakılır (yeni sekme).
+- **Klavye ve ekran okuyucu:** ödeme adımında özet, dar ekranda formun
+  üstünde *ve* sayfa sırasında da formdan önce; geniş ekranda formun yanında
+  ve sonra (iki yer var, yalnızca biri çizilir — hiçbir şey CSS ile yer
+  değiştirmez). Hatalı ve odaklı alan kırmızı kenarın dışında ayrıca halka
+  takar. Onay kutusu dokunulmadan "geçersiz" diye okunmaz. Koyu panelde
+  klavye halkası koyu zemin için olan açık renktir. Bir düğmenin sesli adı
+  üstünde yazanı içerir ("Add to cart: Solis Presets — $59"). Alttaki
+  çubuk iki fiyatını "$118, eski fiyatı $177" diye okur. Bir adımdan
+  çıkılınca o adımın son duyurusu sayfanın sonunda kalmaz.
+- **`rm-cart.js` gelmezse** (ya da tarayıcı eski bir kopyasını tutuyorsa)
+  sepet sayfası boş bir çerçeve yerine "Sepetin yüklenemedi. Eklediklerin
+  duruyor." der ve "Sayfayı yenile" düğmesi verir; ana sayfa da betiğinin
+  ortasında durmak yerine sepeti hatırlamadan çalışır.
 - İki dil: footer'daki dil seçici Türkçe'ye alınırsa sayfanın tamamı Türkçe
   olur (üst bar ve footer ana sayfadaki gibi İngilizce kalır); belge de
   `lang="tr"` olur, İngilizce kalan bölümler `lang="en"` taşır. Türkçede
@@ -215,7 +238,13 @@ bunlar gider.
   sepetini kullanır (`window.RMBasket`); eskiden kendi gizli listesini
   tutuyordu, orada eklenen ürün sepete hiç ulaşmıyordu. Sepetteki setin
   içinde olan bir ürünün penceresinde düğme "Setinde — önce seti çıkar" der
-  (eskiden "Sepetten çıkar" yazıp hiçbir şey yapmıyordu).
+  (eskiden "Sepetten çıkar" yazıp hiçbir şey yapmıyordu). Pencere açıkken
+  sepet başka bir yerden (raf, paket kurucu, başka sekme) değişirse düğme
+  kendiliğinden güncellenir.
+- Telefon yan tutulunca açılan menü pencereden uzun kalıyordu ve dil
+  seçiciye ulaşılamıyordu; kısa pencerede menü kendi içinde kayar, dil
+  listesi yukarı açılır. Dil ve sıralama listeleri seçili olanı ekran
+  okuyucuya da söyler; Esc, klavyeyi listeyi açan düğmeye geri verir.
 - Sepet sayacı ilk karede doğru sayıyı gösterir (eskiden sayfanın en altındaki
   betik çalışana kadar 0 yazıyordu).
 - "… added" notu barın durduğu yere göre konumlanır; sepet ikonunun üstüne
@@ -236,11 +265,18 @@ python3 tools/sync-cart.py          # ortak parçaları yeniden keser
 python3 tools/sync-cart.py --check  # iki sayfa uyumlu mu, onu söyler
 ```
 
+Tek istisna o parçaları çalıştıran betiktir (bar, menü, arama, dil seçici,
+ipucu, "reveal"): `cart.html` her bloğun kendi kopyasını taşır ve araç
+bunları **kesmez, karşılaştırır** — bir blok `index.html`'dekiyle kelimesi
+kelimesine aynı değilse `--check` hangi blok olduğunu söyleyip hata verir;
+o blok elle taşınır. (Stil yeniden kesilip betik eski kalınca sepet sayfası
+bomboş görünebiliyordu ve hiçbir araç bunu yakalamıyordu.)
+
 **Testler**
 
 ```
 node tools/test-cart.js     # hesap: kampanya kuralları + ana sayfayla aynı ürün/fiyat mı (109 kontrol)
-node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (460+ kontrol)
+node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (510+ kontrol)
 ```
 
 ---
