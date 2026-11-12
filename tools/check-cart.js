@@ -93,8 +93,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const sum = q(view === 'pay' ? '[data-paysum]' : view === 'done' ? '[data-donesum]' : '[data-sum]');
     const rows = {};
     qa('.sum__row', sum).forEach(r => {
-      const k = r.classList.contains('sum__total') ? 'total' : r.classList.contains('sum__row--deal') ? 'deal'
-        : r.classList.contains('sum__row--next') ? 'next' : 'subtotal';
+      const k = r.classList.contains('sum__total') ? 'total' : r.classList.contains('sum__row--deal') ? 'deal' : 'subtotal';
       rows[k] = { label: txt(q('dt', r)), value: txt(q('dd', r)) };
     });
     const names = window.RMCart.names(window.RMCart.load());
@@ -107,12 +106,15 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
         eyebrow: txt(q('[data-l="eyebrow"]')), say: txt(q('[data-l="say"]')), why: txt(q('[data-l="why"]')),
         rungs: qa('[data-rung]').map(r => ({
           is: ['is-done', 'is-current', 'is-later'].filter(c => r.classList.contains(c)).join(' '),
-          t: txt(q('[data-rung-t]', r)), n: txt(q('[data-rung-n] [aria-hidden]', r) || q('[data-rung-n]', r)),
+          t: txt(q('[data-rung-t]', r)), n: txt(q('[data-rung-n]', r)), vh: txt(q('[data-rung-vh]', r)),
           filled: qa('figure.prod', r).length, free: qa('figure.prod.is-free', r).length,
-          empty: qa('button.prod--empty', r).length, later: qa('.prod--later', r).length,
+          button: qa('button.prod--empty', r).length, wait: qa('span.prod--empty:not(.prod--later)', r).length,
+          later: qa('.prod--later', r).length,
           nextfree: qa('.is-nextfree', r).length, ghost: qa('.prod__badge--ghost', r).length,
-          names: qa('figure.prod', r).map(f => f.getAttribute('aria-label'))
+          names: qa('figure.prod .tile__t', r).map(txt),
+          place: q('button[data-place]', r) ? q('button[data-place]', r).getAttribute('aria-label') : null
         })),
+        best: seen(q('[data-best]')),
         ring: q('#ladder').classList.contains('is-added'),
         pick: seen(q('[data-l="pick"]')) ? {
           label: txt(q('.pick__label')), name: txt(q('.pick__t')), free: q('[data-l="pick"]').classList.contains('is-free'),
@@ -122,23 +124,28 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
         } : null
       },
       lines: qa('[data-lines] > li').map(li => li.classList.contains('line')
-        ? { line: li.getAttribute('data-line'), free: li.classList.contains('is-free'), pill: !!q('.prod__badge', li),
+        ? { line: li.getAttribute('data-line'), no: txt(q('.prod__no', li)), free: li.classList.contains('is-free'), pill: !!q('.prod__badge', li),
             price: txt(q('.price', li)), won: txt(q('.line__won', li)) }
         : li.classList.contains('undo') ? { undo: txt(q('p', li)) } : { cap: txt(li) }),
       linesShown: seen(q('[data-lines-sec]')), linesN: txt(q('[data-lines-n]')),
       more: seen(q('[data-more]')) ? {
         h: txt(q('[data-more-h]')), sub: txt(q('[data-more-sub]')),
         rows: qa('[data-addrows] > li').map(li => ({ name: li.getAttribute('data-offer'), price: txt(q('.price', li)),
-          free: !!q('.price b.is-free', li), with: txt(q('.addrow__with', li)), aria: q('[data-add]', li).getAttribute('aria-label') })),
+          free: !!q('.price b.is-free', li) && li.classList.contains('is-free'), with: txt(q('.addrow__with', li)),
+          aria: q('[data-add]', li).getAttribute('aria-label') })),
         all: seen(q('[data-more-all]')) ? txt(q('[data-more-all]')) : null
       } : null,
-      sum: seen(sum) ? { rows, save: txt(q('.osave', sum)), go: txt(q('.sum__go', sum)), mini: qa('.sum__mini li', sum).length } : null,
+      unfold: seen(q('[data-unfold]')) ? txt(q('[data-unfold]')) : null,
+      rules: { button: txt(q('[data-rules]')), open: q('[data-rules]').getAttribute('aria-expanded'),
+        shown: seen(q('[data-rules-list]')), list: qa('[data-rules-list] li').map(txt) },
+      sum: seen(sum) ? { rows, save: txt(q('.osave', sum)), go: txt(q('.sum__go', sum)), mini: qa('.sum__mini li', sum).length,
+        next: txt(q('.sum__next span:not(.nav__gift)', sum)) } : null,
       bar: (() => { const b = q('[data-paybar]'); return { hidden: b.hidden, on: b.classList.contains('is-on'),
-        total: txt(q('[data-bar-total]')), note: txt(q('[data-bar-note]')), go: txt(q('[data-bar-go]')) }; })(),
-      crumbs: qa('[data-crumbs] li').map(li => (li.getAttribute('aria-current') ? '>' : li.classList.contains('is-done') ? '✓' : ' ') +
-        txt(q('.crumbs__l', li)) + (q('a', li) ? '*' : '')),
+        total: txt(q('[data-bar-total]')), note: txt(q('[data-bar-note]')), go: txt(q('.paybar__long')), short: txt(q('.paybar__short')),
+        aria: q('[data-bar-go]').getAttribute('aria-label'), label: b.getAttribute('aria-label') }; })(),
+      back: seen(q('.pay__back')) ? txt(q('.pay__back')) : null,
       badge: txt(q('.cart__n')), bagLabel: q('[data-basket]').getAttribute('aria-label'),
-      live: txt(q('[data-live]')), cheer: qa('.cheer').length, cheerLead: txt(q('.cheer__lead')),
+      live: txt(q('[data-live]')), cheer: qa('.cheer').length, cheerIn: qa('[data-cheer] > .cheer').length, cheerLead: txt(q('.cheer__lead')),
       undoSolo: seen(q('[data-undo-solo]')) ? txt(q('[data-undo-solo] p')) : null,
       emptyOnly: qa('[data-empty-only]').filter(seen).length,
       focus: (() => { const a = document.activeElement; if(!a || a === document.body) return null;
@@ -147,7 +154,11 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
       stored: localStorage.getItem('rm-cart'),
       engine: { count: price.count, counted: price.counted, subtotal: price.subtotal, saving: price.saving, total: price.total,
         deal: price.deal ? price.deal.get + '/' + price.deal.pay : null, next: price.next ? price.next.get + ':' + price.next.need : null,
-        free: price.lines.filter(l => l.free).map(l => l.name) }
+        free: price.lines.filter(l => l.free).map(l => l.name),
+        /* the receipt's order is the order the deal is applied in */
+        order: price.lines.map((l, i) => ({ l, i })).sort((a, b) =>
+          ((a.l.place === null ? 1e9 : a.l.place) - (b.l.place === null ? 1e9 : b.l.place)) || (a.i - b.i)).map(x => x.l.name),
+        placed: price.lines.filter(l => l.place !== null).length }
     };
   });
   /* whatever the page prints as money must be what the engine says it is */
@@ -158,15 +169,22 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.sum.rows.total && r.sum.rows.total.value === '$' + e.total, where + ': total is the engine’s', [r.sum.rows.total, e.total]);
     ok(e.deal ? (r.sum.rows.deal && r.sum.rows.deal.value === '−$' + e.saving) : !r.sum.rows.deal, where + ': the deal row is the engine’s deal', [r.sum.rows.deal, e.deal, e.saving]);
     if(r.view === 'basket'){
-      ok(e.next ? !!r.sum.rows.next : !r.sum.rows.next, where + ': the next-step row is there only while there is a next step', r.sum.rows.next);
-      const free = r.lines.filter(l => l.line && l.free).map(l => l.line);
-      ok(JSON.stringify(free) === JSON.stringify(e.free), where + ': the lines marked free are the engine’s', [free, e.free]);
+      ok((e.next && e.counted >= 1) ? !!r.sum.next : !r.sum.next, where + ': what the next step would come to is said only while there is one, and something to build on', r.sum.next);
+      const lines = r.lines.filter(l => l.line);
+      ok(JSON.stringify(lines.map(l => l.line)) === JSON.stringify(e.order), where + ': the lines are in the order the deal is applied in', [lines.map(l => l.line), e.order]);
+      const nos = lines.map(l => l.no).filter(Boolean), want = [];
+      for(let i = 1; i <= e.placed; i++) want.push((i < 10 ? '0' : '') + i);
+      ok(JSON.stringify(nos) === JSON.stringify(want), where + ': each numbered 01, 02 … and what has no place has no number', nos);
+      const free = lines.filter(l => l.free).map(l => l.line).sort();
+      ok(JSON.stringify(free) === JSON.stringify(e.free.slice().sort()), where + ': the lines marked free are the engine’s', [free, e.free]);
       ok(r.badge === String(e.count), where + ': the count in the bar', [r.badge, e.count]);
       ok(r.bar.total.indexOf('$' + e.total) === 0, where + ': the bar under the window carries the total', r.bar.total);
       const filled = r.ladder.rungs[0].filled + r.ladder.rungs[1].filled;
       ok(filled === Math.min(5, e.counted), where + ': the places filled are the packs that count', [filled, e.counted]);
       const ringed = r.ladder.rungs[0].free + r.ladder.rungs[1].free;
       ok(ringed === e.free.length, where + ': as many ringed places as free lines', [ringed, e.free.length]);
+      const buttons = r.ladder.rungs[0].button + r.ladder.rungs[1].button;
+      ok(buttons === (e.counted < 5 ? 1 : 0), where + ': one place is a button — the next one — and no other', buttons);
     }
   }
 
@@ -179,80 +197,117 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.h1.length === 1 && r.h1[0] === 'Your basket', 'one heading: Your basket', r.h1);
     ok(r.eyebrow === 'Basket · 1 item', 'the eyebrow counts', r.eyebrow);
     ok(r.ladder.eyebrow === 'Step 1 of 2 · Get 3, Pay 2', 'Get 3, Pay 2 is the first step shown', r.ladder.eyebrow);
-    ok(r.ladder.say === 'Add 2 more packs, get 1 of the 3 free.', 'one product: the sentence', r.ladder.say);
-    ok(/^That’s \$59 for the two of them\./.test(r.ladder.why), 'and what the two would cost, worked out', r.ladder.why);
+    ok(r.ladder.say === 'Two more and 1 of the 3 is on us.', 'one product: the sentence', r.ladder.say);
+    ok(r.ladder.why === 'The two together add just $59.', 'and what the two would add, worked out', r.ladder.why);
     ok(r.ladder.rungs[0].is === 'is-current' && r.ladder.rungs[1].is === 'is-later', 'step one is the one to do, step two is waiting', r.ladder.rungs.map(x => x.is));
-    ok(r.ladder.rungs[0].n === '1 / 3' && r.ladder.rungs[1].n === 'Next step', 'their captions', r.ladder.rungs.map(x => x.n));
-    ok(r.ladder.rungs[0].filled === 1 && r.ladder.rungs[0].empty === 2 && r.ladder.rungs[1].later === 2, 'one place filled, two to fill, two for later', r.ladder.rungs);
+    ok(r.ladder.rungs[0].n === '1 / 3' && r.ladder.rungs[1].n === 'Next', 'their captions', r.ladder.rungs.map(x => x.n));
+    ok(r.ladder.rungs[0].vh === 'Step 1: Get 3, Pay 2 — 1 of 3.' && r.ladder.rungs[1].vh === 'Step 2: Get 5, Pay 3 — next step.', 'and the same in a sentence, for a screen reader', r.ladder.rungs.map(x => x.vh));
+    ok(r.ladder.rungs[0].filled === 1 && r.ladder.rungs[0].button === 1 && r.ladder.rungs[0].wait === 1 && r.ladder.rungs[1].later === 2, 'one place filled, one to fill now, one waiting, two for later', r.ladder.rungs);
+    ok(r.ladder.rungs[0].place === 'Choose a pack for place 2', 'the next place says which place it is', r.ladder.rungs[0].place);
     ok(r.ladder.rungs[0].ghost === 1 && r.ladder.rungs[0].nextfree === 0, 'the third place wears the pill as a promise', r.ladder.rungs[0]);
+    ok(!r.ladder.best, 'the gold badge waits until the first step is done', r.ladder.best);
     ok(r.ladder.pick && r.ladder.pick.name === 'Solis Presets' && r.ladder.pick.label === 'Our pick' && !r.ladder.pick.free && r.ladder.pick.go === 'Add to basket' && !r.ladder.pick.primary,
        'the pick is the next pack on the shelf, at its price', r.ladder.pick);
-    ok(r.sum.rows.next.label.indexOf('Get 3, Pay 2 · 2 packs away') === 0, 'the summary keeps a place for the saving', r.sum.rows.next);
+    ok(r.more && r.more.h === 'Or choose another' && r.more.sub === 'Any pack on the shelf counts.', 'the rest of the shelf is under it', r.more);
+    ok(r.more.rows.map(x => x.name).join() === 'Terra Presets,Jardin Presets,Mely Presets,Onyx Presets' && r.more.all === 'Show all 10 packs', 'four of them, without the pick, and a way to the rest', [r.more.rows.map(x => x.name), r.more.all]);
+    ok(r.unfold === null, 'nothing is folded away while there is a step to take', r.unfold);
+    ok(r.sum.next === 'With 2 more packs your total is $118 — 1 of them is free.', 'the summary says what the step would come to', r.sum.next);
     ok(r.sum.save === null, 'nothing is saved yet, and nothing says otherwise', r.sum.save);
     ok(r.cheer === 0 && r.live === '', 'nothing rings and nothing is announced on arrival', [r.cheer, r.live]);
     ok(r.bagLabel === 'Basket, 1 item', 'the basket in the bar says 1 item', r.bagLabel);
     agrees(r, '1 product');
 
+    /* the empty place and the summary's sentence both lead to the pick */
+    await page.click('[data-place]'); await page.waitForTimeout(200);
+    ok((await read(page)).focus === 'add:Solis Presets', 'pressing the next place goes to the pack offered for it');
+    await page.evaluate(() => document.activeElement.blur());
+    await page.click('.sum__next'); await page.waitForTimeout(200);
+    ok((await read(page)).focus === 'add:Solis Presets', 'and so does the sentence in the summary');
+
     await page.click('.pick__go'); await page.waitForTimeout(450);
     r = await read(page);
-    ok(r.ladder.say === 'Add 1 more pack and it’s free.', 'two: one more and it is free', r.ladder.say);
+    ok(r.ladder.say === 'One more and it’s on us.' && r.ladder.why === 'Your total stays $118. That’s Get 3, Pay 2.', 'two: one more and it is on us', [r.ladder.say, r.ladder.why]);
     ok(r.ladder.pick.label === 'Your free pack' && r.ladder.pick.free && r.ladder.pick.pill && r.ladder.pick.go === 'Add your free pack' && r.ladder.pick.primary,
        'the pick is the free pack, and its button is the accent', r.ladder.pick);
     ok(/free with Get 3, Pay 2$/.test(r.ladder.pick.aria), 'and says so to a screen reader', r.ladder.pick.aria);
-    ok(r.ladder.rungs[0].nextfree === 1, 'the third place is free the moment it is filled', r.ladder.rungs[0]);
-    ok(r.more.h === 'Pick your free pack', 'the list under the lines changes its heading', r.more.h);
-    ok(r.more.rows.filter(x => x.name !== 'Full Plugin Pack').every(x => x.free && x.price === 'Free$59'), 'every $59 pack reads Free', r.more.rows.map(x => x.price));
-    const plug = r.more.rows.filter(x => x.name === 'Full Plugin Pack')[0];
-    ok(plug && plug.price === '$90$149' && plug.with === 'with Get 3, Pay 2', 'and the plugin pack reads what it would really add: $90', plug);
+    ok(r.ladder.rungs[0].nextfree === 1 && r.ladder.rungs[0].place === 'Choose your free pack for place 3', 'the third place is free the moment it is filled, and says so', r.ladder.rungs[0]);
+    ok(r.more.sub === 'Any $59 pack is free right now.', 'the shelf says what is true of it now', r.more.sub);
+    ok(r.more.rows.length === 4 && r.more.rows.every(x => x.free && x.price === 'Free$59' && /free with Get 3, Pay 2$/.test(x.aria)), 'every pack the eye meets first reads Free', r.more.rows);
+    ok(r.sum.next === 'Add 1 more pack and your total stays $118.', 'and the summary: the total stays', r.sum.next);
     ok(r.cheer === 0, 'nothing is celebrated at two', r.cheer);
-    ok(r.live === 'Solis Presets added. Total $118. Next step: 1 more pack for Get 3, Pay 2.', 'what is announced', r.live);
+    ok(r.live === 'Solis Presets added to your basket. Total $118. One more and it’s on us.', 'what is announced: what happened, the total, what to do next', r.live);
     ok(r.focus === 'add:Terra Presets', 'focus is on the next pick', r.focus);
     ok(r.stored === S(['Lora Presets', 'Solis Presets']), 'and it is kept', r.stored);
     agrees(r, '2 products');
 
     await page.click('.pick__go'); await page.waitForTimeout(300);
     r = await read(page);
-    ok(r.cheer === 1 && r.cheerLead === 'You saved', 'three: the step is celebrated, once', [r.cheer, r.cheerLead]);
+    ok(r.cheer === 1 && r.cheerIn === 1 && r.cheerLead === 'You saved', 'three: the step is celebrated, once, over the words and the steps', [r.cheer, r.cheerIn, r.cheerLead]);
+    const clear = await page.evaluate(() => {
+      const c = document.querySelector('.cheer').getBoundingClientRect(), p = document.querySelector('.pick').getBoundingClientRect();
+      const l = document.querySelector('#ladder').getBoundingClientRect();
+      return { above: c.bottom <= p.top + 0.5, edges: Math.abs(c.left - l.left) < 2 && Math.abs(c.right - l.right) < 2 && Math.abs(c.top - l.top) < 2 };
+    });
+    ok(clear.above && clear.edges, 'it reaches the panel’s edges and never covers the way to the next pack', clear);
     await page.waitForTimeout(900);
     ok(await page.evaluate(() => document.querySelector('[data-cheer-n]') && document.querySelector('[data-cheer-n]').textContent) === '59', 'and counts up to what it saved: $59');
     ok(r.ladder.eyebrow === 'Step 2 of 2 · Get 5, Pay 3', 'now the page points at Get 5, Pay 3', r.ladder.eyebrow);
-    ok(r.ladder.say === 'Add 2 more packs, get 2 of the 5 free.', 'the sentence', r.ladder.say);
-    ok(r.ladder.why === 'Get 3, Pay 2 is yours — Terra Presets is free. The next two are $59 together.', 'and why', r.ladder.why);
+    ok(r.ladder.say === 'Two more and 2 of the 5 are on us.', 'the sentence', r.ladder.say);
+    ok(r.ladder.why === 'Get 3, Pay 2 is yours — Terra Presets is free. The next two add just $59.', 'and why', r.ladder.why);
     ok(r.ladder.rungs[0].is === 'is-done' && r.ladder.rungs[0].n === 'Unlocked' && r.ladder.rungs[1].is === 'is-current' && r.ladder.rungs[1].n === '3 / 5', 'step one done, step two the one to do', r.ladder.rungs.map(x => [x.is, x.n]));
-    ok(r.ladder.rungs[0].free === 1 && r.ladder.rungs[1].empty === 2 && r.ladder.rungs[1].later === 0, 'the third place is ringed; the second step’s places can be filled', r.ladder.rungs);
+    ok(r.ladder.rungs[0].vh === 'Step 1: Get 3, Pay 2 — yours, 1 pack free.' && r.ladder.rungs[1].vh === 'Step 2: Get 5, Pay 3 — 3 of 5. Best deal.', 'and in a sentence', r.ladder.rungs.map(x => x.vh));
+    ok(r.ladder.best, 'the gold badge arrives with the second step', r.ladder.best);
+    ok(r.ladder.rungs[0].free === 1 && r.ladder.rungs[1].button === 1 && r.ladder.rungs[1].wait === 1 && r.ladder.rungs[1].later === 0 && r.ladder.rungs[1].place === 'Choose a pack for place 4',
+       'the third place is ringed; the fourth is the one to fill', r.ladder.rungs);
     ok(r.sum.rows.deal.label === 'Get 3, Pay 2' && r.sum.save === 'You save $59 · 33% off', 'the summary shows the deal and the saving', [r.sum.rows.deal, r.sum.save]);
-    ok(r.lines[2].free && r.lines[2].pill && r.lines[2].won === 'with Get 3, Pay 2', 'the third line wears the pill', r.lines[2]);
-    ok(r.live === 'Terra Presets added. Get 3, Pay 2 unlocked: Terra Presets is free. You save $59. Total $118. Next step: 2 more packs for Get 5, Pay 3.', 'what is announced', r.live);
+    ok(r.sum.next === 'With 2 more packs your total is $177 — 1 of them is free.', 'and what the second step would come to', r.sum.next);
+    ok(r.lines[2].free && r.lines[2].pill && r.lines[2].won === 'with Get 3, Pay 2' && r.lines[2].no === '03', 'the third line wears the pill', r.lines[2]);
+    ok(r.live === 'Terra Presets added to your basket. Get 3, Pay 2 unlocked: Terra Presets is free. You save $59. Total $118. Two more and 2 of the 5 are on us.', 'what is announced', r.live);
     agrees(r, '3 products');
     await page.waitForTimeout(1800);
     ok((await read(page)).cheer === 0, 'the celebration clears itself');
 
-    await page.click('[data-add="Jardin Presets"][data-from="more"]'); await page.waitForTimeout(450);
+    await page.click('[data-add="Mely Presets"][data-from="more"]'); await page.waitForTimeout(450);
     r = await read(page);
-    ok(r.ladder.say === 'Add 1 more pack and it’s free.' && r.ladder.why === 'Your fifth pack is $0. That’s Get 5, Pay 3.', 'four: one more and it is free', [r.ladder.say, r.ladder.why]);
-    ok(r.ladder.pick.free && r.ladder.pick.name === 'Mely Presets', 'the pick is free again', r.ladder.pick);
+    ok(r.ladder.say === 'One more and it’s on us.' && r.ladder.why === 'Your total stays $177. That’s Get 5, Pay 3.', 'four: one more and it is on us', [r.ladder.say, r.ladder.why]);
+    ok(r.ladder.pick.free && r.ladder.pick.name === 'Jardin Presets', 'the pick is free again', r.ladder.pick);
     ok(r.lines.filter(l => l.free).map(l => l.line).join() === 'Terra Presets', 'the free line is still the third', r.lines);
+    ok(r.focus === 'add:Onyx Presets', 'focus is on the row that took the pressed one’s place', r.focus);
+    ok(r.live === 'Mely Presets added to your basket. Total $177. One more and it’s on us.', 'what is announced', r.live);
     ok(r.cheer === 0, 'nothing is celebrated at four', r.cheer);
     agrees(r, '4 products');
 
     await page.click('.pick__go'); await page.waitForTimeout(300);
     r = await read(page);
     ok(r.cheer === 1, 'five: celebrated', r.cheer);
-    ok(r.ladder.eyebrow === 'Both steps done' && r.ladder.say === 'Get 5, Pay 3 is yours — 2 packs on us.', 'both steps done', [r.ladder.eyebrow, r.ladder.say]);
+    ok(r.ladder.eyebrow === 'Both steps done' && r.ladder.say === 'Get 5, Pay 3 is yours.' && r.ladder.why === '2 of your 5 are on us — you save $118.', 'both steps done', [r.ladder.eyebrow, r.ladder.say, r.ladder.why]);
     ok(r.ladder.rungs.every(x => x.is === 'is-done') && r.ladder.ring, 'both steps ticked and the panel wears the ring', [r.ladder.rungs.map(x => x.is), r.ladder.ring]);
+    ok(r.ladder.rungs[0].vh === 'Step 1: Get 3, Pay 2 — done.' && r.ladder.rungs[1].vh === 'Step 2: Get 5, Pay 3 — yours, 2 packs free. Best deal.', 'the first step is done, the second is the one that applies', r.ladder.rungs.map(x => x.vh));
     ok(r.ladder.rungs[0].free === 0 && r.ladder.rungs[1].free === 2, 'three paid in the first step, two free in the second', r.ladder.rungs);
+    ok(r.engine.free.join() === 'Mely Presets,Jardin Presets' && r.lines[3].free && r.lines[4].free && !r.lines[2].free, 'the free mark has moved to the fourth and fifth; the third is paid again', [r.engine.free, r.lines]);
     ok(r.ladder.pick === null, 'there is no next pick: there is no next step', r.ladder.pick);
-    ok(r.sum.rows.deal.label === 'Get 5, Pay 3' && r.sum.save === 'You save $118 · 40% off', 'one deal, the bigger one', [r.sum.rows.deal, r.sum.save]);
-    ok(r.more.h === 'Add another pack' && r.more.rows.every(x => !x.free), 'more packs are at their own price, and say so', [r.more.h, r.more.rows.map(x => x.price)]);
-    ok(r.bar.note === 'Get 5, Pay 3 · saved $118', 'the bar under the window says what was saved', r.bar.note);
+    ok(r.sum.rows.deal.label === 'Get 5, Pay 3' && r.sum.save === 'You save $118 · 40% off' && r.sum.next === null, 'one deal, the bigger one, and nothing more to point at', [r.sum.rows.deal, r.sum.save, r.sum.next]);
+    ok(r.more === null && r.unfold === 'Add another pack', 'the shelf folds away behind one button', [r.more, r.unfold]);
+    ok(r.focus === 'ladderSay', 'focus goes to what the campaign now says', r.focus);
+    ok(r.bar.note === 'You save $118', 'the bar under the window says what was saved', r.bar.note);
+    ok(r.live === 'Jardin Presets added to your basket. Get 5, Pay 3 unlocked: Mely Presets and Jardin Presets are free. You save $118. Total $177.', 'what is announced', r.live);
     agrees(r, '5 products');
     await page.waitForTimeout(2600);
+
+    await page.click('[data-unfold]'); await page.waitForTimeout(200);
+    r = await read(page);
+    ok(r.more && r.more.h === 'Add another pack' && r.more.sub === 'One deal per basket — from here each pack is at its own price.' && r.unfold === null && r.focus === 'moreH',
+       'opened, the shelf says what a pack costs from here, and focus is on its heading', [r.more, r.unfold, r.focus]);
+    ok(r.more.rows.length === 4 && r.more.rows.every(x => !x.free && x.price === '$59$119') && r.more.all === 'Show all 7 packs', 'every pack at its own price', r.more);
 
     await page.click('[data-add="Onyx Presets"]'); await page.waitForTimeout(450);
     r = await read(page);
     ok(r.cheer === 0, 'six: nothing new was unlocked, nothing is celebrated', r.cheer);
-    ok(/from the sixth on each pack is at its own price\.$/.test(r.ladder.why), 'and the page says why', r.ladder.why);
+    ok(r.ladder.why === '2 of your packs are on us — you save $118. One deal per basket, so from the sixth on each pack is at its own price.', 'and the page says why', r.ladder.why);
     ok(r.sum.rows.total.value === '$236', 'six $59 packs come to $236', r.sum.rows.total);
+    ok(r.lines[5].line === 'Onyx Presets' && r.lines[5].no === '06' && !r.lines[5].free, 'the sixth is line 06, at its own price', r.lines[5]);
+    ok(r.live === 'Onyx Presets added to your basket. Total $236.', 'what is announced', r.live);
+    ok(r.more !== null, 'once opened, the shelf stays open', r.more);
     agrees(r, '6 products');
 
     /* ── 2 · taking one out, and putting it back ── */
@@ -260,62 +315,90 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const before = r.stored;
     await page.click('[data-remove="Jardin Presets"]'); await page.waitForTimeout(300);
     r = await read(page);
-    ok(r.lines[3] && r.lines[3].undo === 'Jardin Presets removed.', 'the way back is where the line was', r.lines.map(l => l.line || l.undo));
+    ok(r.lines[4] && r.lines[4].undo === 'Jardin Presets removed.', 'the way back is where the line was', r.lines.map(l => l.line || l.undo));
     ok(r.focus === 'undo', 'and focus is on it', r.focus);
-    ok(r.live === 'Jardin Presets removed. Total $177.', 'what is announced (the deal still stands)', r.live);
+    ok(r.live === 'Jardin Presets removed from your basket. Total $177.', 'what is announced (the deal still stands)', r.live);
     agrees(r, 'after a removal');
     await page.click('[data-undo]'); await page.waitForTimeout(300);
     r = await read(page);
     ok(r.stored === before, 'Undo puts back exactly what was there', r.stored);
     ok(r.focus === 'remove:Jardin Presets', 'focus returns to that line', r.focus);
+    ok(r.live === 'Jardin Presets is back in your basket. Total $236.', 'and it is said', r.live);
     ok(r.cheer === 0, 'putting something back is not celebrated', r.cheer);
     agrees(r, 'after undo');
-    /* down the ladder: the deal that is lost is named */
+    /* down the ladder: the deal that is lost is named, once, where it happened */
     await page.click('[data-remove="Onyx Presets"]'); await page.waitForTimeout(200);
     await page.click('[data-remove="Mely Presets"]'); await page.waitForTimeout(300);
     r = await read(page);
-    ok(r.live === 'Mely Presets removed. Get 5, Pay 3 no longer applies; Get 3, Pay 2 does. Total $177.', 'going down a step says which deal is left', r.live);
-    ok(!r.ladder.ring && r.ladder.rungs[1].is === 'is-current', 'the ring goes and step two is open again', r.ladder.rungs.map(x => x.is));
+    ok(r.live === 'Mely Presets removed from your basket. Get 5, Pay 3 no longer applies; Get 3, Pay 2 does. Total $177. One more and it’s on us.', 'going down a step says which deal is left, and what to do', r.live);
+    ok(r.lines.some(l => l.undo === 'Mely Presets removed. Get 5, Pay 3 no longer applies; Get 3, Pay 2 does.'), 'and the way back says it too', r.lines.filter(l => l.undo));
+    ok(!r.ladder.ring && r.ladder.rungs[1].is === 'is-current' && r.unfold === null && r.more, 'the ring goes, step two is open again, and so is the shelf', [r.ladder.rungs.map(x => x.is), r.unfold]);
     agrees(r, 'back at 4');
+    await page.click('[data-remove="Jardin Presets"]'); await page.waitForTimeout(300);
+    r = await read(page);
+    ok(r.live === 'Jardin Presets removed from your basket. Total $118. Two more and 2 of the 5 are on us.', 'a removal that loses nothing says so by saying nothing about it', r.live);
+    await page.click('[data-remove="Terra Presets"]'); await page.waitForTimeout(300);
+    r = await read(page);
+    ok(r.live === 'Terra Presets removed from your basket. Get 3, Pay 2 no longer applies. Total $118. One more and it’s on us.', 'and the last deal lost is named', r.live);
+    ok(!r.ladder.best && r.ladder.rungs[0].is === 'is-current', 'the badge goes back with it', [r.ladder.best, r.ladder.rungs.map(x => x.is)]);
+    agrees(r, 'back at 2');
     await ctx.close();
   }
 
   /* ── 3 · mixed prices, the sampler, a bundle from the front page ─── */
-  section('3 · the plugin pack, the sampler, and a bundle from the front page');
+  section('3 · the plugin pack, the sampler, the rules, and a bundle from the front page');
   {
     let o = await open({ state: S(['Lora Presets', 'Solis Presets']) });
-    await o.page.click('[data-add="Full Plugin Pack"]'); await o.page.waitForTimeout(400);
+    await o.page.click('[data-more-all]'); await o.page.waitForTimeout(250);
     let r = await read(o.page);
+    ok(r.more.rows.length === 9 && r.more.all === null && r.live === '5 more packs shown.' && r.focus === 'add:Olbia LUTs', 'Show all shows the rest, says how many, and puts focus on the first of them', [r.more.rows.length, r.more.all, r.live, r.focus]);
+    const plug = r.more.rows[r.more.rows.length - 1];
+    ok(plug.name === 'Full Plugin Pack' && plug.price === '$90$149' && plug.with === 'with Get 3, Pay 2' && !plug.free, 'the one pack with a different story comes last, and reads what it would really add: $90', plug);
+    ok(plug.aria === 'Add Full Plugin Pack to basket — $90 with Get 3, Pay 2, usually $149', 'and says so to a screen reader', plug.aria);
+    ok(r.more.rows.slice(0, -1).every(x => x.free), 'every $59 pack reads Free', r.more.rows.map(x => x.price));
+    await o.page.click('[data-add="Full Plugin Pack"]'); await o.page.waitForTimeout(400);
+    r = await read(o.page);
     ok(r.sum.rows.total.value === '$208' && r.engine.free.join() === 'Solis Presets', 'two packs then the plugin pack: $208, and the free one is Solis', [r.sum.rows.total, r.engine.free]);
-    ok(r.ladder.rungs[0].names[0] === 'Place 1: Full Plugin Pack', 'the plugin pack takes the first place, as on the front page', r.ladder.rungs[0].names);
-    ok(/The free one is always the lowest-priced pack\.$/.test(r.ladder.why), 'and the page says which one comes free', r.ladder.why);
-    ok(r.live.indexOf('Full Plugin Pack added. Get 3, Pay 2 unlocked: Solis Presets is free.') === 0, 'the announcement names the line that turned free', r.live);
+    ok(r.ladder.rungs[0].names.join() === 'Plugin Pack,Lora,Solis' && r.lines[0].line === 'Full Plugin Pack' && r.lines[0].no === '01', 'the plugin pack takes the first place and the first line, as on the front page', [r.ladder.rungs[0].names, r.lines[0]]);
+    ok(r.lines[2].line === 'Solis Presets' && r.lines[2].free && r.lines[2].no === '03', 'and the free one is the third place', r.lines[2]);
+    ok(r.live === 'Full Plugin Pack added to your basket. Get 3, Pay 2 unlocked: Solis Presets is free. You save $59. Total $208. Two more and 2 of the 5 are on us.', 'the announcement names the line that turned free', r.live);
     agrees(r, 'plugin third');
     await o.ctx.close();
 
     o = await open({ state: S(['Demo Presets']) });
     r = await read(o.page);
     ok(r.sum.rows.total.value === '$0' && r.ladder.rungs[0].filled === 0, 'the sampler alone: $0, and no place taken', [r.sum.rows.total, r.ladder.rungs[0]]);
-    ok(/Demo Presets is free anyway, so it doesn’t count\.$/.test(r.ladder.why), 'and the page says it does not count', r.ladder.why);
-    ok(r.lines[0].price === 'Free', 'its line reads Free', r.lines[0]);
-    ok(r.more.rows.every(x => x.name !== 'Demo Presets'), 'it is never offered as a pack to add', r.more.rows.map(x => x.name));
+    ok(r.ladder.say === 'Pick any 3 and 1 of them is on us.' && r.ladder.why === 'Three packs come to $118 instead of $177.', 'the campaign is where it would be with nothing in the basket', r.ladder);
+    ok(r.lines[0].price === 'Free' && r.lines[0].no === '', 'its line reads Free and has no number', r.lines[0]);
+    ok(r.more.rows.every(x => x.name !== 'Demo Presets') && r.ladder.pick.name !== 'Demo Presets', 'it is never offered as a pack to add', r.more.rows.map(x => x.name));
+    ok(r.bar.note === 'Get 3, Pay 2 · 0 / 3', 'and the bar counts the packs that count', r.bar.note);
     agrees(r, 'sampler alone');
+    /* the rules, for anyone who wants them */
+    ok(r.rules.button === 'How the deals work' && r.rules.open === 'false' && !r.rules.shown, 'the rules are a line that opens', r.rules);
+    await o.page.click('[data-rules]'); await o.page.waitForTimeout(150);
+    r = await read(o.page);
+    ok(r.rules.open === 'true' && r.rules.shown && r.rules.list.length === 4 && r.rules.list[0] === 'Only paid products count. Demo Presets is free already.'
+       && r.rules.list[3] === 'Deals don’t stack: a sixth pack is at its own price.', 'four of them, in the engine’s own terms', r.rules);
+    await o.page.click('[data-rules]'); await o.page.waitForTimeout(150);
+    r = await read(o.page);
+    ok(r.rules.open === 'false' && !r.rules.shown, 'and it closes again', r.rules);
     await o.ctx.close();
 
     o = await open({ state: S(['Aster LUTs'], { label: 'Bestseller bundle', packs: FIVE }) });
     r = await read(o.page);
-    ok(r.lines[0].cap && /^Bestseller bundle\s*· 5 packs/.test(r.lines[0].cap), 'a bundle arrives as its packs, under its name', r.lines[0]);
-    ok(r.lines[6] && r.lines[6].cap === 'Added separately', 'and what was added on its own is named', r.lines.map(l => l.cap || l.line));
+    ok(r.lines[0].cap && /^Bestseller bundle · 5 packs\s*Take one out and the rest stay\.$/.test(r.lines[0].cap) && r.lines.filter(l => l.cap).length === 1, 'a bundle arrives as its packs, under one line that says so', r.lines.filter(l => l.cap));
+    ok(r.lines.filter(l => l.line).map(l => l.line).join() === 'Full Plugin Pack,Lora Presets,Solis Presets,Terra Presets,Jardin Presets,Aster LUTs', 'its packs and the one added on its own are one receipt', r.lines.map(l => l.line));
     ok(r.sum.rows.subtotal.value === '$444' && r.sum.rows.total.value === '$326', 'five and one: $444 less $118', r.sum.rows);
     ok(r.engine.free.join() === 'Terra Presets,Jardin Presets', 'the same two free as the front page ringed', r.engine.free);
-    ok(r.cheer === 0, 'it was celebrated where it was bought, not here', r.cheer);
+    ok(r.cheer === 0 && r.ladder.ring && r.unfold === 'Add another pack', 'it was celebrated where it was bought, not here', [r.cheer, r.ladder.ring, r.unfold]);
     agrees(r, 'bundle and one');
     const kept = r.stored;
     await o.page.click('[data-remove="Terra Presets"]'); await o.page.waitForTimeout(300);
     r = await read(o.page);
     ok(JSON.parse(r.stored).bundle === null && JSON.parse(r.stored).items.join() === 'Full Plugin Pack,Lora Presets,Solis Presets,Jardin Presets,Aster LUTs',
        'taking one out lets go of the bundle and keeps the rest', r.stored);
-    ok(r.lines.some(l => l.undo === 'Terra Presets removed. The bundle is now 4 separate packs — they keep the deal they still earn.'), 'and says so', r.lines.filter(l => l.undo));
+    ok(r.lines.some(l => l.undo === 'Terra Presets removed. The bundle is now 4 separate packs.') && !r.lines.some(l => l.cap), 'and says so, in place of the line that named it', r.lines.filter(l => l.undo || l.cap));
+    ok(r.live === 'Terra Presets removed from your basket. The bundle is now 4 separate packs. Total $267.', 'aloud too', r.live);
     ok(r.sum.rows.total.value === '$267', 'the five that are left still earn Get 5, Pay 3', r.sum.rows.total);
     agrees(r, 'bundle dissolved');
     await o.page.click('[data-undo]'); await o.page.waitForTimeout(300);
@@ -331,7 +414,8 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     let r = await read(o.page);
     ok(r.h1.join() === 'Your basket is empty.' && r.emptyOnly >= 3, 'it says so, and offers the two ways on', [r.h1, r.emptyOnly]);
     ok(!r.linesShown && r.sum === null && r.bar.hidden, 'no lines, no summary, no bar under the window', [r.linesShown, r.sum, r.bar]);
-    ok(r.ladder.say === 'Pick any 3 packs, get 1 of them free.' && r.ladder.why === 'Three packs for $118 instead of $177.', 'the campaign is still there, from the start', r.ladder);
+    ok(r.ladder.say === 'Pick any 3 and 1 of them is on us.' && r.ladder.why === 'Three packs come to $118 instead of $177.', 'the campaign is still there, from the start', r.ladder);
+    ok(r.ladder.rungs[0].place === 'Choose a pack for place 1' && r.ladder.rungs[0].wait === 2, 'with its first place to fill', r.ladder.rungs[0]);
     ok(r.badge === '0' && r.bagLabel === 'Basket, empty', 'the bar says empty', [r.badge, r.bagLabel]);
     await o.page.click('.pick__go'); await o.page.waitForTimeout(400);
     r = await read(o.page);
@@ -339,6 +423,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await o.page.click('[data-remove]'); await o.page.waitForTimeout(300);
     r = await read(o.page);
     ok(r.undoSolo === 'Lora Presets removed.' && r.h1.join() === 'Your basket is empty.', 'the last line out leaves the way back standing', [r.undoSolo, r.h1]);
+    ok(r.live === 'Lora Presets removed from your basket. Your basket is empty.', 'and it is said', r.live);
     ok(r.stored === null, 'and nothing kept', r.stored);
     await o.page.click('[data-undo]'); await o.page.waitForTimeout(300);
     r = await read(o.page);
@@ -355,10 +440,20 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     let r = await read(page);
     ok(r.view === 'pay' && r.hash === '#pay' && r.title === 'Payment — Retouch Market', 'Continue goes to payment', [r.view, r.hash, r.title]);
     ok(r.h1.join() === 'PaymentPreview' && r.focus === 'payH', 'one heading, marked Preview, and focus on it', [r.h1, r.focus]);
-    ok(r.crumbs.join('|') === '✓Basket*|>Payment| Done', 'the basket is done and is the one step you can go back to', r.crumbs);
+    const shape = await page.evaluate(() => {
+      const back = document.querySelector('.pay__back'), h1 = document.getElementById('payH'), form = document.getElementById('payForm');
+      return { backFirst: !!(back.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING),
+        noteFirst: form.firstElementChild.id === 'payNote', note: form.firstElementChild.textContent.replace(/\s+/g, ' ').trim(),
+        where: form.querySelector('h2').textContent, fine: form.querySelector('.pay__fine').textContent,
+        says: document.querySelector('[data-pay-go]').getAttribute('aria-describedby') };
+    });
+    ok(r.back === 'Back to basket' && shape.backFirst, 'the way back is above the heading', [r.back, shape.backFirst]);
+    ok(shape.noteFirst && shape.note === 'Design preview. No payment is taken, and nothing you type here is stored or sent.', 'the form says it is a preview before it asks for anything', shape);
+    ok(shape.where === 'Where should we send it?' && shape.fine === 'Preview only. You will not be charged.' && shape.says === 'payNote', 'and again under the button that completes it', shape);
     ok(r.sum.mini === 3 && r.sum.rows.total.value === '$118', 'the summary lists the order', r.sum);
+    ok(r.bar.hidden, 'the bar under the window is the basket’s: this step has one button, at the end of the form', r.bar);
     ok(await page.evaluate(() => document.querySelector('[data-pay-go]').textContent) === 'Complete order — $118', 'the button carries the total');
-    ok(await page.evaluate(() => !document.querySelector('#payForm input[name="card"], #payForm input[autocomplete^="cc-"]')), 'there is no card field to type into');
+    ok(await page.evaluate(() => !document.querySelector('#payForm input[name="card"], #payForm input[autocomplete^="cc-"]') && document.querySelectorAll('#payForm input').length === 3), 'there is no card field to type into');
     ok(await page.evaluate(() => !document.getElementById('payForm').hasAttribute('action')), 'and the form goes nowhere');
     await page.goBack(); await page.waitForTimeout(300);
     r = await read(page);
@@ -374,38 +469,42 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     }));
     let e = await errs();
     ok(e[0].err === 'Enter your email address.' && e[1].err === 'Enter your full name.' && e[2].err === 'Tick the box to accept the contract and the terms.', 'each field says what it needs', e);
-    ok(e.every(x => x.bad === 'true') && e[0].by === 'payEmailErr payEmailHint', 'and is marked for a screen reader', e);
+    ok(e.every(x => x.bad === 'true') && e[0].by === 'payEmailErr payEmailHint' && e[1].by === 'payNameErr', 'and is marked for a screen reader', e);
     ok(r.focus === 'payEmail' && r.live === '3 things need fixing before you can continue.', 'focus goes to the first, and the count is announced', [r.focus, r.live]);
     await page.fill('#payEmail', 'ayse@example'); await page.waitForTimeout(80);
     e = await errs();
     ok(e[0].err === 'That doesn’t look like an email address. Check the @ and the dot.', 'a half-typed address is told what is missing', e[0]);
     await page.fill('#payEmail', 'Ayse+shop@Example.com'); await page.waitForTimeout(80);
     e = await errs();
-    ok(e[0].err === '' && e[0].bad === 'false', 'and the message goes the moment it is right (a plus sign is fine)', e[0]);
-    await page.fill('#payName', 'Cher'); await page.check('#payAgree'); await page.waitForTimeout(80);
+    ok(e[0].err === '' && e[0].bad === 'false' && e[0].by === 'payEmailHint', 'and the message goes the moment it is right (a plus sign is fine)', e[0]);
+    await page.fill('#payName', 'Zebrowski'); await page.check('#payAgree'); await page.waitForTimeout(80);
     e = await errs();
-    ok(e.every(x => x.err === ''), 'a one-word name is a name', e);
+    ok(e.every(x => x.err === '') && e[1].by === null, 'a one-word name is a name', e);
     const stored = await page.evaluate(() => localStorage.getItem('rm-cart'));
     const keysBefore = await page.evaluate(() => Object.keys(localStorage).sort().join());
     await page.click('[data-pay-go]'); await page.waitForTimeout(400);
     r = await read(page);
     ok(r.view === 'done' && r.hash === '#done' && r.h1.join() === 'Order complete — in preview', 'a complete form is Done — in preview', [r.view, r.h1]);
-    ok(r.crumbs.join('|') === '✓Basket|✓Payment|>Done', 'all three steps', r.crumbs);
-    const p = await page.evaluate(() => document.querySelector('[data-done-p]').textContent);
-    ok(p === 'This is a design preview, so no payment was taken and nothing was sent to ayse+shop@example.com. In the live shop your download links arrive by email right after payment.', 'it says, with the address, that nothing was taken and nothing sent', p);
-    ok(r.sum.rows.total.label === 'Total — not charged' && r.sum.rows.total.value === '$118', 'the receipt says not charged', r.sum.rows.total);
+    const p = await page.evaluate(() => document.querySelector('[data-view-name="done"] .lede').textContent);
+    ok(p === 'No payment was taken, and nothing you typed was stored or sent. In the live shop your downloads are ready right after payment.', 'it says that nothing was taken and nothing kept', p);
+    ok(r.sum.rows.total.label === 'Total — not charged' && r.sum.rows.total.value === '$118' && r.sum.mini === 3, 'the receipt says not charged', r.sum);
     ok(r.stored === stored && await page.evaluate(() => Object.keys(localStorage).sort().join()) === keysBefore, 'the basket is as it was, and nothing typed was kept', r.stored);
+    const gone = await page.evaluate(() => ({ email: document.getElementById('payEmail').value, name: document.getElementById('payName').value,
+      agree: document.getElementById('payAgree').checked, session: sessionStorage.length, search: location.search,
+      inPage: /ayse\+shop|Zebrowski/i.test(document.documentElement.innerHTML) }));
+    ok(gone.email === '' && gone.name === '' && !gone.agree && gone.session === 0 && gone.search === '' && !gone.inPage, 'the form is emptied, and what was typed is nowhere on the page or in its address', gone);
     ok(r.bar.hidden, 'no bar under the window once it is done', r.bar);
     await page.goBack(); await page.waitForTimeout(300);
     r = await read(page);
     ok(r.view === 'basket', 'Back from Done is the basket, never the finished form', [r.view, r.hash]);
     await o.ctx.close();
 
-    /* the address is text, whatever is in it */
+    /* whatever is typed stays text, and stays in the field */
     o = await open({ state: S(['Lora Presets']), hash: 'pay' });
-    await o.page.fill('#payEmail', '"><b>x</b>@example.com'); await o.page.fill('#payName', 'A B'); await o.page.check('#payAgree');
+    await o.page.fill('#payEmail', '"><b>x</b>@example.com'); await o.page.fill('#payName', '<img src=x onerror=alert(1)>'); await o.page.check('#payAgree');
     await o.page.click('[data-pay-go]'); await o.page.waitForTimeout(300);
-    ok(await o.page.evaluate(() => document.querySelectorAll('[data-done-p] b').length === 1 && document.querySelector('[data-done-p] b').textContent === '"><b>x</b>@example.com'), 'markup typed into the form stays text');
+    ok(await o.page.evaluate(() => document.getElementById('main').getAttribute('data-view') === 'done'
+      && ![].some.call(document.querySelectorAll('#main b'), b => b.textContent === 'x') && !document.querySelector('#main img[src="x"]')), 'markup typed into the form never becomes markup');
     await o.ctx.close();
 
     /* routes that must not open */
@@ -420,6 +519,13 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     o = await open({ state: S(['Demo Presets']), hash: 'pay' });
     ok(await o.page.evaluate(() => document.querySelector('[data-paybox]').hidden && document.querySelector('[data-pay-go]').textContent === 'Complete order — Free'), 'a basket that costs nothing asks for no card');
     await o.ctx.close();
+    /* the one echo of the campaign on the payment step, and only when it is true */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets']), hash: 'pay' });
+    ok(await o.page.evaluate(() => { const n = document.querySelector('.sum__nudge'); return !!n && n.textContent.replace(/\s+/g, ' ').trim(); }) === 'One more pack would be free. Back to basket', 'two packs: the payment step says one more would be free');
+    await o.ctx.close();
+    o = await open({ state: S(['Lora Presets']), hash: 'pay' });
+    ok(await o.page.evaluate(() => !document.querySelector('.sum__nudge')), 'one pack: it says nothing');
+    await o.ctx.close();
   }
 
   /* ── 6 · Turkish ────────────────────────────────────────────────── */
@@ -430,19 +536,36 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     let r = await read(page);
     ok(r.lang === 'tr' && r.title === 'Sepetin — Retouch Market' && r.h1.join() === 'Sepetin', 'the page is in Turkish, and says it is', [r.lang, r.title, r.h1]);
     ok(r.ladder.say === '1 ürün daha ekle, 1 ürün bedava kazan.', 'two products: the owner’s own sentence', r.ladder.say);
-    ok(r.ladder.eyebrow === 'Adım 1 / 2 · 3 Al 2 Öde' && r.ladder.pick.label === 'Bedava ürünün' && r.ladder.pick.go === 'Bedava ürününü ekle', 'the step and the pick', r.ladder);
-    ok(r.sum.rows.next.label.indexOf('3 Al 2 Öde · 1 ürün kaldı') === 0 && r.sum.go === 'Ödemeye geç', 'the summary', r.sum);
-    ok(r.bagLabel === 'Sepet, 2 ürün' && r.crumbs.join('|') === '>Sepet| Ödeme| Tamam', 'the bar and the steps', [r.bagLabel, r.crumbs]);
+    ok(r.ladder.why === 'Toplamın yine $118. 3 Al 2 Öde tam da bu.', 'and why', r.ladder.why);
+    ok(r.ladder.eyebrow === '1. adım · 3 Al 2 Öde' && r.ladder.pick.label === 'Bedava ürünün' && r.ladder.pick.go === 'Bedava ürününü ekle', 'the step and the pick', r.ladder);
+    ok(r.ladder.rungs[0].vh === '1. adım: 3 Al 2 Öde — 2 / 3.' && r.ladder.rungs[1].vh === '2. adım: 5 Al 3 Öde — sonraki adım.' && r.ladder.rungs[1].n === 'Sırada'
+       && r.ladder.rungs[0].place === '3. yer için bedava ürününü seç', 'the steps and the next place', r.ladder.rungs);
+    ok(r.more.h === 'Ya da başka birini seç' && r.more.sub === 'Şu an $59 değerindeki her ürün bedava.' && r.more.all === '9 ürünün hepsini göster' && r.more.rows[0].price === 'Bedava$59',
+       'the shelf — and no suffix is bent onto a price', r.more);
+    ok(r.sum.next === '1 ürün daha eklersen toplamın yine $118.' && r.sum.go === 'Ödemeye geç', 'the summary', r.sum);
+    ok(r.rules.button === 'Kampanyalar nasıl işliyor?' && r.rules.list[1] === 'Her sepette tek kampanya geçerli: ulaştığın en iyisi.', 'the rules', r.rules);
+    ok(r.bagLabel === 'Sepet, 2 ürün' && r.bar.label === 'Toplam ve ödeme' && r.bar.go === 'Ödemeye geç' && r.bar.short === 'Devam', 'the bar in the header and the bar under the window', [r.bagLabel, r.bar]);
     await page.click('.pick__go'); await page.waitForTimeout(400);
     r = await read(page);
     ok(r.cheerLead === 'Kazancın', 'the celebration is in Turkish too', r.cheerLead);
-    ok(r.live === 'Terra Presets sepete eklendi. 3 Al 2 Öde açıldı: Terra Presets bedava. Kazancın $59. Toplam $118. Sonraki adım: 5 Al 3 Öde için 2 ürün daha.', 'and so is what is announced', r.live);
+    ok(r.live === 'Terra Presets sepete eklendi. 3 Al 2 Öde açıldı: Terra Presets bedava. Kazancın $59. Toplam $118. 2 ürün daha ekle, 5 üründen 2’si bizden.', 'and so is what is announced', r.live);
     ok(r.sum.save === 'Kazancın $59 · %33 indirim', 'the percent sign goes in front', r.sum.save);
+    ok(r.sum.next === '2 ürün daha eklersen toplamın $177 olur — 1’i bedava.', 'what the second step would come to', r.sum.next);
+    ok(r.ladder.rungs[0].vh === '1. adım: 3 Al 2 Öde — senin, 1 ürün bedava.' && r.ladder.rungs[1].vh === '2. adım: 5 Al 3 Öde — 3 / 5. En iyi fırsat.', 'the steps, one done', r.ladder.rungs.map(x => x.vh));
+    ok(r.ladder.why === '3 Al 2 Öde artık senin — Terra Presets bedava. Sonraki iki ürün toplamına yalnızca $59 ekler.', 'and why', r.ladder.why);
     agrees(r, 'Turkish, 3 products');
+    await page.waitForTimeout(2500);
+    await page.click('[data-remove="Terra Presets"]'); await page.waitForTimeout(300);
+    r = await read(page);
+    ok(r.live === 'Terra Presets sepetten çıkarıldı. 3 Al 2 Öde artık geçerli değil. Toplam $118. 1 ürün daha ekle, 1 ürün bedava kazan.', 'a deal lost is said plainly', r.live);
+    ok(r.lines.some(l => l.undo === 'Terra Presets sepetten çıkarıldı. 3 Al 2 Öde artık geçerli değil.'), 'in the way back too', r.lines.filter(l => l.undo));
+    await page.click('[data-undo]'); await page.waitForTimeout(300);
+    r = await read(page);
+    ok(r.live === 'Terra Presets sepete geri eklendi. Toplam $118.', 'and so is the way back', r.live);
     /* changing it on the page changes the page, there and then */
     await page.evaluate(() => window.RMLang.set('en')); await page.waitForTimeout(200);
     r = await read(page);
-    ok(r.lang === 'en' && r.h1.join() === 'Your basket' && r.ladder.say === 'Add 2 more packs, get 2 of the 5 free.' && r.cheer <= 1, 'the language switch redraws everything', [r.lang, r.h1, r.ladder.say]);
+    ok(r.lang === 'en' && r.h1.join() === 'Your basket' && r.ladder.say === 'Two more and 2 of the 5 are on us.' && r.cheer === 0, 'the language switch redraws everything, and celebrates nothing', [r.lang, r.h1, r.ladder.say, r.cheer]);
     ok(r.live.indexOf('sepete') > -1 || r.live === '', 'and announces nothing new', r.live);
     await page.evaluate(() => window.RMLang.set('tr'));
     await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(250);
@@ -450,14 +573,32 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     ok(r.lang === 'tr' && r.h1.join() === 'Sepetin', 'and it is remembered', [r.lang, r.h1]);
     /* the Turkish strings that are not English ones: every key has both */
     const gaps = await page.evaluate(() => {
-      const out = []; const seen = new Set();
-      document.querySelectorAll('#main [data-s]').forEach(el => seen.add(el.getAttribute('data-s')));
+      const out = [];
       window.RMLang.set('en'); const en = {}; document.querySelectorAll('#main [data-s]').forEach(el => en[el.getAttribute('data-s')] = el.textContent);
       window.RMLang.set('tr'); document.querySelectorAll('#main [data-s]').forEach(el => {
-        const k = el.getAttribute('data-s'); if(el.textContent === en[k] && !/^(card_cvc)$/.test(k) && el.textContent !== 'CVC') out.push(k); });
+        const k = el.getAttribute('data-s'); if(!el.textContent || el.textContent === 'undefined' || el.textContent === en[k]) out.push(k); });
       return out;
     });
     ok(gaps.length === 0, 'every fixed string on the page has its own Turkish', gaps);
+    await o.ctx.close();
+
+    o = await open({ state: S(['Lora Presets', 'Solis Presets', 'Terra Presets', 'Jardin Presets']), lang: 'tr' });
+    r = await read(o.page);
+    ok(r.ladder.eyebrow === '2. adım · 5 Al 3 Öde' && r.ladder.say === '1 ürün daha ekle, 1 ürün daha bedava kazan.' && r.ladder.why === 'Toplamın yine $177. 5 Al 3 Öde tam da bu.', 'four products: one more, one more free', r.ladder);
+    await o.page.click('.pick__go'); await o.page.waitForTimeout(400);
+    r = await read(o.page);
+    ok(r.ladder.eyebrow === 'İki adım da tamam' && r.ladder.say === '5 Al 3 Öde artık senin.' && r.ladder.why === '5 ürününün 2’si bizden — kazancın $118.' && r.unfold === 'Bir ürün daha ekle' && r.bar.note === 'Kazancın $118',
+       'five: both steps done', [r.ladder, r.unfold, r.bar.note]);
+    ok(r.live === 'Mely Presets sepete eklendi. 5 Al 3 Öde açıldı: Jardin Presets ve Mely Presets bedava. Kazancın $118. Toplam $177.', 'and what is announced', r.live);
+    await o.ctx.close();
+
+    /* a message already under a field changes language with the rest */
+    o = await open({ state: S(['Lora Presets']), lang: 'tr', hash: 'pay' });
+    await o.page.click('[data-pay-go]'); await o.page.waitForTimeout(200);
+    const trErr = await o.page.evaluate(() => document.getElementById('payEmailErr').textContent.trim());
+    await o.page.evaluate(() => window.RMLang.set('en')); await o.page.waitForTimeout(200);
+    const enErr = await o.page.evaluate(() => document.getElementById('payEmailErr').textContent.trim());
+    ok(trErr === 'E-posta adresini yaz.' && enErr === 'Enter your email address.', 'an error showing under a field follows the language', [trErr, enErr]);
     await o.ctx.close();
   }
 
@@ -470,11 +611,13 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await home.goto(BASE + 'index.html', { waitUntil: 'load' }); await home.waitForTimeout(600);
     ok(await home.evaluate(() => document.querySelector('.cart__n').textContent) === '1', 'the front page opens with the same one product in its bar');
     ok(await home.evaluate(() => document.querySelector('[data-basket]').getAttribute('href')) === 'cart.html', 'and its basket goes to the basket page');
+    await o.page.focus('[data-remove="Lora Presets"]');
     await home.evaluate(() => { [].slice.call(document.querySelectorAll('.card__add')).filter(b => /Onyx Presets/.test(b.getAttribute('aria-label')))[0].click(); });
     await o.page.waitForTimeout(400);
     let r = await read(o.page);
     ok(r.lines.map(l => l.line).join() === 'Lora Presets,Onyx Presets', 'a pack added on the front page arrives on the basket page', r.lines);
     ok(r.cheer === 0 && r.live === '', 'quietly: it was not pressed here', [r.cheer, r.live]);
+    ok(r.focus === 'remove:Lora Presets', 'and the keyboard is still where it was, though the list was redrawn', r.focus);
     agrees(r, 'after the front page added one');
     await o.page.click('[data-remove="Onyx Presets"]'); await home.waitForTimeout(400);
     ok(await home.evaluate(() => { const b = [].slice.call(document.querySelectorAll('.card__add')).filter(x => /Onyx Presets/.test(x.getAttribute('aria-label')))[0]; return b.getAttribute('aria-pressed') + '|' + b.textContent.trim(); }) === 'false|Add to cart',
@@ -486,6 +629,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     const label = await home.evaluate(() => document.querySelector('[data-save]').textContent.replace(/\s+/g, ' ').trim());
     ok(r.sum.rows.total.value === '$267' && r.sum.rows.subtotal.value === '$385' && /You save \$118/.test(label), 'the front page’s Get 5, Pay 3 bundle is $267 of $385 on both pages', [r.sum.rows, label]);
     ok(r.lines[0].cap && r.engine.free.join() === 'Terra Presets,Jardin Presets', 'the same two packs free', r.engine.free);
+    ok(r.ladder.rungs[0].names.join() === 'Plugin Pack,Lora,Solis' && r.ladder.rungs[1].names.join() === 'Terra,Jardin' && r.ladder.rungs[1].free === 2, 'in the same five places, the last two ringed', r.ladder.rungs);
     await o.ctx.close();
   }
 
@@ -497,6 +641,10 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     await page.waitForTimeout(400);
     let r = await read(page);
     ok(r.bar.on && !r.bar.hidden && r.bar.go === 'Continue to payment' && r.bar.note === 'Get 3, Pay 2 · 1 / 3', 'on a phone it is there while the real button is below the fold', r.bar);
+    ok(r.bar.aria === 'Continue to payment' && r.bar.label === 'Total and checkout', 'its button and the bar itself have names', r.bar);
+    const words = () => page.evaluate(() => [getComputedStyle(document.querySelector('.paybar__long')).display, getComputedStyle(document.querySelector('.paybar__short')).display]);
+    let d = await words();
+    ok(d[0] !== 'none' && d[1] === 'none', 'at 390 the button says it in full', d);
     await page.evaluate(() => document.querySelector('.sum__go').scrollIntoView({ block: 'center' })); await page.waitForTimeout(500);
     ok(!(await read(page)).bar.on, 'and steps aside when the real button is on the screen');
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(500);
@@ -506,8 +654,14 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     r = await read(page);
     ok(r.view === 'pay', 'its button goes to payment', r.view);
     ok(await page.evaluate(() => !!document.querySelector('details.sum--fold') && !document.querySelector('details.sum--fold').open), 'where the summary is one line until it is asked for');
-    await page.focus('#payEmail'); await page.waitForTimeout(350);
-    ok(!(await read(page)).bar.on, 'and it is never over a field being typed in');
+    ok(r.bar.hidden && !r.bar.on, 'and where there is no bar: the form ends in its own button', r.bar);
+    await o.ctx.close();
+
+    o = await open({ state: S(['Lora Presets']), w: 360, h: 760, touch: true });
+    await o.page.waitForTimeout(400);
+    d = await o.page.evaluate(() => [getComputedStyle(document.querySelector('.paybar__long')).display, getComputedStyle(document.querySelector('.paybar__short')).display,
+      document.querySelector('.paybar__short').textContent, document.querySelector('[data-bar-go]').getAttribute('aria-label')]);
+    ok(d[0] === 'none' && d[1] !== 'none' && d[2] === 'Continue' && d[3] === 'Continue to payment', 'on the narrowest phones the button shows one word and keeps its name', d);
     await o.ctx.close();
 
     o = await open({ state: S(['Lora Presets']), w: 1440, h: 900 });
@@ -535,6 +689,9 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
             await o.page.evaluate(([s]) => { if(s) localStorage.setItem('rm-cart', s); else localStorage.removeItem('rm-cart'); }, [STATES[name]]);
             await o.page.goto(BASE + 'cart.html', { waitUntil: 'load' });
             if(hash) await o.page.goto(BASE + 'cart.html#' + hash, { waitUntil: 'load' });
+            /* everything that opens is opened: the rest of the shelf, the rules */
+            else await o.page.evaluate(() => { ['[data-unfold]', '[data-more-all]', '[data-rules]'].forEach(s => {
+              const b = document.querySelector(s); if(b && !b.hidden) b.click(); }); });
             await o.page.waitForTimeout(60);
             count++;
             const m = await o.page.evaluate(() => {
@@ -543,18 +700,28 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
               /* anything a finger is asked to hit is at least 44px tall, unless it is a link in a sentence */
               if(matchMedia('(pointer:coarse)').matches || vw < 700){
                 document.querySelectorAll('#main button, #main a, #main summary, #main input[type="checkbox"]').forEach(el => {
-                  if(!seen(el) || el.closest('.sum__nudge, .agree, .prod--later') || el.matches('.agree input')) return;
+                  if(!seen(el) || el.closest('.sum__nudge, .agree') || el.matches('.agree input')) return;
                   const r = el.getBoundingClientRect();
                   const label = el.closest('label'); const h = label ? label.getBoundingClientRect().height : r.height;
                   if(h < 43.5) out.small.push((el.className || el.tagName) + ' ' + Math.round(h));
                 });
               }
               /* nothing that is meant to be read runs out of the window */
-              document.querySelectorAll('#main h1, #main h2, #main h3, #main p, #main .btn, #main .rung, #main .line, #main .addrow, #main .sum, #main .pick').forEach(el => {
+              document.querySelectorAll('#main h1, #main h2, #main h3, #main p, #main .btn, #main .rung, #main .line, #main .addrow, #main .sum, #main .sum__next, #main .pick, #main .rules, #main .shelf__foot > *, #main .osbest').forEach(el => {
                 if(!seen(el)) return;
                 const r = el.getBoundingClientRect();
                 if(r.right > vw + 0.5 || r.left < -0.5) out.cut.push((el.className || el.tagName) + ' ' + Math.round(r.left) + '..' + Math.round(r.right));
               });
+              /* and nothing in the campaign hangs out of its panel, which would clip it */
+              const lad = document.querySelector('#ladder');
+              if(seen(lad)){
+                const L = lad.getBoundingClientRect();
+                lad.querySelectorAll('.osbest, .prod__badge, .rung, .pick, .addrow, .rules, .btn').forEach(el => {
+                  if(!seen(el)) return;
+                  const r = el.getBoundingClientRect();
+                  if(r.right > L.right + 0.5 || r.left < L.left - 0.5 || r.top < L.top - 0.5) out.cut.push('clipped ' + (el.className || el.tagName) + ' ' + Math.round(r.left - L.left) + '..' + Math.round(r.right - L.left) + ' of ' + Math.round(L.width));
+                });
+              }
               return out;
             });
             const at = w + (lang ? ' tr ' : ' en ') + name + (hash ? ' #pay' : '');
@@ -567,7 +734,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
       }
     }
     ok(wide.length === 0, 'nothing is wider than the window (' + count + ' pages)', wide.slice(0, 6));
-    ok(cut.length === 0, 'nothing that is read runs off the edge', cut.slice(0, 6));
+    ok(cut.length === 0, 'nothing that is read runs off the edge or out of the panel', cut.slice(0, 6));
     ok(small.length === 0, 'everything a finger is asked to hit is 44px tall', small.slice(0, 8));
   }
 
@@ -577,6 +744,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
     let o = await open({ state: S(['Aster LUTs'], { label: 'Bestseller bundle', packs: FIVE }) });
     for(const hash of ['', 'pay']){
       if(hash) { await o.page.goto(BASE + 'cart.html#' + hash, { waitUntil: 'load' }); await o.page.waitForTimeout(150); }
+      else { await o.page.click('[data-unfold]'); await o.page.click('[data-rules]'); await o.page.waitForTimeout(150); }
       const a = await o.page.evaluate(() => {
         const seen = el => !el.closest('[hidden]') && el.getClientRects().length > 0;
         const all = s => [].slice.call(document.querySelectorAll(s)).filter(seen);
@@ -589,16 +757,30 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
           noalt: all('#main img').filter(i => !i.hasAttribute('alt')).length,
           unlabelled: all('#main input').filter(i => !document.querySelector('label[for="' + i.id + '"]') && !i.closest('label')).map(i => i.id),
           landmarks: [!!document.querySelector('header'), !!document.querySelector('main'), !!document.querySelector('footer')],
-          live: !!document.querySelector('#main [role="status"][aria-live="polite"]'),
-          dupIds: (() => { const ids = {}; let d = []; document.querySelectorAll('[id]').forEach(e => { if(ids[e.id]) d.push(e.id); ids[e.id] = 1; }); return d; })()
+          live: document.querySelectorAll('#main [role="status"][aria-live="polite"]').length === 1,
+          dupIds: (() => { const ids = {}; let d = []; document.querySelectorAll('[id]').forEach(e => { if(ids[e.id]) d.push(e.id); ids[e.id] = 1; }); return d; })(),
+          /* an aria-labelledby or aria-controls that points at nothing is worse than none */
+          dangling: all('#main [aria-labelledby], #main [aria-controls], #main [aria-describedby]').filter(el =>
+            ['aria-labelledby', 'aria-controls', 'aria-describedby'].some(a => (el.getAttribute(a) || '').split(/\s+/).filter(Boolean).some(id => !document.getElementById(id))))
+            .map(el => el.outerHTML.slice(0, 80))
         };
       });
       const at = hash ? 'payment' : 'basket';
       ok(a.h1 === 1 && a.first === 1 && !a.jump, at + ': one h1, first, and no level skipped', a);
       ok(a.nameless.length === 0, at + ': every button and link has a name', a.nameless);
       ok(a.noalt === 0 && a.unlabelled.length === 0, at + ': every picture has an alt and every field a label', [a.noalt, a.unlabelled]);
-      ok(a.landmarks.every(Boolean) && a.live && a.dupIds.length === 0, at + ': header, main, footer, one live region, no id twice', [a.landmarks, a.live, a.dupIds]);
+      ok(a.landmarks.every(Boolean) && a.live && a.dupIds.length === 0 && a.dangling.length === 0, at + ': header, main, footer, one live region, no id twice, no name pointing at nothing', [a.landmarks, a.live, a.dupIds, a.dangling]);
     }
+    await o.ctx.close();
+
+    /* the places are a picture: a screen reader gets each step's sentence, and the one place that is a button */
+    o = await open({ state: S(['Lora Presets', 'Solis Presets']) });
+    const pic = await o.page.evaluate(() => ({
+      open: [].slice.call(document.querySelectorAll('#ladder .prod')).filter(el => el.getAttribute('aria-hidden') !== 'true').map(el => el.tagName + (el.hasAttribute('data-place') ? '[place]' : '')),
+      heads: [].slice.call(document.querySelectorAll('#ladder .rung__head')).every(el => el.getAttribute('aria-hidden') === 'true'),
+      says: [].slice.call(document.querySelectorAll('#ladder [data-rung-vh]')).map(el => el.textContent)
+    }));
+    ok(pic.open.join() === 'BUTTON[place]' && pic.heads && pic.says.every(Boolean), 'every place but the next is hidden from a screen reader, and each step speaks for its own', pic);
     await o.ctx.close();
 
     o = await open({ state: S(['Lora Presets', 'Solis Presets']), still: true });
@@ -611,7 +793,7 @@ const FIVE = ['Full Plugin Pack', 'Lora Presets', 'Solis Presets', 'Terra Preset
   }
 
   /* ── 11 · the same bar and the same footer ──────────────────────── */
-  section('11 · the bar and the footer are the front page\u2019s, property for property');
+  section('11 · the bar and the footer are the front page’s, property for property');
   {
     const snap = sel => {
       const root = document.querySelector(sel);

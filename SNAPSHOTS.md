@@ -131,29 +131,57 @@ bunlar gider.
   anahtarında durur. Sayfayı yenileyince, başka sekmede değiştirince ya da
   geri tuşuyla dönünce iki taraf da aynı sepeti gösterir.
 - Tek dosyada üç adım: **Sepet → Ödeme → Tamam** (adres çubuğunda `#pay`,
-  `#done`).
+  `#done`). Sayfanın üstünde ayrıca bir "adım şeridi" yok: sayfada adım
+  sayan tek şey kampanyadır, ikincisi onunla karışırdı.
 - **Kampanya paneli** ana sayfadaki teklifin diliyle: koyu, ışıklı zemin,
   aynı kutular, aynı "Free!" rozeti ve dönen çizgi, aynı altın "Best deal".
   İki adım yan yana durur: önce **3 Al 2 Öde** (3 yer), sonra **5 Al 3 Öde**
-  (2 yer daha). Sıradaki adım için tek cümle, tek öneri ve tek düğme var:
-  "1 ürün daha ekle, 1 ürün bedava kazan."
+  (2 yer daha). Altın rozet ilk adım bitince gelir. Her durum için tek
+  cümle ve altında parasal karşılığı var:
+
+  | sepette | başlık | altındaki satır |
+  |---|---|---|
+  | 0 | 3 ürün seç, 1'i bizden. | Üç ürün, $177 yerine $118. |
+  | 1 | 2 ürün daha ekle, 3 üründen 1'i bizden. | İkisi birlikte toplamına yalnızca $59 ekler. |
+  | 2 | **1 ürün daha ekle, 1 ürün bedava kazan.** | Toplamın yine $118. 3 Al 2 Öde tam da bu. |
+  | 3 | 2 ürün daha ekle, 5 üründen 2'si bizden. | 3 Al 2 Öde artık senin — … bedava. Sonraki iki ürün toplamına yalnızca $59 ekler. |
+  | 4 | 1 ürün daha ekle, 1 ürün daha bedava kazan. | Toplamın yine $177. 5 Al 3 Öde tam da bu. |
+  | 5+ | 5 Al 3 Öde artık senin. | 5 ürününün 2'si bizden — kazancın $118. |
+
+  (İngilizcesi ana sayfanın sesiyle: "One more and it's on us." vb.)
+- **Ürün eklemek sayfadan çıkmadan, panelin içinde**: sıradaki yer için tek
+  öneri ve tek düğme ("Önerimiz" / "Bedava ürünün"), altında rafın geri
+  kalanı. Her ürünün yanında sepete **gerçekte** ekleyeceği tutar yazar:
+  `$59`, `Bedava`, ya da plugin paketi için `$90`. En ucuz adım en üstte.
+  Beş üründen sonra liste "Bir ürün daha ekle" düğmesinin arkasına katlanır.
+  "Kampanyalar nasıl işliyor?" satırı dört kuralı açar.
+- Bir adım tamamlanınca ana sayfadaki yeşil kutlama panelin üst yarısında
+  oynar ("Kazancın $59"); sıradaki ürünün düğmesini hiç örtmez. Sayfa
+  açılırken, dil değişince, geri alınca ya da başka sekme sepeti
+  değiştirince hiçbir şey kutlanmaz.
 - Kurallar (hepsi `rm-cart.js`'te, `node tools/test-cart.js` ile kanıtlı):
   sepette tek kampanya geçer — ulaşılan en büyüğü; bedava olan her zaman en
   ucuz olandır, eşitlerde en son eklenen; 6. üründen sonrası kendi fiyatıyla;
   ücretsiz Demo Presets kampanyaya sayılmaz. Ana sayfada kurulan paket
   burada ürün ürün listelenir, biri çıkarılırsa paket çözülür ama kalanlar
-  hak ettikleri kampanyayı korur.
-- Altında fiş: ürün satırları (çıkar / geri al), "ürün ekle" listesi (her
-  ürünün yanında sepete **gerçekte** ekleyeceği tutar: `$59`, `Free`, ya da
-  plugin paketi için `$90`), yanında sipariş özeti.
-- **Ödeme adımı bir önizlemedir**: e-posta, ad soyad ve onay kutusu gerçek;
-  kart alanları çizili ama canlı değil (oraya ödeme sağlayıcısının kendi
-  formu gelecek). Hiçbir yere bir şey gönderilmez, yazılanlar saklanmaz,
-  sepet de boşaltılmaz. Sayfa bunu açıkça söyler.
+  hak ettikleri kampanyayı korur. Sayfa hiçbir fiyatı kendi hesaplamaz,
+  hangi yerin bedava olduğunu da kendi varsaymaz: hepsini `rm-cart.js`'e
+  sorar.
+- Altında fiş: satırlar kampanyanın uygulandığı sırayla ve paneldeki yer
+  numarasıyla (01, 02 …) durur; bedava olan satır rozetini taşır. Çıkar /
+  geri al var; çıkarınca kaybedilen kampanya aynı satırda söylenir.
+- Yanında sipariş özeti: ara toplam, kampanya, toplam, "Kazancın …" ve tek
+  cümlelik "…eklersen toplamın şu olur" kutusu (basınca öneriye götürür).
+- **Ödeme adımı bir önizlemedir** ve bunu hiçbir şey sormadan önce söyler:
+  e-posta, ad soyad ve onay kutusu gerçek; kart alanları çizili ama canlı
+  değil (oraya ödeme sağlayıcısının kendi formu gelecek). Hiçbir yere bir
+  şey gönderilmez, yazılanlar saklanmaz (form tamamlanınca boşaltılır),
+  sepet de boşaltılmaz.
 - İki dil: footer'daki dil seçici Türkçe'ye alınırsa sayfanın tamamı Türkçe
   olur (üst bar ve footer ana sayfadaki gibi İngilizce kalır).
-- Telefonda ödeme düğmesi ekranda değilken altta sabit bir çubuk toplamı ve
-  düğmeyi taşır; footer'a gelince çekilir.
+- Telefonda sepet görünümünde, ödeme düğmesi ekranda değilken altta sabit
+  bir çubuk kampanyanın durumunu, toplamı ve düğmeyi taşır; footer'a
+  gelince çekilir. Ödeme adımında çubuk yoktur.
 
 **Ortak parçalar tek yerden gelir.** `cart.html`'in stili, üst barı ve
 footer'ı `index.html`'den kesilir — elle yazılmaz. `index.html`'de stil,
@@ -168,7 +196,7 @@ python3 tools/sync-cart.py --check  # iki sayfa uyumlu mu, onu söyler
 
 ```
 node tools/test-cart.js     # hesap: kampanya kuralları (67 kontrol)
-node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (300 kontrol)
+node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (420+ kontrol)
 ```
 
 ---
