@@ -141,24 +141,32 @@ bunlar gider.
 
   | sepette | başlık | altındaki satır |
   |---|---|---|
-  | 0 | 3 ürün seç, 1'i bizden. | Üç ürün, $177 yerine $118. |
-  | 1 | 2 ürün daha ekle, 3 üründen 1'i bizden. | İkisi birlikte toplamına yalnızca $59 ekler. |
-  | 2 | **1 ürün daha ekle, 1 ürün bedava kazan.** | Toplamın yine $118. 3 Al 2 Öde tam da bu. |
-  | 3 | 2 ürün daha ekle, 5 üründen 2'si bizden. | 3 Al 2 Öde artık senin — … bedava. Sonraki iki ürün toplamına yalnızca $59 ekler. |
-  | 4 | 1 ürün daha ekle, 1 ürün daha bedava kazan. | Toplamın yine $177. 5 Al 3 Öde tam da bu. |
-  | 5+ | 5 Al 3 Öde artık senin. | 5 ürününün 2'si bizden — kazancın $118. |
+  | 0 | 3 ürün seç, 1'i bizden. | $59'lık üç ürün, $177 yerine $118. |
+  | 1 | 2 ürün daha ekle, 3 üründen 1'i bizden. | $59'lık iki ürün birlikte toplamına yalnızca $59 ekler. |
+  | 2 | **1 ürün daha ekle, 1 ürün bedava kazan.** | $59'lık bir ürün toplamını değiştirmez: yine $118. 3 Al 2 Öde tam da bu. |
+  | 3 | 2 ürün daha ekle, 5 üründen 2'si bizden. | 3 Al 2 Öde fırsatını yakaladın — … bedava. $59'lık iki ürün daha toplamına yalnızca $59 ekler. |
+  | 4 | 1 ürün daha ekle, 1 ürün daha bedava kazan. | $59'lık bir ürün toplamını değiştirmez: yine $177. 5 Al 3 Öde tam da bu. |
+  | 5+ | 5 Al 3 Öde fırsatını yakaladın. | 5 ürününün 2'si bizden — kazancın $118. |
 
-  (İngilizcesi ana sayfanın sesiyle: "One more and it's on us." vb.)
+  (İngilizcesi ana sayfanın sesiyle: "One more and it's on us." vb. Parayla
+  ilgili her cümle hangi fiyat için doğru olduğunu söyler: plugin paketi
+  eklenirse rakamlar başka olur, onun satırı da bunu ayrıca yazar.)
 - **Ürün eklemek sayfadan çıkmadan, panelin içinde**: sıradaki yer için tek
   öneri ve tek düğme ("Önerimiz" / "Bedava ürünün"), altında rafın geri
   kalanı. Her ürünün yanında sepete **gerçekte** ekleyeceği tutar yazar:
-  `$59`, `Bedava`, ya da plugin paketi için `$90`. En ucuz adım en üstte.
-  Beş üründen sonra liste "Bir ürün daha ekle" düğmesinin arkasına katlanır.
-  "Kampanyalar nasıl işliyor?" satırı dört kuralı açar.
+  `$59`, `Bedava`, ya da plugin paketi için `$90` ("$59'lık 1 ürün bedava"
+  notuyla: paket indirimde değil, sepete $149'dan girer ve bir ürünü bedava
+  yapar). En ucuz adım en üstte. Beş üründen sonra liste "Bir ürün daha
+  ekle" düğmesinin arkasına katlanır. "Kampanyalar nasıl işliyor?" satırı
+  dört kuralı açar. Ürün adları hiçbir genişlikte üç noktayla kesilmez.
 - Bir adım tamamlanınca ana sayfadaki yeşil kutlama panelin üst yarısında
-  oynar ("Kazancın $59"); sıradaki ürünün düğmesini hiç örtmez. Sayfa
-  açılırken, dil değişince, geri alınca ya da başka sekme sepeti
-  değiştirince hiçbir şey kutlanmaz.
+  oynar ("Kazancın $59"); sıradaki ürünün düğmesini hiç örtmez. Panelin
+  üstü o an ekranda değilse (telefonda rafın aşağısından eklendiyse) sayfa
+  önce paneli ekrana getirir, sonra kutlar. Sayfa açılırken, dil değişince,
+  geri alınca ya da başka sekme sepeti değiştirince hiçbir şey kutlanmaz.
+- Bir ürün eklenince ya da çıkarılınca, basılan düğmenin yerine gelen şey
+  (sıradaki ürün, "Geri al") tam parmağın olduğu yerde kalır: üstte ne
+  açılıp kapanırsa kapansın sayfa ona göre kayar.
 - Kurallar (hepsi `rm-cart.js`'te, `node tools/test-cart.js` ile kanıtlı):
   sepette tek kampanya geçer — ulaşılan en büyüğü; bedava olan her zaman en
   ucuz olandır, eşitlerde en son eklenen; 6. üründen sonrası kendi fiyatıyla;
@@ -176,9 +184,17 @@ bunlar gider.
   e-posta, ad soyad ve onay kutusu gerçek; kart alanları çizili ama canlı
   değil (oraya ödeme sağlayıcısının kendi formu gelecek). Hiçbir yere bir
   şey gönderilmez, yazılanlar saklanmaz (form tamamlanınca boşaltılır),
-  sepet de boşaltılmaz.
+  sepet de boşaltılmaz. Onay kutusundaki iki belge (Mesafeli Satış
+  Sözleşmesi, Teslimat ve İade Koşulları) henüz yayımlanmadığı için bağlantı
+  değil düz yazıdır ve altındaki satır bunu söyler; belgeler yayımlanınca
+  bağlantıya çevrilecek ve o satır kaldırılacak.
+- "İçeriğe geç" bağlantısı ve footer'daki henüz yazılmamış sayfa
+  bağlantıları (`#`) adımı değiştirmez. Geri tuşu sepete, bırakıldığı
+  yerden döner.
 - İki dil: footer'daki dil seçici Türkçe'ye alınırsa sayfanın tamamı Türkçe
-  olur (üst bar ve footer ana sayfadaki gibi İngilizce kalır).
+  olur (üst bar ve footer ana sayfadaki gibi İngilizce kalır); belge de
+  `lang="tr"` olur, İngilizce kalan bölümler `lang="en"` taşır. Türkçede
+  sayfanın adı "Sepetim", tek ürün "paket", birlikte alınanlar "set"tir.
 - Telefonda sepet görünümünde, ödeme düğmesi ekranda değilken altta sabit
   bir çubuk kampanyanın durumunu, toplamı ve düğmeyi taşır; footer'a
   gelince çekilir. Ödeme adımında çubuk yoktur.
@@ -196,7 +212,7 @@ python3 tools/sync-cart.py --check  # iki sayfa uyumlu mu, onu söyler
 
 ```
 node tools/test-cart.js     # hesap: kampanya kuralları (67 kontrol)
-node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (420+ kontrol)
+node tools/check-cart.js    # sayfa: gerçek tarayıcıda, her genişlikte, iki dilde (440+ kontrol)
 ```
 
 ---

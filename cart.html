@@ -4490,7 +4490,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .bag [hidden],.paybar[hidden]{display:none !important}
 /* a view's heading takes focus when the view changes, so a keyboard and a
    screen reader arrive where the eye does; it is not a control */
-.bag h1[tabindex]:focus,.bag h2[tabindex]:focus{outline:none}
+.bag h1[tabindex]:focus,.bag h2[tabindex]:focus,.bag h3[tabindex]:focus{outline:none}
+/* Whatever the keyboard brings to the edge of the window is not left under
+   the bar at the top — nor, on a phone, under the one at the bottom. The
+   front page gives every element with an id this room as a margin; inside
+   this page the window gives it instead, to everything, so the two are not
+   added together. */
+html{scroll-padding-top:calc(var(--nav-h) + var(--s-4))}
+.bag [id]{scroll-margin-top:0}
+html.has-paybar{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px))}
 
 /* ── the page's own heading ─────────────────────────────────────── */
 .bag__title{margin:0 0 var(--s-7)}
@@ -4553,6 +4561,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* both steps done: the front page's ring for "this is yours now", cut to
    this panel's own corners rather than a card's */
 .ladder.is-added::after{border-radius:inherit}
+.ladder.is-added{border-color:var(--accent)}
 .ladder .eyebrow{margin-bottom:var(--s-3)}
 .ladder__say{
   font-size:clamp(24px,2.5vw,var(--fs-9));line-height:var(--lh-tight);font-weight:var(--fw-bold);
@@ -4574,7 +4583,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .rung{
   position:relative;box-sizing:border-box;min-width:0;
   display:flex;flex-direction:column;gap:var(--s-3);
-  padding:var(--p);border-radius:var(--r-card);
+  padding:var(--s-4) var(--p) var(--p);border-radius:var(--r-card);   /* the gold badge hangs 13px into the step */
   border:1px solid var(--border);background:rgba(0,0,0,.30);   /* the ground the boxes stand on */
   transition:border-color var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
 }
@@ -4654,6 +4663,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 /* a pack that has just gone in grows into its place */
 .ladder .prod.is-new .prod__shot{animation:placeIn var(--dur-3) var(--ease) both}
 @keyframes placeIn{from{opacity:0;transform:scale(.84)}to{opacity:1;transform:none}}
+/* the Free mark arriving on a place or a line that did not have it — when a
+   step is reached, and when it changes places at the second one */
+.ladder .prod.is-won .prod__badge,.line.is-won .prod__badge{animation:pillIn var(--dur-3) var(--ease) both}
+@keyframes pillIn{from{opacity:0;scale:.82}to{opacity:1;scale:1}}
 @keyframes bestWakeEdge{
   0%  {transform:translateY(0) scale(1)}
   34% {transform:translateY(-4px) scale(1.09)}
@@ -4680,7 +4693,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .ladder .prod--empty.is-nextfree .prod__shot{border-color:var(--accent);background:var(--accent-bg)}
 /* the second step's places, while the first is still being worked on: there
    to be seen, not yet to be filled */
-.ladder .prod--later{opacity:.45;cursor:default}
+.ladder .prod--later{opacity:.6;cursor:default}
 .ladder .prod--later:hover{border-color:var(--accent-border)}
 .ladder .prod--later .prod__shot{border-style:dashed}
 
@@ -4700,19 +4713,33 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .pick.is-free .pick__label{color:var(--accent-fg)}
 .pick__row{grid-area:row;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:var(--s-3) var(--s-4)}
 .pick__txt{min-width:0}
+/* a product's name is never cut short: where there is no room for it on one
+   line it takes two */
 .pick__t{
   display:block;font-size:var(--fs-5);font-weight:var(--fw-semibold);line-height:var(--lh-snug);color:var(--fg);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  overflow-wrap:break-word;
 }
 .pick .choice__by{margin-top:var(--s-1)}
 /* ── and the rest of the shelf, for the same place ────────────────
    The front page's picker, as a list to add from: the same row, the same
    thumbnail, the same maker line — with what the pack would add to the
    total where the tick would be, and a button that adds it. */
-.shelf{display:grid;gap:var(--s-3);min-width:0}
+.shelf{display:grid;gap:var(--s-3);min-width:0;container:shelf / inline-size}
 .shelf__h{margin:0;font-size:var(--fs-4);line-height:var(--lh-snug);font-weight:var(--fw-semibold);color:var(--fg)}
 .shelf__sub{margin:calc(var(--s-2) * -1) 0 0;font-size:var(--fs-3);line-height:var(--lh-snug);color:var(--fg-muted)}
-.addrows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
+.addrows{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-3)}
+/* three rows until all of them are asked for */
+.addrows:not(.is-all) > li:nth-child(n+4){display:none}
+/* Two columns, and so four rows, when the shelf has room for two names side
+   by side. That is the panel's width, not the window's: beside the summary
+   on a small laptop the panel is narrower than it is on a tablet, and a rule
+   written for the window cut the names off there. (A browser without
+   container queries keeps the one column.) */
+@container shelf (min-width:540px){
+  .addrows{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .addrows:not(.is-all) > li:nth-child(4){display:grid}
+  .shelf[data-n="4"] [data-more-all]{display:none}
+}
 .addrow{
   display:grid;grid-template-columns:auto minmax(0,1fr) auto;
   grid-template-areas:"shot txt go" "shot price go";align-items:center;column-gap:var(--s-3);row-gap:2px;
@@ -4729,11 +4756,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 .addrow__txt{grid-area:txt;min-width:0}
 .addrow__t{
   display:block;font-size:var(--fs-3);font-weight:var(--fw-semibold);line-height:var(--lh-snug);color:var(--fg);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  overflow-wrap:break-word;
 }
+/* nor is its maker's: the picker cuts a long name with three dots, which is
+   right for a row that scrolls past and wrong for one that is being read */
+.addrow .choice__by,.pick .choice__by{align-items:flex-start}
+.addrow .choice__by span:last-child,.pick .choice__by span:last-child{white-space:normal;overflow:visible;line-height:18px}
 .addrow .choice__by{margin-top:var(--s-1)}
-.addrow__price{grid-area:price;display:flex;align-items:baseline;gap:var(--s-2);min-width:0}
-.addrow__with{font-size:var(--fs-1);font-weight:var(--fw-medium);color:var(--accent-fg);white-space:nowrap}
+.addrow__price{grid-area:price;display:flex;align-items:baseline;flex-wrap:wrap;gap:0 var(--s-2);min-width:0}
+/* under the figure, on a line of its own: it is the reason for the figure */
+.addrow__with{flex:0 0 100%;font-size:var(--fs-1);line-height:var(--lh-snug);font-weight:var(--fw-medium);color:var(--accent-fg)}
 .addrow__go{grid-area:go;gap:var(--s-1);padding:0 var(--s-3)}
 .shelf__body{display:grid;gap:var(--s-3);min-width:0}
 .shelf__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--s-2) var(--s-5);flex-wrap:wrap}
@@ -4964,7 +4996,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   font-size:var(--fs-3);line-height:var(--lh-normal);color:var(--fg-body);cursor:pointer;
 }
 .agree input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);cursor:pointer}
-.agree a{color:var(--accent-fg);text-decoration:underline;text-underline-offset:3px}
+.agreebox .field__err,.agreebox .field__hint{margin-left:calc(20px + var(--s-3))}
+.agreebox .field__hint{margin-top:var(--s-1)}
 .previewnote{
   display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s-3);
   padding:var(--s-3) var(--s-4);border-radius:var(--r-control);
@@ -5016,9 +5049,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .paygrid .baggrid__side{order:-1}
   .pay{max-width:none}
 }
-@media (max-width:700px){
-  .addrows{grid-template-columns:minmax(0,1fr)}
-}
 @media (max-width:600px){
   .bag{padding-top:var(--s-6)}
   .bag__title{margin-bottom:var(--s-6)}
@@ -5030,7 +5060,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .rungs{--g:6px;--p:var(--s-2);gap:var(--s-3)}
   /* the gold badge hangs into the step from its top edge; the step's name
      starts under it rather than behind it */
-  .rung{gap:var(--s-2);padding-top:var(--s-4)}
+  .rung{gap:var(--s-2)}
   /* over a step this narrow the badge can be wider than the step, and centred
      it would reach the panel's edge: it hangs from the step's right corner
      instead, and wakes without the sideways half-step centring needs */
@@ -5077,6 +5107,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
   .has-paybar .totop{bottom:calc(72px + var(--s-3) + env(safe-area-inset-bottom))}
 }
 @media (max-width:380px){
+  /* the pill on a line keeps its word and gives its mark's room to the name beside it */
+  .line .prod__badge--inline .nav__gift{display:none}
   /* the bar's button says it in one word; its name for a screen reader does not change */
   .paybar__long{display:none}
   .paybar__short{display:inline}
@@ -5085,6 +5117,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
    the height a finger needs */
 @media (pointer:coarse){
   .pick__go,.addrow__go{min-height:44px}
+  .sum__top .link,.sum__nudge a{display:inline-flex;align-items:center;min-height:44px}
 }
 /* motion off: the front page's last rule already stops every transition and
    animation on the page; what is left are the ones that would otherwise loop */
@@ -5292,14 +5325,17 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
             <div class="paybox__f"><span class="paybox__l" data-s="card_exp">Expiry</span><span class="paybox__i" data-s="card_exp_ph">MM / YY</span></div>
             <div class="paybox__f"><span class="paybox__l" data-s="card_cvc">Security code</span><span class="paybox__i">CVC</span></div>
           </div>
-          <p data-s="card_note">The payment provider’s secure card form goes here. In this preview there is nothing to fill in.</p>
+          <p data-s="card_note">The payment provider’s card form goes here. In this preview there is nothing to fill in.</p>
         </div>
-        <div>
-          <label class="agree"><input type="checkbox" name="agree" id="payAgree" required><span data-agree></span></label>
+        <!-- the two documents are named, not linked: neither is published yet,
+             and the line under the box says what ticking it means here -->
+        <div class="agreebox">
+          <label class="agree"><input type="checkbox" name="agree" id="payAgree" required aria-describedby="payAgreeHint"><span data-agree></span></label>
           <p class="field__err" id="payAgreeErr" hidden></p>
+          <p class="field__hint" id="payAgreeHint" data-s="agree_hint">These two documents are not published yet — in this preview the tick only shows how the step works.</p>
         </div>
         <button class="btn btn--primary btn--lg pay__go" type="submit" aria-describedby="payNote" data-pay-go>Complete order</button>
-        <p class="pay__fine" data-s="pay_fine">Preview only. You will not be charged.</p>
+        <p class="pay__fine" data-s="pay_fine">Preview only. You won’t be charged.</p>
       </form>
       <aside class="baggrid__side" data-paysum></aside>
     </div>
@@ -5937,7 +5973,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     function trOf(k){ return k + '’' + ({1:'i', 2:'si', 3:'ü', 4:'ü', 5:'i', 6:'sı', 7:'si', 8:'i', 9:'u'}[k] || 'i'); }
     var STR = {
       en: {
-        title: {basket:'Your basket — Retouch Market', pay:'Payment — Retouch Market', done:'Order complete — Retouch Market'},
+        title: {basket:'Your basket — Retouch Market', pay:'Payment — Retouch Market', done:'Order complete (preview) — Retouch Market'},
         nav_basket: function(n){ return 'Basket, ' + (n ? n + ' item' + (n > 1 ? 's' : '') : 'empty'); },
         items: function(n){ return n + (n === 1 ? ' item' : ' items'); },
         eyebrow_basket: function(n){ return 'Basket · ' + n + (n === 1 ? ' item' : ' items'); },
@@ -5954,7 +5990,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         best: 'Best deal',
         rungs_label: 'The two deals',
         rung_next: 'Next',
-        rung_done: 'Unlocked',
+        rung_done: 'Done',
         rung_of: function(a, b){ return a + ' / ' + b; },
         rung_vh_current: function(k, deal, a, b){ return 'Step ' + k + ': ' + deal + ' — ' + a + ' of ' + b + '.'; },
         rung_vh_later: function(k, deal){ return 'Step ' + k + ': ' + deal + ' — next step.'; },
@@ -5965,10 +6001,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         say_more: function(need, get, k){ return (need === 1 ? 'One' : need === 2 ? 'Two' : need) + ' more and ' + k + ' of the ' + get + (k === 1 ? ' is' : ' are') + ' on us.'; },
         say_one_free: function(){ return 'One more and it’s on us.'; },
         say_done: function(deal){ return deal + ' is yours.'; },
-        why_pick: function(get, total, full){ return (get === 3 ? 'Three' : get) + ' packs come to ' + total + ' instead of ' + full + '.'; },
-        why_more: function(need, add){ return (need === 2 ? 'The two' : 'The next ' + need) + ' together add just ' + add + '.'; },
-        why_more_after: function(deal, names, many, need, add){ return deal + ' is yours — ' + names + (many ? ' are' : ' is') + ' free. The next ' + (need === 2 ? 'two' : need) + ' add just ' + add + '.'; },
-        why_stay: function(total, deal){ return 'Your total stays ' + total + '. That’s ' + deal + '.'; },
+        /* every sentence about money names the price it is true for: with a
+           dearer pack in the place the figures would be different ones */
+        why_pick: function(get, price, total, full){ return (get === 3 ? 'Three' : get) + ' ' + price + ' packs come to ' + total + ' instead of ' + full + '.'; },
+        why_more: function(need, price, add){ return (need === 2 ? 'Two' : need) + ' ' + price + ' packs together add just ' + add + '.'; },
+        why_more_after: function(deal, names, many, need, price, add){ return deal + ' is yours — ' + names + (many ? ' are' : ' is') + ' free. ' + (need === 2 ? 'Two' : need) + ' more ' + price + ' packs add just ' + add + '.'; },
+        why_stay: function(price, total, deal){ return 'A ' + price + ' pack leaves your total at ' + total + '. That’s ' + deal + '.'; },
         why_one: function(add){ return 'One more adds ' + add + '.'; },
         why_done: function(k, get, saving){ return k + ' of your ' + get + ' are on us — you save ' + saving + '.'; },
         why_over: function(k, saving){ return k + ' of your packs are on us — you save ' + saving + '. One deal per basket, so from the sixth on each pack is at its own price.'; },
@@ -5986,7 +6024,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         how_free: function(deal){ return 'free with ' + deal; },
         vh_free: function(deal, price){ return 'Free with ' + deal + ', usually ' + price + '.'; },
         vh_price: function(price, was){ return price + (was ? ', was ' + was : ''); },
-        vh_with: function(cost, deal, price){ return cost + ' with ' + deal + ', usually ' + price; },
+        /* a pack that adds less than its price because it turns another one
+           free: it is not on sale — the receipt will show it at full price */
+        with_free: function(gift){ return 'a ' + gift + ' pack goes free'; },
+        how_adds: function(cost, price, gift, deal){ return 'adds ' + cost + ' to your total: it is ' + price + ' and a ' + gift + ' pack goes free with ' + deal; },
 
         tile_add: 'Add a pack',
         place_next: function(no){ return 'Choose a pack for place ' + no; },
@@ -6012,15 +6053,14 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         more_other: 'Or choose another',
         more_another: 'Add another pack',
         more_sub: 'Any pack on the shelf counts.',
-        more_sub_free: function(price){ return 'Any ' + price + ' pack is free right now.'; },
+        more_sub_free: function(price){ return 'Your next ' + price + ' pack is free.'; },
         more_sub_done: 'One deal per basket — from here each pack is at its own price.',
         more_all: function(n){ return 'Show all ' + n + ' packs'; },
-        more_shown: function(k){ return k + ' more ' + (k === 1 ? 'pack' : 'packs') + ' shown.'; },
         rules_h: 'How the deals work',
         rules: [
           'Only paid products count. Demo Presets is free already.',
           'One deal per basket — the best one you’ve reached.',
-          'The free ones are the lowest-priced of your packs.',
+          'The free ones are the lowest-priced of your packs. Which of your same-priced packs is marked free makes no difference to the total.',
           'Deals don’t stack: a sixth pack is at its own price.'
         ],
 
@@ -6029,9 +6069,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         total: 'Total',
         total_not: 'Total — not charged',
         save: function(saving, pct){ return 'You save <b>' + saving + '</b> · ' + pct + '% off'; },
-        next_more: function(need, total, gifts){ return 'With ' + need + ' more packs your total is ' + total + (gifts ? ' — ' + gifts + ' of them ' + (gifts === 1 ? 'is' : 'are') + ' free.' : '.'); },
-        next_stay: function(total){ return 'Add 1 more pack and your total stays ' + total + '.'; },
-        next_one: function(total){ return 'With 1 more pack your total is ' + total + '.'; },
+        next_more: function(need, price, total, gifts){ return 'With ' + (need === 2 ? 'two' : need) + ' more ' + price + ' packs your total is ' + total + (gifts ? ' — ' + (gifts === 1 ? 'one of them is' : gifts + ' of them are') + ' free.' : '.'); },
+        next_stay: function(price, total){ return 'Add one more ' + price + ' pack and your total stays ' + total + '.'; },
+        next_one: function(price, total){ return 'With one more ' + price + ' pack your total is ' + total + '.'; },
         go_pay: 'Continue to payment',
         go_short: 'Continue',
         assure: 'Instant Download · macOS & Windows',
@@ -6053,12 +6093,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         card_exp: 'Expiry',
         card_exp_ph: 'MM / YY',
         card_cvc: 'Security code',
-        card_note: 'The payment provider’s secure card form goes here. In this preview there is nothing to fill in.',
-        agree: 'I have read and accept the <a href="#" data-soon>Distance sales contract</a> and the <a href="#" data-soon>Delivery &amp; returns</a> terms.',
+        card_note: 'The payment provider’s card form goes here. In this preview there is nothing to fill in.',
+        /* the two documents are names, not links, until there is something to
+           link to — and the line under the box says so */
+        agree: 'I have read and accept the Distance sales contract and the Delivery &amp; returns terms.',
+        agree_hint: 'These two documents are not published yet — in this preview the tick only shows how the step works.',
         note: '<b>Design preview.</b> No payment is taken, and nothing you type here is stored or sent.',
         pay_go: function(total){ return 'Complete order — ' + total; },
         pay_go_free: 'Complete order — Free',
-        pay_fine: 'Preview only. You will not be charged.',
+        pay_fine: 'Preview only. You won’t be charged.',
         back_basket: 'Back to basket',
         err_email_empty: 'Enter your email address.',
         err_email_bad: 'That doesn’t look like an email address. Check the @ and the dot.',
@@ -6072,46 +6115,51 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         done_shop: 'Back to the shop',
 
         say_added: function(name){ return name + ' added to your basket.'; },
-        say_unlocked: function(deal, names, many, saving){ return deal + ' unlocked: ' + names + (many ? ' are' : ' is') + ' free. You save ' + saving + '.'; },
+        say_unlocked: function(deal, names, many){ return deal + ' is yours: ' + names + (many ? ' are' : ' is') + ' free.'; },
         say_and: function(a, b){ return a + ' and ' + b; },
         say_total: function(total){ return 'Total ' + total + '.'; },
         say_removed: function(name){ return name + ' removed from your basket.'; },
         cheer_lead: 'You saved'
       },
       tr: {
-        title: {basket:'Sepetin — Retouch Market', pay:'Ödeme — Retouch Market', done:'Sipariş tamamlandı — Retouch Market'},
+        title: {basket:'Sepetim — Retouch Market', pay:'Ödeme — Retouch Market', done:'Sipariş tamamlandı (önizleme) — Retouch Market'},
         nav_basket: function(n){ return 'Sepet, ' + (n ? n + ' ürün' : 'boş'); },
         items: function(n){ return n + ' ürün'; },
         eyebrow_basket: function(n){ return 'Sepet · ' + n + ' ürün'; },
         eyebrow_empty: 'Sepet',
-        h_basket: 'Sepetin',
+        /* the page's name is the convention — Hesabım, Siparişlerim, Sepetim —
+           and everything said to the customer stays in the sen-form */
+        h_basket: 'Sepetim',
         h_empty: 'Sepetin boş.',
         empty_p: 'Bir ürünle başla. Sepette üç ürün olunca biri bizden; beş olunca ikisi.',
         empty_browse: 'Preset ve LUT’lara göz at',
-        empty_bundle: 'Hazır paketi gör',
+        empty_bundle: 'Çok satanlar setini gör',
 
         deal: function(d){ return d.get + ' Al ' + d.pay + ' Öde'; },
-        step: function(k, deal){ return k + '. adım · ' + deal; },
+        step: function(k, deal){ return 'Adım ' + k + '/2 · ' + deal; },
         both_done: 'İki adım da tamam',
         best: 'En iyi fırsat',
         rungs_label: 'İki kampanya',
         rung_next: 'Sırada',
-        rung_done: 'Açıldı',
+        rung_done: 'Tamam',
         rung_of: function(a, b){ return a + ' / ' + b; },
-        rung_vh_current: function(k, deal, a, b){ return k + '. adım: ' + deal + ' — ' + a + ' / ' + b + '.'; },
+        /* "1 / 3" is read out as a fraction; this is read as what it means */
+        rung_vh_current: function(k, deal, a, b){ return k + '. adım: ' + deal + ' — ' + b + ' üründen ' + a + ' tanesi sepette.'; },
         rung_vh_later: function(k, deal){ return k + '. adım: ' + deal + ' — sonraki adım.'; },
-        rung_vh_yours: function(k, deal, free){ return k + '. adım: ' + deal + ' — senin, ' + free + ' ürün bedava.'; },
+        rung_vh_yours: function(k, deal, free){ return k + '. adım: ' + deal + ' — kazandın, ' + free + ' ürün bedava.'; },
         rung_vh_done: function(k, deal){ return k + '. adım: ' + deal + ' — tamam.'; },
 
         say_pick: function(get, k){ return get + ' ürün seç, ' + trOf(k) + ' bizden.'; },
         say_more: function(need, get, k){ return need + ' ürün daha ekle, ' + get + ' üründen ' + trOf(k) + ' bizden.'; },
         /* the owner's own sentence, word for word; the second time round it is "one more" */
         say_one_free: function(step){ return step > 1 ? '1 ürün daha ekle, 1 ürün daha bedava kazan.' : '1 ürün daha ekle, 1 ürün bedava kazan.'; },
-        say_done: function(deal){ return deal + ' artık senin.'; },
-        why_pick: function(get, total, full){ return (get === 3 ? 'Üç' : get) + ' ürün, ' + full + ' yerine ' + total + '.'; },
-        why_more: function(need, add){ return (need === 2 ? 'İkisi' : need + ' ürün') + ' birlikte toplamına yalnızca ' + add + ' ekler.'; },
-        why_more_after: function(deal, names, many, need, add){ return deal + ' artık senin — ' + names + ' bedava. Sonraki ' + (need === 2 ? 'iki' : need) + ' ürün toplamına yalnızca ' + add + ' ekler.'; },
-        why_stay: function(total, deal){ return 'Toplamın yine ' + total + '. ' + deal + ' tam da bu.'; },
+        say_done: function(deal){ return deal + ' fırsatını yakaladın.'; },
+        /* "$59'lık" is read "elli dokuz dolarlık": the ending follows the word
+           dolar, whatever the figure is */
+        why_pick: function(get, price, total, full){ return price + '’lık ' + (get === 3 ? 'üç' : get) + ' ürün, ' + full + ' yerine ' + total + '.'; },
+        why_more: function(need, price, add){ return price + '’lık ' + (need === 2 ? 'iki' : need) + ' ürün birlikte toplamına yalnızca ' + add + ' ekler.'; },
+        why_more_after: function(deal, names, many, need, price, add){ return deal + ' fırsatını yakaladın — ' + names + ' bedava. ' + price + '’lık ' + (need === 2 ? 'iki' : need) + ' ürün daha toplamına yalnızca ' + add + ' ekler.'; },
+        why_stay: function(price, total, deal){ return price + '’lık bir ürün toplamını değiştirmez: yine ' + total + '. ' + deal + ' tam da bu.'; },
         why_one: function(add){ return 'Bir ürün daha toplamına ' + add + ' ekler.'; },
         why_done: function(k, get, saving){ return get + ' ürününün ' + trOf(k) + ' bizden — kazancın ' + saving + '.'; },
         why_over: function(k, saving){ return 'Ürünlerinin ' + trOf(k) + ' bizden — kazancın ' + saving + '. Her sepette tek kampanya geçerli; altıncı üründen itibaren her ürün kendi fiyatında.'; },
@@ -6129,7 +6177,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         how_free: function(deal){ return deal + ' ile bedava'; },
         vh_free: function(deal, price){ return deal + ' ile bedava, normalde ' + price + '.'; },
         vh_price: function(price, was){ return price + (was ? ', eski fiyatı ' + was : ''); },
-        vh_with: function(cost, deal, price){ return deal + ' ile ' + cost + ', normalde ' + price; },
+        with_free: function(gift){ return gift + '’lık 1 ürün bedava'; },
+        how_adds: function(cost, price, gift, deal){ return 'toplamına ' + cost + ' ekler: fiyatı ' + price + ', ' + deal + ' ile ' + gift + '’lık 1 ürün bedava olur'; },
 
         tile_add: 'Ürün ekle',
         place_next: function(no){ return no + '. yer için ürün seç'; },
@@ -6139,14 +6188,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         kind_presets: 'Preset paketi',
         kind_luts: 'LUT paketi',
         kind_plugins: '3 eklenti · 1 yıllık lisans · Otomatik yenileme yok',
-        kind_demo: 'Ücretsiz deneme paketi — kampanyaya sayılmaz',
+        kind_demo: 'Ücretsiz deneme paketi — kampanyaya dahil değil',
         remove: 'Çıkar',
         aria_remove: function(name){ return 'Sepetten çıkar: ' + name; },
-        bundle_label: function(label){ return label === 'Bestseller bundle' ? 'Çok satanlar paketi' : label; },
+        /* one product is a "paket"; several bought together are a "set" */
+        bundle_label: function(label){ return label === 'Bestseller bundle' ? 'Çok satanlar seti' : label; },
         bundle_n: function(k){ return k + ' ürün'; },
         bundle_note: 'Birini çıkarırsan diğerleri kalır.',
         undo_msg: function(name){ return name + ' sepetten çıkarıldı.'; },
-        undo_split: function(k){ return 'Paket artık ' + k + ' ayrı ürün.'; },
+        undo_split: function(k){ return 'Set artık ' + k + ' ayrı ürün.'; },
         undo: 'Geri al',
         back_msg: function(name){ return name + ' sepete geri eklendi.'; },
         lost: function(deal){ return deal + ' artık geçerli değil.'; },
@@ -6154,17 +6204,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
         more_other: 'Ya da başka birini seç',
         more_another: 'Bir ürün daha ekle',
-        more_sub: 'Raftaki her ürün sayılır.',
-        more_sub_free: function(price){ return 'Şu an ' + price + ' değerindeki her ürün bedava.'; },
+        more_sub: 'Tüm ürünler kampanyaya dahil.',
+        more_sub_free: function(price){ return 'Sıradaki ' + price + '’lık ürünün bedava.'; },
         more_sub_done: 'Her sepette tek kampanya — bundan sonra her ürün kendi fiyatında.',
-        more_all: function(n){ return n + ' ürünün hepsini göster'; },
-        more_shown: function(k){ return k + ' ürün daha gösterildi.'; },
+        more_all: function(n){ return 'Tüm ürünleri göster (' + n + ')'; },
         rules_h: 'Kampanyalar nasıl işliyor?',
         rules: [
-          'Yalnızca ücretli ürünler sayılır. Demo Presets zaten ücretsiz.',
-          'Her sepette tek kampanya geçerli: ulaştığın en iyisi.',
-          'Bedava olanlar, sepetindeki en düşük fiyatlı ürünlerdir.',
-          'Kampanyalar birleşmez: altıncı ürün kendi fiyatındadır.'
+          'Kampanyaya yalnızca ücretli ürünler dahil. Demo Presets zaten ücretsiz.',
+          'Her sepette tek kampanya geçerli: hak kazandığın en avantajlısı.',
+          'Bedava olanlar, sepetindeki en düşük fiyatlı ürünlerdir. Aynı fiyatlı ürünlerden hangisinin bedava göründüğü toplamı değiştirmez.',
+          'Kampanyalar birleştirilemez: altıncı ürün kendi fiyatındadır.'
         ],
 
         sum_h: 'Sipariş özeti',
@@ -6172,9 +6221,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         total: 'Toplam',
         total_not: 'Toplam — tahsil edilmedi',
         save: function(saving, pct){ return 'Kazancın <b>' + saving + '</b> · %' + pct + ' indirim'; },
-        next_more: function(need, total, gifts){ return need + ' ürün daha eklersen toplamın ' + total + ' olur' + (gifts ? ' — ' + trOf(gifts) + ' bedava.' : '.'); },
-        next_stay: function(total){ return '1 ürün daha eklersen toplamın yine ' + total + '.'; },
-        next_one: function(total){ return '1 ürün daha eklersen toplamın ' + total + ' olur.'; },
+        next_more: function(need, price, total, gifts){ return price + '’lık ' + need + ' ürün daha eklersen toplamın ' + total + ' olur' + (gifts ? ' — ' + trOf(gifts) + ' bedava.' : '.'); },
+        next_stay: function(price, total){ return price + '’lık 1 ürün daha eklersen toplamın yine ' + total + '.'; },
+        next_one: function(price, total){ return price + '’lık 1 ürün daha eklersen toplamın ' + total + ' olur.'; },
         go_pay: 'Ödemeye geç',
         go_short: 'Devam',
         assure: 'Anında indirme · macOS ve Windows',
@@ -6196,8 +6245,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         card_exp: 'Son kullanma tarihi',
         card_exp_ph: 'AA / YY',
         card_cvc: 'Güvenlik kodu',
-        card_note: 'Ödeme sağlayıcısının güvenli kart formu burada yer alacak. Bu önizlemede doldurulacak bir şey yok.',
-        agree: '<a href="#" data-soon>Mesafeli satış sözleşmesini</a> ve <a href="#" data-soon>Teslimat ve iade</a> koşullarını okudum, kabul ediyorum.',
+        card_note: 'Ödeme sağlayıcısının kart formu burada yer alacak. Bu önizlemede doldurulacak bir şey yok.',
+        agree: 'Mesafeli Satış Sözleşmesi’ni ve Teslimat ve İade Koşulları’nı okudum, kabul ediyorum.',
+        agree_hint: 'Bu iki belge henüz yayımlanmadı; bu önizlemede onay kutusu yalnızca adımın nasıl işlediğini gösterir.',
         note: '<b>Tasarım önizlemesi.</b> Ödeme alınmaz; buraya yazdıkların kaydedilmez ve hiçbir yere gönderilmez.',
         pay_go: function(total){ return 'Siparişi tamamla — ' + total; },
         pay_go_free: 'Siparişi tamamla — Ücretsiz',
@@ -6215,7 +6265,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         done_shop: 'Mağazaya dön',
 
         say_added: function(name){ return name + ' sepete eklendi.'; },
-        say_unlocked: function(deal, names, many, saving){ return deal + ' açıldı: ' + names + ' bedava. Kazancın ' + saving + '.'; },
+        say_unlocked: function(deal, names){ return deal + ' uygulandı: ' + names + ' bedava.'; },
         say_and: function(a, b){ return a + ' ve ' + b; },
         say_total: function(total){ return 'Toplam ' + total + '.'; },
         say_removed: function(name){ return name + ' sepetten çıkarıldı.'; },
@@ -6246,6 +6296,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
                                typed is in it — and it goes when the page does. */
     var showAll = false;    /* "Show all" has been pressed under the list of packs */
     var unfolded = false;   /* "Add another pack" has been pressed, past the last step */
+    var won = null;         /* the names that were free before the press being drawn: for one
+                               render, a Free mark on anything else has just arrived */
+    var kept = {};          /* where each view was left, for the way back to it */
     function names(){ return C.names(state); }
 
     /* what can still be added: paid, not in the basket yet, and the cheapest
@@ -6312,11 +6365,11 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         return m.n > p.deal.get ? t('why_over', k, usd(p.saving)) : t('why_done', k, p.deal.get, usd(p.saving));
       }
       if(!m.after) return '';
-      var add = usd(m.after.total - p.total);
-      if(nx.need === nx.get) return t('why_pick', nx.get, usd(m.after.total), usd(m.after.subtotal));
-      if(nx.need === 1) return m.nextFree ? t('why_stay', usd(p.total), dealName(nx)) : t('why_one', add);
-      return p.deal ? t('why_more_after', dealName(p.deal), joinNames(m.free), m.free.length > 1, nx.need, add)
-                    : t('why_more', nx.need, add);
+      var add = usd(m.after.total - p.total), each = usd(m.rows[0].item.price);
+      if(nx.need === nx.get) return t('why_pick', nx.get, each, usd(m.after.total), usd(m.after.subtotal));
+      if(nx.need === 1) return m.nextFree ? t('why_stay', each, usd(p.total), dealName(nx)) : t('why_one', add);
+      return p.deal ? t('why_more_after', dealName(p.deal), joinNames(m.free), m.free.length > 1, nx.need, each, add)
+                    : t('why_more', nx.need, each, add);
     }
 
     /* ════════════════════════════════════════════════════════════════
@@ -6362,9 +6415,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(a.cost === 0) return { free: true,
         tag: priceTag(t('free_word'), usd(it.price), true),
         read: t('vh_free', deal, usd(it.price)), how: t('how_free', deal) };
-      if(a.cost < it.price) return { free: false,
-        tag: priceTag(usd(a.cost), usd(it.price)) + '<span class="addrow__with" aria-hidden="true">' + esc(t('with_deal', deal)) + '</span>',
-        read: t('vh_with', usd(a.cost), deal, usd(it.price)), how: t('vh_with', usd(a.cost), deal, usd(it.price)) };
+      if(a.cost < it.price){
+        /* It is not on sale: it goes in at its own price and what it takes
+           off is another pack, which turns free. The row shows what it adds
+           and says why, so the receipt it leads to is no surprise. */
+        var gift = usd(it.price - a.cost);
+        return { free: false,
+          tag: priceTag(usd(a.cost), usd(it.price)) + '<span class="addrow__with" aria-hidden="true">' + esc(t('with_free', gift)) + '</span>',
+          read: t('how_adds', usd(a.cost), usd(it.price), gift, deal), how: t('how_adds', usd(a.cost), usd(it.price), gift, deal) };
+      }
       return { free: false,
         tag: priceTag(usd(it.price), it.was ? usd(it.was) : ''),
         read: t('vh_price', usd(it.price), it.was ? usd(it.was) : ''), how: usd(it.price) };
@@ -6415,7 +6474,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(line){
         var it = line.item;
         var art = it.imgs ? it.imgs.map(img).join('') : (it.img ? img(it.img) : '');
-        return '<figure class="prod' + (line.free ? ' is-free' : '') + (fresh === it.name ? ' is-new' : '') + '" aria-hidden="true">' +
+        return '<figure class="prod' + (line.free ? ' is-free' : '') + (fresh === it.name ? ' is-new' : '') +
+          (line.free && won && won.indexOf(it.name) === -1 ? ' is-won' : '') + '" aria-hidden="true">' +
           '<span class="prod__shot' + (it.imgs ? ' prod__shot--set' : '') + '">' + art + '</span>' +
           (line.free ? '<span class="prod__badge">' + GIFT + '<b>' + esc(t('free_pill')) + '</b></span>' : '') +
           '<figcaption class="tile__cap"><span class="tile__t">' + esc(shortName(it)) + '</span>' +
@@ -6524,14 +6584,18 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
             '<span class="vh">' + esc(t('vh_free', deal, usd(line.price))) + '</span>'
           : priceTag(usd(line.price), line.was ? usd(line.was) : '') +
             '<span class="vh">' + esc(t('vh_price', usd(line.price), line.was ? usd(line.was) : '')) + '</span>';
-      return '<li class="line' + (line.free ? ' is-free' : '') + (fresh === it.name ? ' is-new' : '') + '" data-line="' + esc(it.name) + '">' +
+      /* a pack that came in a bundle says so while the bundle is whole: taking
+         one of these out is what lets go of it */
+      var set = state.bundle && state.bundle.packs.indexOf(it.name) > -1 ? ' · ' + t('bundle_label', state.bundle.label) : '';
+      return '<li class="line' + (line.free ? ' is-free' : '') + (fresh === it.name ? ' is-new' : '') +
+        (line.free && won && won.indexOf(it.name) === -1 ? ' is-won' : '') + '" data-line="' + esc(it.name) + '">' +
         /* the number its place wears in the campaign above; what has no place has none */
         '<span class="prod__no" aria-hidden="true">' + (line.place === null ? '' : pad(line.place + 1)) + '</span>' +
         '<span class="line__shot' + (it.imgs ? ' line__shot--set' : it.img ? '' : ' line__shot--mark') + '" aria-hidden="true">' +
           (it.imgs ? it.imgs.map(img).join('') : it.img ? img(it.img) : BRANDMARK) + '</span>' +
         '<div class="line__body"><h3 class="line__t">' + esc(it.name) + '</h3>' +
           maker(it, 'card__by') +
-          '<span class="line__kind">' + esc(kindOf(it)) + '</span></div>' +
+          '<span class="line__kind">' + esc(kindOf(it) + set) + '</span></div>' +
         '<div class="line__end">' + end +
           '<button class="line__rm" type="button" data-remove="' + esc(it.name) + '" aria-label="' + esc(t('aria_remove', it.name)) + '">' +
           esc(t('remove')) + '</button></div></li>';
@@ -6560,11 +6624,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
     /* ---- the rest of the shelf ----
        Under the pick, on the campaign's own ground: every other pack that
-       can be added, the cheapest step first. Two columns of two where there
-       is room for two columns, three rows where there is not, and the rest
-       behind one button. Past the last step the campaign has nothing more
-       to give, so the list folds away behind a button of its own. */
-    var wide = window.matchMedia('(min-width:701px)');
+       can be added, the cheapest step first. Two columns of two where the
+       panel has room for two names side by side, three rows where it has
+       not — the stylesheet decides which, from the panel's own width — and
+       the rest behind one button. Past the last step the campaign has
+       nothing more to give, so the list folds away behind a button of its
+       own. */
     function drawMore(m){
       var body = $('[data-more]'), list = $('[data-addrows]');
       var all = $('[data-more-all]'), unf = $('[data-unfold]');
@@ -6578,8 +6643,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       $('[data-more-h]').textContent = m.pick ? t('more_other') : t('more_another');
       $('[data-more-sub]').textContent = done ? t('more_sub_done')
         : m.nextFree && m.pick ? t('more_sub_free', usd(m.pick.item.price)) : t('more_sub');
-      var cap = showAll ? rows.length : (wide.matches ? 4 : 3);
-      list.innerHTML = rows.slice(0, cap).map(function(o){
+      $('[data-shelf]').setAttribute('data-n', rows.length);
+      list.classList.toggle('is-all', showAll);
+      list.innerHTML = rows.slice(0, showAll ? rows.length : 4).map(function(o){
         var it = o.item, w = offerWords(o, m.p);
         return '<li class="addrow' + (w.free ? ' is-free' : '') + '" data-offer="' + esc(it.name) + '">' + thumb(it) +
           '<span class="addrow__txt"><b class="addrow__t">' + esc(it.name) + '</b>' + maker(it, 'choice__by') + '</span>' +
@@ -6587,7 +6653,9 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           '<button class="btn btn--secondary addrow__go" type="button" data-add="' + esc(it.name) + '" data-from="more" ' +
             'aria-label="' + esc(t('aria_add', it.name, w.how)) + '">' + PLUS + esc(t('add')) + '</button></li>';
       }).join('');
-      all.hidden = rows.length <= cap;
+      /* with four on offer the button is needed only where three are shown:
+         the stylesheet hides it where the fourth is */
+      all.hidden = showAll || rows.length <= 3;
       all.textContent = t('more_all', rows.length);
     }
 
@@ -6627,10 +6695,10 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     function whatIf(m){
       var p = m.p;
       if(!p.next || m.n < 1 || !m.after) return '';
-      var need = p.next.need, then = usd(m.after.total);
+      var need = p.next.need, then = usd(m.after.total), each = usd(m.rows[0].item.price);
       var gifts = m.walk.slice(0, need).filter(function(w){ return w.cost === 0; }).length;
-      var words = need > 1 ? t('next_more', need, then, gifts)
-        : m.after.total === p.total ? t('next_stay', usd(p.total)) : t('next_one', then);
+      var words = need > 1 ? t('next_more', need, each, then, gifts)
+        : m.after.total === p.total ? t('next_stay', each, usd(p.total)) : t('next_one', each, then);
       return '<button class="sum__next" type="button" data-jump>' + GIFT + '<span>' + esc(words) + '</span>' + CHEV + '</button>';
     }
     function drawSum(m){
@@ -6676,10 +6744,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
        the basket and nowhere else: the payment step has one button and it is
        at the end of the form. */
     var bar = $('[data-paybar]'), barSeen = null, barCta = null, atFoot = false;
+    var short = window.matchMedia('(max-height:520px)');
     function barShow(){
       /* never over the footer: by then the page has ended and the bar would
-         only be covering it */
-      var on = !bar.hidden && barCta === false && !atFoot;
+         only be covering it. And not on a window too short to spare the
+         room — a phone on its side, a page zoomed four times over — where
+         the header and a bar would leave a slit between them. */
+      var on = !bar.hidden && barCta === false && !atFoot && !short.matches;
       bar.classList.toggle('is-on', on);
       document.documentElement.classList.toggle('has-paybar', on);
     }
@@ -6722,14 +6793,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     })();
 
     /* ---- everything that does not change with the basket ---- */
+    /* On this page the words really do change with the language chosen —
+       the title in the tab with them — so the document says which it is in.
+       What stays English says so for itself: the bar, the footer and the
+       rest of what is cut from the front page. (Done here, each time the
+       words are drawn, and not by watching the body for new children: a
+       watcher on the body made Chromium report the bar's own margins
+       differently from one load to the next.) */
+    function english(el){
+      if(el.nodeType === 1 && el !== page && el.tagName !== 'SCRIPT' && !el.hasAttribute('lang')) el.setAttribute('lang', 'en');
+    }
     function drawWords(){
       var code = lang();
-      /* the words in here really are in the language chosen, so this part of
-         the page says so. The bar and the footer are the front page's, and
-         are in English there too. */
+      [].forEach.call(document.body.children, english);
+      document.documentElement.setAttribute('lang', code);
       page.setAttribute('lang', code);
       $$('[data-s]').forEach(function(el){ el.textContent = t(el.getAttribute('data-s')); });
-      $('[data-agree]').innerHTML = t('agree');
+      $('[data-agree]').innerHTML = t('agree');   /* fixed words of the page's own: no markup but an ampersand */
       $('[data-note]').innerHTML = t('note');
       $('[data-rules-list]').innerHTML = t('rules').map(function(rule){ return '<li><span>' + esc(rule) + '</span></li>'; }).join('');
       bar.setAttribute('aria-label', t('bar_label'));
@@ -6744,7 +6824,7 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         side.classList.toggle('is-tall', side.offsetHeight > room);
       });
     }
-    window.addEventListener('resize', fitSides);
+    window.addEventListener('resize', function(){ fitSides(); barShow(); });
 
     /* Drawing replaces the lists it draws. If the keyboard was on something
        in one of them — another tab moved the basket, say — it is put back on
@@ -6839,50 +6919,99 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       el.classList.add(cls);
       setTimeout(function(){ el.classList.remove(cls); }, ms);
     }
+    /* A step has been reached. If the half of the panel that shows it is not
+       all on the screen — the pack was added from far down the shelf, on a
+       phone — the panel is brought to the top of the window first, so the
+       reward is not played where nobody is looking. */
+    function celebrate(saved, k){
+      var host = $('[data-cheer]', ladder);
+      function ring(){
+        cheer(host, saved);
+        wake(rungEls[k], 'is-woken', 800);
+        /* and the badge over the step that is now the one to go for */
+        if(k === 0) wake($('[data-best]', ladder), 'is-wake', 640);
+      }
+      var top = document.getElementById('nav').offsetHeight, r = host.getBoundingClientRect();
+      var foot = window.innerHeight - (bar.classList.contains('is-on') ? bar.offsetHeight : 0);
+      if(r.top >= top && r.bottom <= foot){ ring(); return; }
+      var most = document.documentElement.scrollHeight - window.innerHeight;
+      var want = Math.max(0, Math.min(most, ladder.getBoundingClientRect().top + window.scrollY - (top + 16)));
+      if(Math.abs(want - window.scrollY) < 2){ ring(); return; }
+      window.scrollTo({top: want, behavior: still ? 'auto' : 'smooth'});
+      if(still){ ring(); return; }
+      /* it rings as the window arrives — watched frame by frame rather than
+         waited for, so it is neither early nor late — and in any case within
+         a second */
+      var t0 = 0, rung = false;
+      requestAnimationFrame(function watch(now){
+        if(rung) return;
+        if(!t0) t0 = now;
+        if(Math.abs(window.scrollY - want) < 2 || now - t0 > 900){ rung = true; ring(); return; }
+        requestAnimationFrame(watch);
+      });
+    }
+    /* Whatever grew or shrank above it, the thing that takes the pressed
+       control's place ends up exactly where the finger was: the keyboard
+       goes to it, and the window moves by however far it was carried. */
+    function hold(y0, target){
+      if(!target) return;
+      target.focus({preventScroll: true});
+      var dy = target.getBoundingClientRect().top - y0;
+      if(Math.abs(dy) < 1) return;
+      try { window.scrollBy({top: dy, left: 0, behavior: 'instant'}); }
+      catch(e){ window.scrollBy(0, dy); }
+    }
 
     /* ════════════════════════════════════════════════════════════════
        DOING IT
        ════════════════════════════════════════════════════════════════ */
     var lastAdd = 0;
-    function add(name, from, at){
+    function add(name, from, at, pressed){
       /* a second press that lands on whatever moved into the first one's
          place is the same press, not another pack */
       var now = Date.now();
       if(now - lastAdd < 350) return;
       if(!C.find(name) || C.has(state, name)) return;
       lastAdd = now;
+      var y0 = pressed ? pressed.getBoundingClientRect().top : null;
       /* whether this press reaches a deal is the price list's to say */
       var opens = C.adding(names(), name).opens;
+      won = model().free;
       state = C.write(C.add(state, name));
       undo = null; fresh = name;
       var m = render(), p = m.p;
-      fresh = null;
+      fresh = null; won = null;
       var words = t('say_added', name);
       if(opens && p.deal){
-        words += ' ' + t('say_unlocked', dealName(p.deal), joinNames(m.free), m.free.length > 1, usd(p.saving));
-        /* over the words and the steps — never over the way to the next pack */
-        cheer($('[data-cheer]', ladder), p.saving);
+        /* the heading takes the keyboard and says what comes next, so the
+           sentence spoken stops at the total */
+        words += ' ' + t('say_unlocked', dealName(p.deal), joinNames(m.free), m.free.length > 1) + ' ' + t('say_total', usd(p.total));
+        announce(words);
+        $('#ladderSay').focus({preventScroll: true});
         var k = 0;
         p.steps.forEach(function(s, i){ if(s.get === p.deal.get) k = i; });
-        wake(rungEls[k], 'is-woken', 800);
-        /* and the badge over the step that is now the one to go for */
-        if(k === 0) wake($('[data-best]', ladder), 'is-wake', 640);
+        /* over the words and the steps — never over the way to the next pack */
+        celebrate(p.saving, k);
+        return;
       }
       words += ' ' + t('say_total', usd(p.total));
       /* and what to do next, so it is heard without going back to look */
       if(p.next) words += ' ' + sayFor(m);
       announce(words);
       /* focus was on the thing that has just been redrawn: it goes to what is
-         now in its place, so a keyboard can carry on from where it was */
+         now in its place, so a keyboard can carry on from where it was — and
+         a finger finds it where the last one was */
       var next = null;
-      if(from === 'pick') next = $('.pick__go') || $('#ladderSay');
+      if(from === 'pick') next = $('.pick__go');
       else if(from === 'more'){
-        var rows = $$('[data-addrows] [data-add]');
-        next = rows[Math.min(at, rows.length - 1)] || $('#ladderSay');
+        var rows = $$('[data-addrows] [data-add]').filter(function(b){ return b.offsetParent !== null; });
+        next = rows[Math.min(at, rows.length - 1)];
       }
-      if(next) next.focus({preventScroll: true});
+      if(next && y0 !== null) hold(y0, next);
+      else (next || $('#ladderSay')).focus({preventScroll: true});
     }
-    function remove(name){
+    function remove(name, pressed){
+      var y0 = pressed ? pressed.getBoundingClientRect().top : null;
       var before = model();
       var at = before.lines.map(function(l){ return l.name; }).indexOf(name);
       if(at === -1) return;
@@ -6896,19 +7025,23 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         /* and a deal the basket no longer reaches is said plainly, once */
         lost: pb.deal && (!pa.deal || pa.deal.get < pb.deal.get) ? {from: pb.deal, to: pa.deal} : null
       };
-      fresh = null;
+      fresh = null; won = before.free;
       var m = render(), p = m.p;
+      won = null;
       var words = t('say_removed', name);
       if(undo.split) words += ' ' + t('undo_split', undo.split);
       if(undo.lost) words += ' ' + lostWords(undo.lost);
       if(p.count) words += ' ' + t('say_total', usd(p.total)) + (p.next ? ' ' + sayFor(m) : '');
       else words += ' ' + t('h_empty');
       announce(words);
+      /* the way back stands where the finger was — whatever opened above it */
       var back = $('[data-undo]');
-      if(back) back.focus({preventScroll: true});
+      if(back && y0 !== null) hold(y0, back);
+      else if(back) back.focus({preventScroll: true});
     }
-    function putBack(){
+    function putBack(pressed){
       if(!undo) return;
+      var y0 = pressed ? pressed.getBoundingClientRect().top : null;
       var u = undo;
       undo = null;
       state = C.write(u.prev);
@@ -6916,7 +7049,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       var m = render();
       announce(t('back_msg', u.name) + ' ' + t('say_total', usd(m.p.total)));
       var rm = $$('[data-remove]').filter(function(b){ return b.getAttribute('data-remove') === u.name; })[0];
-      if(rm) rm.focus({preventScroll: true});
+      if(rm && y0 !== null) hold(y0, rm);
+      else if(rm) rm.focus({preventScroll: true});
     }
     /* to the pack offered for the next place — where an empty place and the
        summary's "what if" both point */
@@ -6932,11 +7066,16 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     }
 
     /* ---- the three steps ---- */
-    function show(v, quiet){
+    /* the browser is not left to put the window back where it was: each view
+       is a different height, and it would be restoring one view's place into
+       another. This does it instead — to the top going forward, and to where
+       the view was left going back. */
+    if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    function show(v, quiet, back){
       var moved = v !== view;
       /* what was taken out can be put back only while you are still looking
          at where it was */
-      if(moved) undo = null;
+      if(moved){ undo = null; kept[view] = window.scrollY; }
       view = v;
       $$('[data-view-name]').forEach(function(s){ s.hidden = s.getAttribute('data-view-name') !== v; });
       page.setAttribute('data-view', v);
@@ -6945,10 +7084,12 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       if(moved && !quiet){
         /* a new step starts at its top, at once: the page scrolls smoothly
            everywhere else, and gliding up a whole basket to get to a form is
-           a wait, not a transition. (A browser that does not know the word
-           is asked the old way.) */
-        try { window.scrollTo({top: 0, left: 0, behavior: 'instant'}); }
-        catch(e){ window.scrollTo(0, 0); }
+           a wait, not a transition. The way back returns to where the view
+           was left. (A browser that does not know the word is asked the old
+           way.) */
+        var y = back && kept[v] ? kept[v] : 0;
+        try { window.scrollTo({top: y, left: 0, behavior: 'instant'}); }
+        catch(e){ window.scrollTo(0, y); }
         var h = $('[data-view-name="' + v + '"] h1');
         if(h) h.focus({preventScroll: true});
         if(v === 'done') wake($('[data-done]'), 'is-in', 900);
@@ -6956,24 +7097,42 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
     }
     /* The hash is the route, not an anchor: nothing on the page has the id
        "pay" or "done". Payment with nothing to pay for, and Done without an
-       order made on this page, both go back to the basket. */
-    function route(quiet){
+       order made on this page, both go back to the basket. And only these
+       are routes: any other hash that turns up in the address leaves the
+       view standing, and the address is put right. */
+    function route(quiet, back){
       var h = location.hash.replace(/^#/, '');
-      var want = h === 'pay' ? 'pay' : h === 'done' ? 'done' : 'basket';
+      var want = h === 'pay' ? 'pay' : h === 'done' ? 'done' : (h === '' || h === 'basket') ? 'basket' : view;
       if(want === 'pay' && !names().length) want = 'basket';
       if(want === 'done' && !order) want = 'basket';
       if((want === 'basket' ? '' : want) !== h && window.history && history.replaceState){
         history.replaceState(null, '', want === 'basket' ? location.pathname + location.search : '#' + want);
       }
-      show(want, quiet);
+      show(want, quiet, back);
     }
     function go(v){
       if(v === view){ window.scrollTo({top: 0, behavior: still ? 'auto' : 'smooth'}); return; }
       history.pushState(null, '', v === 'basket' ? location.pathname + location.search : '#' + v);
       route();
     }
-    window.addEventListener('popstate', function(){ route(); });
-    window.addEventListener('hashchange', function(){ route(); });
+    window.addEventListener('popstate', function(){ route(false, true); });
+    window.addEventListener('hashchange', function(){ route(false, true); });
+    /* Two kinds of link on this page would change the hash without meaning a
+       route: "Skip to content", and the front page's links to pages that are
+       not written yet (a bare #, in the footer and elsewhere). The first is
+       done here — to the heading of whichever view is showing; the second
+       does nothing, as it does nothing useful there. Neither moves the view. */
+    document.addEventListener('click', function(e){
+      var a = e.target.closest ? e.target.closest('a[href]') : null;
+      if(!a) return;
+      if(a.classList.contains('skip')){
+        e.preventDefault();
+        var h = $('[data-view-name="' + view + '"] h1');
+        if(h) h.focus();
+      } else if(a.getAttribute('href') === '#'){
+        e.preventDefault();
+      }
+    });
 
     /* ---- the form ----
        A design preview: it has no action, the handler always stops the
@@ -6989,8 +7148,8 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
           return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? '' : 'err_email_bad';
         } },
       { id: 'payName', err: 'payNameErr', hint: '',
-        check: function(el){ return el.value.replace(/\s/g, '').length < 2 ? 'err_name' : ''; } },
-      { id: 'payAgree', err: 'payAgreeErr', hint: '',
+        check: function(el){ return el.value.trim() ? '' : 'err_name'; } },
+      { id: 'payAgree', err: 'payAgreeErr', hint: 'payAgreeHint',
         check: function(el){ return el.checked ? '' : 'err_agree'; } }
     ];
     function paint(f, key){
@@ -7037,15 +7196,15 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
 
     /* ---- presses ---- */
     page.addEventListener('click', function(e){
-      var el = e.target.closest('[data-add],[data-remove],[data-undo],[data-go],[data-place],[data-jump],[data-more-all],[data-unfold],[data-rules],[data-bar-go],[data-soon]');
+      var el = e.target.closest('[data-add],[data-remove],[data-undo],[data-go],[data-place],[data-jump],[data-more-all],[data-unfold],[data-rules],[data-bar-go]');
       if(!el || !page.contains(el)) return;
       if(el.hasAttribute('data-add')){
         var rows = $$('[data-addrows] [data-add]');
-        add(el.getAttribute('data-add'), el.getAttribute('data-from'), rows.indexOf(el));
+        add(el.getAttribute('data-add'), el.getAttribute('data-from'), rows.indexOf(el), el);
       } else if(el.hasAttribute('data-remove')){
-        remove(el.getAttribute('data-remove'));
+        remove(el.getAttribute('data-remove'), el);
       } else if(el.hasAttribute('data-undo')){
-        putBack();
+        putBack(el);
       } else if(el.hasAttribute('data-go')){
         e.preventDefault();
         go(el.getAttribute('data-go'));
@@ -7055,12 +7214,13 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
            the eye and the keyboard are sent. */
         toPick();
       } else if(el.hasAttribute('data-more-all')){
+        /* nothing is said aloud: the keyboard goes to the first pack that was
+           not there before, and that is the news */
         showAll = true;
-        var before = $$('[data-addrows] [data-add]').length;
+        var before = $$('[data-addrows] > li').filter(function(li){ return li.offsetParent !== null; }).length;
         drawMore(model());
         var now = $$('[data-addrows] [data-add]');
         if(now[before]) now[before].focus({preventScroll: true});
-        announce(t('more_shown', now.length - before));
       } else if(el.hasAttribute('data-unfold')){
         /* opened, it stays open for the visit */
         unfolded = true;
@@ -7073,9 +7233,6 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
         list.hidden = !open;
       } else if(el.hasAttribute('data-bar-go')){
         go('pay');
-      } else if(el.hasAttribute('data-soon')){
-        /* the same places the footer's own links go: not written yet */
-        e.preventDefault();
       }
     });
     /* the basket in the bar is this page: from the payment step it is the way
@@ -7089,18 +7246,28 @@ h3{font-size:var(--fs-6);line-height:var(--lh-snug)}
       route(true);
     }
     C.watch(reread);
-    window.addEventListener('pageshow', function(e){ if(e.persisted) reread(); });
+    /* the language, changed in another tab or on the other page: this page
+       follows it, as it follows the basket */
+    function relang(code){
+      if(code && window.RMLang && window.RMLang.has(code) && code !== window.RMLang.get()) window.RMLang.set(code);
+    }
+    window.addEventListener('storage', function(e){ if(e.key === 'rm-lang') relang(e.newValue); });
+    /* a page brought back by the Back button is as it was left, and no script
+       has run: what was done on the other page in the meantime is read now */
+    window.addEventListener('pageshow', function(e){
+      if(!e.persisted) return;
+      try { relang(localStorage.getItem('rm-lang')); } catch(err){}
+      reread();
+    });
     if(window.RMLang) window.RMLang.on(function(){
       drawWords();
       render();
       /* a message already showing under a field changes language with the rest */
       FIELDS.forEach(function(f){ if(f.bad) paint(f, f.bad); });
     });
-    function widthMoved(){ var m = model(); drawMore(m); drawPay(m); drawBar(m); }
-    [wide, narrow].forEach(function(mq){
-      if(mq.addEventListener) mq.addEventListener('change', widthMoved);
-      else if(mq.addListener) mq.addListener(widthMoved);
-    });
+    function widthMoved(){ var m = model(); drawPay(m); drawBar(m); }
+    if(narrow.addEventListener) narrow.addEventListener('change', widthMoved);
+    else if(narrow.addListener) narrow.addListener(widthMoved);
 
     drawWords();
     route(true);
